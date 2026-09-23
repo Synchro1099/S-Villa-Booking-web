@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, FileText, ImageIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { ProofViewer } from "@/components/owner/proof-viewer";
 import { getBookingById } from "@/lib/data/bookings";
 import { effectiveStatus } from "@/lib/booking/status";
 import { formatDate } from "@/lib/time";
@@ -54,26 +55,13 @@ export default async function OwnerBookingPage(props: PageProps<"/owner/bookings
             </dl>
 
             <h3 className="mt-6 text-xs font-bold uppercase tracking-wider text-muted">Payment proof</h3>
-            {booking.proofs && booking.proofs.length > 0 ? (
-              <ul className="mt-3 grid gap-2">
-                {booking.proofs.map((p, i) => (
-                  <li key={p.id}>
-                    <a
-                      href={`/api/owner/proofs/${p.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 text-sm hover:border-forest"
-                    >
-                      {p.mime_type === "application/pdf" ? <FileText className="size-4" aria-hidden /> : <ImageIcon className="size-4" aria-hidden />}
-                      <span className="flex-1 font-semibold">View payment proof{booking.proofs!.length > 1 ? ` ${booking.proofs!.length - i}` : ""}</span>
-                      <span className="text-xs text-muted">{dateTime.format(new Date(p.uploaded_at))}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-3 text-sm text-muted">No proof uploaded yet.</p>
-            )}
+            <ProofViewer
+              proofs={(booking.proofs ?? []).map((p) => ({
+                id: p.id,
+                mimeType: p.mime_type,
+                uploadedLabel: dateTime.format(new Date(p.uploaded_at)),
+              }))}
+            />
           </section>
 
           <BookingActions bookingId={booking.id} status={status} paymentStatus={payment?.status ?? "UNPAID"} />

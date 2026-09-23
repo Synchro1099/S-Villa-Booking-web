@@ -6,7 +6,7 @@ import { CourtArt } from "./court-art";
 
 export function Hero({ settings }: { settings: Settings }) {
   return (
-    <section className="relative overflow-hidden bg-forest text-ivory">
+    <section data-hero className="relative overflow-hidden bg-forest text-ivory">
       <div className="court-lines absolute inset-0 opacity-60" aria-hidden />
       <div className="grain absolute inset-0" aria-hidden />
       <div className="absolute -right-40 -top-40 size-[34rem] rounded-full bg-brass/20 blur-3xl" aria-hidden />

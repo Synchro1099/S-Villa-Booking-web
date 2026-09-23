@@ -15,7 +15,7 @@ export function Logo({ tone = "dark", className, href = "/" }: { tone?: "dark" |
       </span>
       <span className="flex flex-col leading-none">
         <span className={cn("font-display text-2xl tracking-wide", tone === "dark" ? "text-ink" : "text-ivory")}>S-Villa</span>
-        <span className={cn("mt-1 text-[10px] font-bold uppercase tracking-[0.2em]", tone === "dark" ? "text-muted" : "text-ivory/60")}>
+        <span className={cn("mt-1 hidden text-[10px] font-bold uppercase tracking-[0.2em] sm:block", tone === "dark" ? "text-muted" : "text-ivory/60")}>
           Pickleball &amp; Courtyard
         </span>
       </span>

@@ -9,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  */
 export async function GET(_request: Request, ctx: RouteContext<"/api/owner/proofs/[id]">) {
   const { id } = await ctx.params;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const viewer = await getViewer();
   if (!viewer?.isOwner) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
