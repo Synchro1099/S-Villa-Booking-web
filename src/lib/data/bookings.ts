@@ -33,7 +33,11 @@ export function toBookingDetail(row: Row): BookingDetail {
   );
   const rawPayment = Array.isArray(row.payments) ? (row.payments[0] as Row | undefined) : (row.payments as Row | null);
   const payment = rawPayment ? ({ ...(rawPayment as unknown as Payment), amount: Number(rawPayment.amount) } as Payment) : null;
-  const { booking_items: _items, payments: _payments, access_token: _token, ...rest } = row;
+  // Never carry nested rows or the secret access token into the returned object.
+  const rest: Row = { ...row };
+  delete rest.booking_items;
+  delete rest.payments;
+  delete rest.access_token;
   return { ...toBooking(rest), items, payment };
 }
 
