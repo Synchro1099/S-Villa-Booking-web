@@ -37,7 +37,40 @@
   --shadow-soft: 0 1px 2px rgb(23 34 28 / 0.04), 0 8px 24px -8px rgb(23 34 28 / 0.12);
   --shadow-lift: 0 2px 4px rgb(23 34 28 / 0.05), 0 20px 40px -16px rgb(23 34 28 / 0.25);
 
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Same curve as EASE in src/lib/motion.ts → Tailwind `ease-soft`. */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-fade-up: fade-up 0.6s var(--ease-soft) both;
+  /* Slow ambient loops — transform-only, so they run on the compositor. */
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-court-pan: court-pan 48s linear infinite;
+  --animate-glow: glow 9s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes court-pan {
+    to {
+      transform: translate3d(88px, 88px, 0);
+    }
+  }
+  @keyframes glow {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.08);
+    }
+  }
 
   @keyframes lightbox-fade {
     from {

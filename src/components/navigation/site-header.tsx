@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MotionConfig, motion, useMotionValueEvent, useScroll } from "motion/react";
+import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DURATION, EASE } from "@/lib/motion";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 import { isActive, type NavLink } from "./nav-links";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Fixed site header. Fades/slides in once on first load, then condenses and
@@ -46,11 +45,11 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
   });
 
   return (
-    <MotionConfig reducedMotion="user">
+    <>
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE }}
+        transition={{ duration: DURATION.slow, ease: EASE }}
         className={cn(
           "fixed inset-x-0 top-0 z-40 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out",
           condensed ? "border-line/60 bg-ivory/80 shadow-soft backdrop-blur-md backdrop-saturate-150" : "border-transparent bg-ivory",
@@ -114,6 +113,6 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
       </motion.header>
       {/* Reserves the header's full height so condensing never shifts the page. */}
       <div aria-hidden className="h-16 md:h-20" />
-    </MotionConfig>
+    </>
   );
 }

@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getActiveServices, getAvailabilityEntries, getOperatingHours, getSettings } from "@/lib/data/public";
 import { getDayAvailability } from "@/lib/availability/engine";
-import { addDays, formatDate, nowIn } from "@/lib/time";
+import { addDays, formatDate, nowIn, toMinutes } from "@/lib/time";
 import { Hero } from "@/components/sections/hero";
 import { Experience } from "@/components/sections/experience";
 import { Facilities } from "@/components/sections/facilities";
 import { Pricing } from "@/components/sections/pricing";
 import { Contact } from "@/components/sections/contact";
+import { Highlights } from "@/components/sections/highlights";
+import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { DAY_STATUS_LABEL } from "@/components/calendar/month-calendar";
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero settings={settings} />
+      <Hero maxGuests={settings.max_guests} />
+      <Highlights facilities={services.length} maxGuests={settings.max_guests} hoursDaily={longestDay(hours)} />
       <Experience />
       <Facilities services={services} />
       <Pricing services={services} settings={settings} />
@@ -26,6 +29,11 @@ export default async function HomePage() {
       <Contact settings={settings} hours={hours} />
     </>
   );
+}
+
+/** Longest opening day, in whole hours (live from operating hours). */
+function longestDay(hours: Awaited<ReturnType<typeof getOperatingHours>>) {
+  return Math.max(0, ...hours.filter((h) => h.is_open).map((h) => (toMinutes(h.close_time) - toMinutes(h.open_time)) / 60));
 }
 
 /** Next 7 days at a glance, from the live availability feed. */
@@ -55,7 +63,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
             </Link>
           </Button>
         </div>
-        <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        <Stagger as="ul" gap={0.05} className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
           {days.map((date) => {
             const day = getDayAvailability(date, rules, entries, now);
             const open = day.slots.filter((s) => s.status === "AVAILABLE").length;
@@ -70,11 +78,11 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
               </>
             );
             return (
-              <li key={date}>
+              <StaggerItem as="li" key={date}>
                 {selectable ? (
                   <Link
                     href={`/book?date=${date}`}
-                    className="flex flex-col gap-1 rounded-2xl border border-ivory/15 p-4 transition-colors hover:border-brass hover:bg-ivory/5"
+                    className="flex flex-col gap-1 rounded-2xl border border-ivory/15 p-4 transition-[transform,background-color,border-color] duration-300 ease-soft hover:-translate-y-1 hover:border-brass hover:bg-ivory/5 active:scale-[0.98] active:duration-100"
                     aria-label={`${formatDate(date, "full")}: ${open} slots open — book this day`}
                   >
                     {content}
@@ -82,10 +90,10 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
                 ) : (
                   <div className="flex flex-col gap-1 rounded-2xl border border-ivory/5 p-4 opacity-70">{content}</div>
                 )}
-              </li>
+              </StaggerItem>
             );
           })}
-        </ul>
+        </Stagger>
       </div>
     </section>
   );

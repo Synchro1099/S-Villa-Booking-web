@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BookPage(props: PageProps<"/book">) {
-  const { date } = await props.searchParams;
+  const { date, service } = await props.searchParams;
   const [{ settings, config, snapshot, selectedDate, error }, services, viewer] = await Promise.all([
     loadAvailabilitySnapshot(typeof date === "string" ? date : null),
     getActiveServices(),
@@ -31,6 +31,7 @@ export default async function BookPage(props: PageProps<"/book">) {
           config={config}
           initial={snapshot}
           initialDate={selectedDate}
+          initialServiceSlug={typeof service === "string" ? service : null}
           services={services}
           rules={{
             maxGuests: settings.max_guests,

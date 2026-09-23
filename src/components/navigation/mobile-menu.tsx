@@ -7,9 +7,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DURATION, EASE } from "@/lib/motion";
 import { isActive, type NavLink } from "./nav-links";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function MobileMenu({ links, account }: { links: NavLink[]; account: NavLink }) {
   const [open, setOpen] = useState(false);
@@ -48,7 +47,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
               initial={{ opacity: 0, rotate: open ? -90 : 90 }}
               animate={{ opacity: 1, rotate: 0 }}
               exit={{ opacity: 0, rotate: open ? 90 : -90 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: DURATION.fast }}
               className="grid place-items-center"
             >
               {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -68,7 +67,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: DURATION.fast }}
               className="absolute inset-x-0 top-full h-dvh bg-ink/25"
             />
             <motion.div
@@ -77,7 +76,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: EASE }}
+              transition={{ duration: DURATION.base, ease: EASE }}
               className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-ivory shadow-lift"
             >
               <motion.ul
@@ -92,7 +91,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
                     <motion.li
                       key={l.href}
                       variants={{ hidden: { opacity: 0, x: -8 }, shown: { opacity: 1, x: 0 } }}
-                      transition={{ duration: 0.2, ease: EASE }}
+                      transition={{ duration: DURATION.fast, ease: EASE }}
                     >
                       <Link
                         href={l.href}

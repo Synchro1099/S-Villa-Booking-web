@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { AnimatePresence, animate, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Landmark, Loader2, Minus, Plus, Smartphone } from "lucide-react";
 import type { PaymentMethod, Service } from "@/types";
@@ -16,6 +17,14 @@ import { CalendarLegend, MonthCalendar } from "@/components/calendar/month-calen
 import { TimeSlots } from "@/components/calendar/time-slots";
 import { useAvailability, type AvailabilityConfig, type AvailabilitySnapshot } from "@/components/calendar/use-availability";
 import { cn } from "@/lib/utils";
+import { DURATION, EASE } from "@/lib/motion";
+
+/** Steps slide in the direction of travel: forward from the right, back from the left. */
+const STEP_MOTION = {
+  enter: (dir: number) => ({ opacity: 0, x: dir * 28 }),
+  center: { opacity: 1, x: 0, transition: { duration: DURATION.base, ease: EASE } },
+  exit: (dir: number) => ({ opacity: 0, x: dir * -28, transition: { duration: DURATION.fast, ease: EASE } }),
+};
 
 const STEPS = ["Date", "Time", "Services", "Guests", "Review", "Payment"] as const;
 
@@ -23,6 +32,8 @@ export interface WizardProps {
   config: AvailabilityConfig;
   initial: AvailabilitySnapshot;
   initialDate: string | null;
+  /** Pre-selected from ?service=<slug> (e.g. a facility card). */
+  initialServiceSlug?: string | null;
   services: Service[];
   rules: { maxGuests: number; maxBookingHours: number; expirationMinutes: number };
   prefill: { fullName: string; email: string; mobile: string };
@@ -30,7 +41,7 @@ export interface WizardProps {
 
 type Errors = Partial<Record<"fullName" | "email" | "mobile" | "guests", string>>;
 
-export function BookingWizard({ config, initial, initialDate, services, rules, prefill }: WizardProps) {
+export function BookingWizard({ config, initial, initialDate, initialServiceSlug, services, rules, prefill }: WizardProps) {
   const router = useRouter();
   const av = useAvailability(config, initial);
   // Arriving with ?date= skips straight to time selection if that day is open.
@@ -39,7 +50,8 @@ export function BookingWizard({ config, initial, initialDate, services, rules, p
   const [date, setDate] = useState<string | null>(startsOnTime ? initialDate : null);
   const [start, setStart] = useState<number | null>(null);
   const [hours, setHours] = useState(1);
-  const [serviceIds, setServiceIds] = useState<string[]>([]);
+  const [serviceIds, setServiceIds] = useState<string[]>(() => services.filter((s) => s.slug === initialServiceSlug).map((s) => s.id));
+  const [dir, setDir] = useState(1);
   const [guests, setGuests] = useState(Math.min(2, rules.maxGuests));
   const [fullName, setFullName] = useState(prefill.fullName);
   const [email, setEmail] = useState(prefill.email);
@@ -56,6 +68,7 @@ export function BookingWizard({ config, initial, initialDate, services, rules, p
 
   function go(to: number) {
     setBanner(null);
+    setDir(to > step ? 1 : -1);
     setStep(to);
     requestAnimationFrame(() => document.getElementById("wizard-top")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
@@ -112,6 +125,7 @@ export function BookingWizard({ config, initial, initialDate, services, rules, p
       await av.refresh();
       if (/schedule|time|date|closed|opening/i.test(result.error)) {
         setStart(null);
+        setDir(-1);
         setStep(1);
       }
     });
@@ -129,198 +143,202 @@ export function BookingWizard({ config, initial, initialDate, services, rules, p
             </p>
           ) : null}
 
-          {step === 0 && (
-            <>
-              <StepTitle n={1} title="Select a date" sub="Days marked closed or fully booked can't be selected." />
-              <MonthCalendar
-                month={av.month}
-                statusOf={(d) => av.dayAvailability(d).status}
-                selected={date}
-                onSelect={(d) => {
-                  setDate(d);
-                  setStart(null);
-                  setHours(1);
-                }}
-                onMonthChange={av.setMonth}
-                canGoBack={av.canGoBack}
-                canGoForward={av.canGoForward}
-                loading={av.loading}
-                isSelectable={isSelectableDay}
-              />
-              <CalendarLegend className="mt-6" />
-              {av.error ? <p className="mt-4 text-sm text-bad">{av.error}</p> : null}
-            </>
-          )}
-
-          {step === 1 && day && (
-            <>
-              <StepTitle n={2} title="Select a start time" sub={formatDate(day.date, "full")} />
-              <TimeSlots
-                slots={day.slots}
-                selectedStart={start}
-                selectedHours={hours}
-                onSelect={(s) => {
-                  setStart(s);
-                  setHours((h) => Math.max(1, Math.min(h, maxHoursFrom(day.slots, s, rules.maxBookingHours))));
-                }}
-              />
-              {start != null && (
-                <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-sand/60 p-5">
-                  <div>
-                    <p className="text-sm font-semibold" id="duration-label">
-                      How long?
-                    </p>
-                    <p className="text-sm text-muted">{formatTimeRange(start, start + hours * 60)}</p>
-                  </div>
-                  <Stepper
-                    labelledBy="duration-label"
-                    value={hours}
-                    min={1}
-                    max={maxHours}
-                    onChange={setHours}
-                    format={(v) => `${v} hour${v === 1 ? "" : "s"}`}
+          <AnimatePresence mode="wait" initial={false} custom={dir}>
+            <motion.div key={step} custom={dir} variants={STEP_MOTION} initial="enter" animate="center" exit="exit">
+              {step === 0 && (
+                <>
+                  <StepTitle n={1} title="Select a date" sub="Days marked closed or fully booked can't be selected." />
+                  <MonthCalendar
+                    month={av.month}
+                    statusOf={(d) => av.dayAvailability(d).status}
+                    selected={date}
+                    onSelect={(d) => {
+                      setDate(d);
+                      setStart(null);
+                      setHours(1);
+                    }}
+                    onMonthChange={av.setMonth}
+                    canGoBack={av.canGoBack}
+                    canGoForward={av.canGoForward}
+                    loading={av.loading}
+                    isSelectable={isSelectableDay}
                   />
-                </div>
+                  <CalendarLegend className="mt-6" />
+                  {av.error ? <p className="mt-4 text-sm text-bad">{av.error}</p> : null}
+                </>
               )}
-            </>
-          )}
 
-          {step === 2 && (
-            <>
-              <StepTitle n={3} title="Choose your facilities" sub="The whole venue is private to your group. Pick what you'd like to use." />
-              <fieldset>
-                <legend className="sr-only">Facilities</legend>
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {services.map((s) => {
-                    const checked = serviceIds.includes(s.id);
-                    return (
-                      <li key={s.id}>
-                        <label
-                          className={cn(
-                            "flex h-full cursor-pointer gap-4 rounded-2xl border bg-white p-4 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass",
-                            checked ? "border-forest shadow-soft" : "border-line hover:border-ink/40",
-                          )}
-                        >
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={checked}
-                            onChange={() => setServiceIds((ids) => (checked ? ids.filter((i) => i !== s.id) : [...ids, s.id]))}
-                          />
-                          <span className={cn("grid size-11 shrink-0 place-items-center rounded-full", checked ? "bg-forest text-brass" : "bg-sand text-forest")}>
-                            {checked ? <Check className="size-5" aria-hidden /> : <ServiceIcon name={s.icon} className="size-5" />}
-                          </span>
-                          <span className="flex-1">
-                            <span className="flex items-baseline justify-between gap-2">
-                              <span className="font-semibold">{s.name}</span>
-                              <span className="text-sm font-semibold">
-                                {formatPeso(s.price)}
-                                <span className="font-normal text-muted">/{unitLabel(s.pricing_unit)}</span>
+              {step === 1 && day && (
+                <>
+                  <StepTitle n={2} title="Select a start time" sub={formatDate(day.date, "full")} />
+                  <TimeSlots
+                    slots={day.slots}
+                    selectedStart={start}
+                    selectedHours={hours}
+                    onSelect={(s) => {
+                      setStart(s);
+                      setHours((h) => Math.max(1, Math.min(h, maxHoursFrom(day.slots, s, rules.maxBookingHours))));
+                    }}
+                  />
+                  {start != null && (
+                    <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-sand/60 p-5">
+                      <div>
+                        <p className="text-sm font-semibold" id="duration-label">
+                          How long?
+                        </p>
+                        <p className="text-sm text-muted">{formatTimeRange(start, start + hours * 60)}</p>
+                      </div>
+                      <Stepper
+                        labelledBy="duration-label"
+                        value={hours}
+                        min={1}
+                        max={maxHours}
+                        onChange={setHours}
+                        format={(v) => `${v} hour${v === 1 ? "" : "s"}`}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <StepTitle n={3} title="Choose your facilities" sub="The whole venue is private to your group. Pick what you'd like to use." />
+                  <fieldset>
+                    <legend className="sr-only">Facilities</legend>
+                    <ul className="grid gap-3 sm:grid-cols-2">
+                      {services.map((s) => {
+                        const checked = serviceIds.includes(s.id);
+                        return (
+                          <li key={s.id}>
+                            <label
+                              className={cn(
+                                "flex h-full cursor-pointer gap-4 rounded-2xl border bg-white p-4 transition-[transform,border-color,box-shadow] duration-200 ease-soft active:scale-[0.98] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass",
+                                checked ? "border-forest shadow-soft" : "border-line hover:border-ink/40",
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={checked}
+                                onChange={() => setServiceIds((ids) => (checked ? ids.filter((i) => i !== s.id) : [...ids, s.id]))}
+                              />
+                              <span className={cn("grid size-11 shrink-0 place-items-center rounded-full", checked ? "bg-forest text-brass" : "bg-sand text-forest")}>
+                                {checked ? <Check className="size-5" aria-hidden /> : <ServiceIcon name={s.icon} className="size-5" />}
                               </span>
-                            </span>
-                            <span className="mt-1 block text-sm text-muted">{s.description}</span>
-                          </span>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </fieldset>
-              {services.length === 0 && <p className="text-muted">No facilities are available for booking right now.</p>}
-            </>
-          )}
+                              <span className="flex-1">
+                                <span className="flex items-baseline justify-between gap-2">
+                                  <span className="font-semibold">{s.name}</span>
+                                  <span className="text-sm font-semibold">
+                                    {formatPeso(s.price)}
+                                    <span className="font-normal text-muted">/{unitLabel(s.pricing_unit)}</span>
+                                  </span>
+                                </span>
+                                <span className="mt-1 block text-sm text-muted">{s.description}</span>
+                              </span>
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </fieldset>
+                  {services.length === 0 && <p className="text-muted">No facilities are available for booking right now.</p>}
+                </>
+              )}
 
-          {step === 3 && (
-            <>
-              <StepTitle n={4} title="Guests & your details" sub="We'll send your confirmation to this email and mobile number." />
-              <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-sand/60 p-5">
-                <div>
-                  <p className="text-sm font-semibold" id="guests-label">
-                    Number of guests
-                  </p>
-                  <p className="text-sm text-muted">Maximum {rules.maxGuests} people per booking.</p>
-                </div>
-                <Stepper labelledBy="guests-label" value={guests} min={1} max={rules.maxGuests} onChange={setGuests} format={(v) => `${v} guest${v === 1 ? "" : "s"}`} />
-              </div>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Full name" htmlFor="fullName" error={errors.fullName} className="sm:col-span-2">
-                  <Input id="fullName" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                </Field>
-                <Field label="Mobile number" htmlFor="mobile" error={errors.mobile} hint="e.g. 0917 123 4567">
-                  <Input id="mobile" type="tel" inputMode="tel" autoComplete="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} />
-                </Field>
-                <Field label="Email address" htmlFor="email" error={errors.email}>
-                  <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </Field>
-                <Field label="Notes (optional)" htmlFor="notes" hint="Occasion, special requests…" className="sm:col-span-2">
-                  <Textarea id="notes" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} />
-                </Field>
-              </div>
-            </>
-          )}
-
-          {step === 4 && date && start != null && (
-            <>
-              <StepTitle n={5} title="Review your reservation" sub="Check everything before choosing how to pay." />
-              <dl className="divide-y divide-line rounded-2xl border border-line bg-white">
-                {[
-                  ["Date", formatDate(date, "full"), 0],
-                  ["Time", formatTimeRange(start, start + hours * 60), 1],
-                  ["Facilities", estimate.lines.map((l) => l.name).join(", "), 2],
-                  ["Guests", `${guests}`, 3],
-                  ["Name", fullName, 3],
-                  ["Mobile", mobile, 3],
-                  ["Email", email, 3],
-                  ...(notes ? [["Notes", notes, 3] as const] : []),
-                ].map(([k, v, target]) => (
-                  <div key={k as string} className="flex items-start justify-between gap-4 px-5 py-4">
-                    <dt className="text-sm text-muted">{k}</dt>
-                    <dd className="flex items-start gap-3 text-right text-sm font-semibold">
-                      <span>{v}</span>
-                      <button type="button" className="text-xs font-bold text-brass-deep underline-offset-2 hover:underline" onClick={() => go(target as number)} aria-label={`Edit ${k}`}>
-                        Edit
-                      </button>
-                    </dd>
+              {step === 3 && (
+                <>
+                  <StepTitle n={4} title="Guests & your details" sub="We'll send your confirmation to this email and mobile number." />
+                  <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-sand/60 p-5">
+                    <div>
+                      <p className="text-sm font-semibold" id="guests-label">
+                        Number of guests
+                      </p>
+                      <p className="text-sm text-muted">Maximum {rules.maxGuests} people per booking.</p>
+                    </div>
+                    <Stepper labelledBy="guests-label" value={guests} min={1} max={rules.maxGuests} onChange={setGuests} format={(v) => `${v} guest${v === 1 ? "" : "s"}`} />
                   </div>
-                ))}
-              </dl>
-            </>
-          )}
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Field label="Full name" htmlFor="fullName" error={errors.fullName} className="sm:col-span-2">
+                      <Input id="fullName" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                    </Field>
+                    <Field label="Mobile number" htmlFor="mobile" error={errors.mobile} hint="e.g. 0917 123 4567">
+                      <Input id="mobile" type="tel" inputMode="tel" autoComplete="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} />
+                    </Field>
+                    <Field label="Email address" htmlFor="email" error={errors.email}>
+                      <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </Field>
+                    <Field label="Notes (optional)" htmlFor="notes" hint="Occasion, special requests…" className="sm:col-span-2">
+                      <Textarea id="notes" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                    </Field>
+                  </div>
+                </>
+              )}
 
-          {step === 5 && (
-            <>
-              <StepTitle n={6} title="Choose how to pay" sub="After you submit, we'll show the payment details and the exact amount to send." />
-              <fieldset className="grid gap-3 sm:grid-cols-2">
-                <legend className="sr-only">Payment method</legend>
-                {(
-                  [
-                    ["GCASH", "GCash", "Send via the GCash app", Smartphone],
-                    ["BANK_TRANSFER", "Bank Transfer", "Online banking or over the counter", Landmark],
-                  ] as const
-                ).map(([value, label, sub, Icon]) => (
-                  <label
-                    key={value}
-                    className={cn(
-                      "flex cursor-pointer items-center gap-4 rounded-2xl border bg-white p-5 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass",
-                      method === value ? "border-forest shadow-soft" : "border-line hover:border-ink/40",
-                    )}
-                  >
-                    <input type="radio" name="method" value={value} className="sr-only" checked={method === value} onChange={() => setMethod(value)} />
-                    <span className={cn("grid size-11 place-items-center rounded-full", method === value ? "bg-forest text-brass" : "bg-sand text-forest")}>
-                      {method === value ? <Check className="size-5" aria-hidden /> : <Icon className="size-5" aria-hidden />}
-                    </span>
-                    <span>
-                      <span className="block font-semibold">{label}</span>
-                      <span className="text-sm text-muted">{sub}</span>
-                    </span>
-                  </label>
-                ))}
-              </fieldset>
-              <p className="mt-6 rounded-xl bg-warn-bg/70 px-4 py-3 text-sm text-warn">
-                Your slot is held for {rules.expirationMinutes} minutes after you submit. Upload your payment proof within that time to keep it.
-              </p>
-            </>
-          )}
+              {step === 4 && date && start != null && (
+                <>
+                  <StepTitle n={5} title="Review your reservation" sub="Check everything before choosing how to pay." />
+                  <dl className="divide-y divide-line rounded-2xl border border-line bg-white">
+                    {[
+                      ["Date", formatDate(date, "full"), 0],
+                      ["Time", formatTimeRange(start, start + hours * 60), 1],
+                      ["Facilities", estimate.lines.map((l) => l.name).join(", "), 2],
+                      ["Guests", `${guests}`, 3],
+                      ["Name", fullName, 3],
+                      ["Mobile", mobile, 3],
+                      ["Email", email, 3],
+                      ...(notes ? [["Notes", notes, 3] as const] : []),
+                    ].map(([k, v, target]) => (
+                      <div key={k as string} className="flex items-start justify-between gap-4 px-5 py-4">
+                        <dt className="text-sm text-muted">{k}</dt>
+                        <dd className="flex items-start gap-3 text-right text-sm font-semibold">
+                          <span>{v}</span>
+                          <button type="button" className="text-xs font-bold text-brass-deep underline-offset-2 hover:underline" onClick={() => go(target as number)} aria-label={`Edit ${k}`}>
+                            Edit
+                          </button>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </>
+              )}
+
+              {step === 5 && (
+                <>
+                  <StepTitle n={6} title="Choose how to pay" sub="After you submit, we'll show the payment details and the exact amount to send." />
+                  <fieldset className="grid gap-3 sm:grid-cols-2">
+                    <legend className="sr-only">Payment method</legend>
+                    {(
+                      [
+                        ["GCASH", "GCash", "Send via the GCash app", Smartphone],
+                        ["BANK_TRANSFER", "Bank Transfer", "Online banking or over the counter", Landmark],
+                      ] as const
+                    ).map(([value, label, sub, Icon]) => (
+                      <label
+                        key={value}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-4 rounded-2xl border bg-white p-5 transition-[transform,border-color,box-shadow] duration-200 ease-soft active:scale-[0.98] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass",
+                          method === value ? "border-forest shadow-soft" : "border-line hover:border-ink/40",
+                        )}
+                      >
+                        <input type="radio" name="method" value={value} className="sr-only" checked={method === value} onChange={() => setMethod(value)} />
+                        <span className={cn("grid size-11 place-items-center rounded-full", method === value ? "bg-forest text-brass" : "bg-sand text-forest")}>
+                          {method === value ? <Check className="size-5" aria-hidden /> : <Icon className="size-5" aria-hidden />}
+                        </span>
+                        <span>
+                          <span className="block font-semibold">{label}</span>
+                          <span className="text-sm text-muted">{sub}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </fieldset>
+                  <p className="mt-6 rounded-xl bg-warn-bg/70 px-4 py-3 text-sm text-warn">
+                    Your slot is held for {rules.expirationMinutes} minutes after you submit. Upload your payment proof within that time to keep it.
+                  </p>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
             {step > 0 ? (
@@ -464,10 +482,37 @@ function Summary({
         </div>
         <div className="mt-4 flex items-baseline justify-between border-t border-ivory/10 pt-4">
           <span className="text-sm font-bold uppercase tracking-wider">Total</span>
-          <span className="font-display text-3xl tabular-nums">{formatPeso(total)}</span>
+          <AnimatedPeso value={total} className="font-display text-3xl tabular-nums" />
         </div>
         <p className="mt-3 text-xs text-ivory/50">Current rates. Your final total is confirmed when you submit.</p>
       </div>
     </aside>
+  );
+}
+
+/** Total that glides to its new value instead of snapping (display only). */
+function AnimatedPeso({ value, className }: { value: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const shown = useRef(value);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || shown.current === value) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const controls = animate(shown.current, value, {
+      duration: reduce ? 0 : 0.4,
+      ease: EASE,
+      onUpdate: (v) => {
+        shown.current = v;
+        el.textContent = formatPeso(Math.round(v));
+      },
+    });
+    return () => controls.stop();
+  }, [value]);
+
+  return (
+    <span ref={ref} className={className} aria-live="polite">
+      {formatPeso(value)}
+    </span>
   );
 }

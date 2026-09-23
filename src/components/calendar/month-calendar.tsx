@@ -114,8 +114,9 @@ export function MonthCalendar({
               aria-label={`${formatDate(date, "full")} — ${DAY_STATUS_LABEL[status]}`}
               onClick={() => onSelect(date)}
               className={cn(
-                "relative flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border text-sm font-semibold tabular-nums transition-all sm:text-base",
+                "relative flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border text-sm font-semibold tabular-nums transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-soft sm:text-base",
                 style.cell,
+                selectable && "hover:-translate-y-px active:scale-95 active:duration-100",
                 !selectable && "cursor-not-allowed",
                 isSelected && "!border-forest !bg-forest !text-ivory shadow-soft ring-2 ring-brass ring-offset-2 ring-offset-cream",
               )}

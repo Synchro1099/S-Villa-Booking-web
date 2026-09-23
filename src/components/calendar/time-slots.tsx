@@ -51,7 +51,8 @@ export function TimeSlots({
               aria-label={label}
               onClick={() => onSelect?.(slot.start)}
               className={cn(
-                "flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-left transition-all",
+                "flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-left transition-[transform,background-color,border-color,color] duration-200 ease-soft",
+                available && onSelect && "active:scale-[0.98] active:duration-100",
                 available && "border-line bg-white hover:border-forest",
                 slot.status === "BOOKED" && "border-transparent bg-bad-bg/60 text-bad",
                 slot.status === "PENDING" && "border-transparent bg-warn-bg/70 text-warn",

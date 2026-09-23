@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
 import { publicEnv } from "@/lib/env";
+import { MotionProvider } from "@/components/motion/motion-provider";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -48,8 +49,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} h-full`} data-scroll-behavior="smooth">
+      <head>
+        {/* Without JavaScript, scroll reveals never run — show that content immediately. */}
+        <noscript>
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
+      </head>
       <body className="min-h-full flex flex-col">
-        {children}
+        <MotionProvider>{children}</MotionProvider>
         <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
