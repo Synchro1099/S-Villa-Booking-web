@@ -43,3 +43,6 @@ next-env.d.ts
 # local Claude Code settings
 .claude/settings.local.json
 !.env.example
+
+# generated one-time setup script
+supabase-setup.sql
