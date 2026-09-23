@@ -43,7 +43,7 @@ Nobody can make themselves an owner from the website. New accounts are always `C
 
 1. Push the repo to GitHub and import it in Vercel.
 2. Add the variables from `.env.example` under *Settings → Environment Variables*, and set `NEXT_PUBLIC_SITE_URL` to your production URL.
-3. **Emails:** create a free [Resend](https://resend.com) account, verify your domain and set `RESEND_API_KEY` and `EMAIL_FROM`. Without a key, emails are only written to the server log.
+3. **Emails:** create a free [Resend](https://resend.com) account, verify your domain and set `RESEND_API_KEY` and `EMAIL_FROM`. Without a key, emails are only written to the server log. Before the domain is verified, use `EMAIL_FROM="S-Villa <onboarding@resend.dev>"` and set `EMAIL_REDIRECT_TO` to your Resend signup address; every email then goes there, marked with who it was meant for. Delivery attempts and errors are recorded in the `notifications` table.
 4. **Expiry emails:** `vercel.json` runs `/api/cron/expire` once a day (the Hobby plan limit). For faster "expired" emails, also call it every 5–10 minutes from a free service like cron-job.org, with the header `Authorization: Bearer <CRON_SECRET>`. Availability is always correct even without the cron. Lapsed holds are ignored and cleared automatically.
 5. **SMS (optional):** set `SEMAPHORE_API_KEY` to send SMS updates through Semaphore.
 

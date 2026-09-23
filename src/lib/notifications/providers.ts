@@ -5,6 +5,7 @@ import "server-only";
  * can be swapped in by changing only this file.
  *
  *   EMAIL  → Resend (RESEND_API_KEY) — otherwise logged to the server console.
+ *            EMAIL_REDIRECT_TO sends everything to one test inbox.
  *   SMS    → Semaphore, a Philippine SMS gateway (SEMAPHORE_API_KEY) — otherwise disabled.
  *   IN_APP → the booking status page and dashboards read status straight from
  *            the database, so no extra delivery is needed.
@@ -59,6 +60,32 @@ class ConsoleEmailProvider implements EmailProvider {
   }
 }
 
+/**
+ * Sends every email to one test inbox instead of the real recipient. Needed
+ * while using Resend's sandbox sender (onboarding@resend.dev), which only
+ * delivers to the Resend account's own address.
+ */
+export class RedirectEmailProvider implements EmailProvider {
+  constructor(
+    private inner: EmailProvider,
+    private redirectTo: string,
+  ) {}
+
+  send(message: EmailMessage): Promise<DeliveryResult> {
+    const note = `Test mode: this email was meant for ${message.to}.`;
+    return this.inner.send({
+      to: this.redirectTo,
+      subject: `[Test → ${message.to}] ${message.subject}`,
+      text: `${note}\n\n${message.text}`,
+      html: `<p style="margin:0 0 16px;padding:8px 12px;background:#fff4d6;border-radius:6px;font:13px sans-serif;color:#6b4e00">${escapeHtml(note)}</p>${message.html}`,
+    });
+  }
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 class SemaphoreSmsProvider implements SmsProvider {
   readonly enabled = true;
   constructor(
@@ -89,7 +116,9 @@ class DisabledSmsProvider implements SmsProvider {
 export function getEmailProvider(): EmailProvider {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM || "S-Villa <onboarding@resend.dev>";
-  return key ? new ResendEmailProvider(key, from) : new ConsoleEmailProvider();
+  const provider = key ? new ResendEmailProvider(key, from) : new ConsoleEmailProvider();
+  const redirectTo = process.env.EMAIL_REDIRECT_TO?.trim();
+  return redirectTo ? new RedirectEmailProvider(provider, redirectTo) : provider;
 }
 
 export function getSmsProvider(): SmsProvider {
