@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Content AGENTS.md, CLAUDE.md, next.config.ts; Get-ChildItem -Recurse src -File | ForEach-Object FullName; Get-ChildItem node_modules\\\\next\\\\dist\\\\docs -ErrorAction SilentlyContinue | Select-Object -First 30 Name)"
+    ]
+  }
+}

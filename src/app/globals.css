@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* =============================================================================
+   S-Villa design system
+   Palette: deep forest ink, warm ivory, sand lines and a brass accent —
+   quiet, resort-like and high contrast. Status colours always pair with an
+   icon + label so meaning never depends on colour alone.
+   ============================================================================= */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-ink: #17221c;
+  --color-forest: #1f3329;
+  --color-forest-soft: #2c4638;
+  --color-ivory: #f7f3ec;
+  --color-cream: #fbf9f5;
+  --color-sand: #e9e1d3;
+  --color-line: #ddd3c2;
+  --color-muted: #5b665f;
+  --color-brass: #c3a06a;
+  --color-brass-deep: #8a6634;
+
+  --color-ok: #2f6b4f;
+  --color-ok-bg: #e4efe7;
+  --color-warn: #8a5a0b;
+  --color-warn-bg: #f8ecd3;
+  --color-bad: #9b3b2e;
+  --color-bad-bg: #f6e1dc;
+  --color-info: #3e4f8a;
+  --color-info-bg: #e3e7f5;
+  --color-off: #5f615e;
+  --color-off-bg: #ebe9e4;
+
+  --radius-card: 1.25rem;
+  --shadow-soft: 0 1px 2px rgb(23 34 28 / 0.04), 0 8px 24px -8px rgb(23 34 28 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(23 34 28 / 0.05), 0 20px 40px -16px rgb(23 34 28 / 0.25);
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brass-deep);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--color-brass);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-brass-deep);
+  }
+  .court-lines {
+    background-image:
+      linear-gradient(to right, rgb(195 160 106 / 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(195 160 106 / 0.16) 1px, transparent 1px);
+    background-size: 88px 88px;
+  }
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
