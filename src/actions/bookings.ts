@@ -127,7 +127,7 @@ export async function cancelMyBooking(reference: string, token: string | null): 
   const { error } = await createAdminClient().rpc("customer_cancel_booking", { p_booking_id: access.booking.id });
   if (error) return { ok: false, error: friendlyError(error) };
 
-  after(() => notifyBooking(access.booking.id, "CANCELLED"));
+  after(() => notifyBooking(access.booking.id, "CANCELLED", { cancelledBy: "CUSTOMER" }));
   revalidatePath(`/bookings/${reference}`);
   return { ok: true };
 }

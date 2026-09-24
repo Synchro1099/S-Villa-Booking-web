@@ -4,7 +4,7 @@ import { publicEnv } from "@/lib/env";
 import { toBookingDetail, DETAIL_COLUMNS } from "@/lib/data/bookings";
 import type { BookingDetail, Settings } from "@/types";
 import { envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
-import { renderBookingEmail, renderBookingSms, type BookingEvent } from "./templates";
+import { OWNER_EVENTS, renderBookingEmail, renderBookingSms, type BookingEvent, type CancelledBy } from "./templates";
 
 /**
  * Notification entry point. Sends to every configured channel and records each
@@ -46,7 +46,7 @@ function ownerRecipient(settings: Settings) {
   return envValue("OWNER_NOTIFICATION_EMAIL") || settings.contact_email.trim();
 }
 
-export async function notifyBooking(bookingId: string, event: BookingEvent) {
+export async function notifyBooking(bookingId: string, event: BookingEvent, opts: { cancelledBy?: CancelledBy } = {}) {
   try {
     const { admin, booking, token, settings } = await loadContext(bookingId);
     const email = getEmailProvider();
@@ -63,15 +63,16 @@ export async function notifyBooking(bookingId: string, event: BookingEvent) {
       await log(admin, { bookingId, channel: "SMS", audience: "CUSTOMER", template: event, recipient: booking.customer_mobile, result: smsResult });
     }
 
-    // Owner: new bookings and uploaded proofs need attention.
+    // Owner: new bookings and uploaded proofs need attention; cancellations and expiries free a slot.
     const ownerTo = ownerRecipient(settings);
-    if ((event === "PENDING" || event === "PROOF_SUBMITTED") && ownerTo) {
+    if (OWNER_EVENTS.includes(event) && ownerTo) {
       const ownerMail = renderBookingEmail({
         event,
         audience: "OWNER",
         booking,
         settings,
         link: `${publicEnv.siteUrl()}/owner/bookings/${booking.id}`,
+        cancelledBy: opts.cancelledBy,
       });
       const ownerResult = await email.send({ to: ownerTo, ...ownerMail });
       await log(admin, { bookingId, channel: "EMAIL", audience: "OWNER", template: event, recipient: ownerTo, result: ownerResult });

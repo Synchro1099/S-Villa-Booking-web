@@ -65,7 +65,7 @@ export async function cancelBooking(bookingId: string, reason: string): Promise<
   const supabase = await createClient();
   const { error } = await supabase.rpc("owner_cancel_booking", { p_booking_id: bookingId, p_reason: r.data });
   if (error) return { ok: false, error: friendlyError(error) };
-  after(() => notifyBooking(bookingId, "CANCELLED"));
+  after(() => notifyBooking(bookingId, "CANCELLED", { cancelledBy: "OWNER" }));
   refreshEverywhere();
   return { ok: true };
 }

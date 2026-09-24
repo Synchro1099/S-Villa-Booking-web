@@ -53,3 +53,27 @@ describe("owner booking emails", () => {
     expect(mail.text).not.toContain("Reservation for:");
   });
 });
+
+describe("owner emails when a slot frees up", () => {
+  const renderOwner = (event: "CANCELLED" | "EXPIRED", overrides: Partial<BookingDetail> = {}, cancelledBy?: "CUSTOMER" | "OWNER") =>
+    renderBookingEmail({ event, audience: "OWNER", booking: { ...booking, ...overrides }, settings, link: "https://example.com/x", cancelledBy });
+
+  it("says the customer cancelled", () => {
+    const mail = renderOwner("CANCELLED", { status: "CANCELLED", status_reason: "Cancelled by customer." }, "CUSTOMER");
+    expect(mail.subject).toBe("Booking cancelled — SV-2026-00012 · Sep 30, 2026, 7:00 PM – 8:00 PM");
+    expect(mail.text).toContain("The customer cancelled this booking.");
+    expect(mail.text).toContain("Slot available again: September 30, 2026, 7:00 PM – 8:00 PM");
+  });
+
+  it("says it was cancelled from the Owner Portal, with the reason", () => {
+    const mail = renderOwner("CANCELLED", { status: "CANCELLED", status_reason: "Rain" }, "OWNER");
+    expect(mail.text).toContain("This booking was cancelled from the Owner Portal. Reason: Rain");
+  });
+
+  it("explains an expiry", () => {
+    const mail = renderOwner("EXPIRED", { status: "EXPIRED" });
+    expect(mail.subject).toBe("Booking expired — SV-2026-00012 · Sep 30, 2026, 7:00 PM – 8:00 PM");
+    expect(mail.text).toContain("within 30 minutes");
+    expect(mail.text).toContain("Slot available again:");
+  });
+});

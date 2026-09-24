@@ -63,23 +63,57 @@ function customerCopy(event: BookingEvent, b: BookingDetail, s: Settings): Copy 
   }
 }
 
-function ownerCopy(event: BookingEvent, b: BookingDetail): Copy {
+/** Who cancelled a booking, when known (the customer or the owner). */
+export type CancelledBy = "CUSTOMER" | "OWNER";
+
+/** Owner-facing events: new bookings and proofs need action; cancellations and expiries free a slot. */
+export const OWNER_EVENTS: readonly BookingEvent[] = ["PENDING", "PROOF_SUBMITTED", "CANCELLED", "EXPIRED"];
+
+function ownerCopy(event: BookingEvent, b: BookingDetail, s: Settings, cancelledBy?: CancelledBy): Copy {
   // When the reservation is for, up front: in the subject (for the inbox list) and highlighted in the body.
-  const highlight = { label: "Reservation for", value: reservationWhen(b) };
+  const when = reservationWhen(b);
   const inSubject = reservationWhen(b, "short");
-  return event === "PROOF_SUBMITTED"
-    ? {
-        subject: `Payment proof to review — ${b.booking_reference} · ${inSubject}`,
+  const ref = b.booking_reference;
+  const reservedFor = { label: "Reservation for", value: when };
+  const freed = { label: "Slot available again", value: when };
+  switch (event) {
+    case "PROOF_SUBMITTED":
+      return {
+        subject: `Payment proof to review — ${ref} · ${inSubject}`,
         heading: "A customer uploaded a payment proof",
         intro: "Review the proof in the Owner Portal, then confirm or reject the booking.",
-        highlight,
-      }
-    : {
-        subject: `New booking — ${b.booking_reference} · ${inSubject}`,
+        highlight: reservedFor,
+      };
+    case "CANCELLED": {
+      const reason = b.status_reason ? ` Reason: ${b.status_reason}` : "";
+      const who =
+        cancelledBy === "CUSTOMER"
+          ? "The customer cancelled this booking."
+          : cancelledBy === "OWNER"
+            ? `This booking was cancelled from the Owner Portal.${reason}`
+            : `This booking was cancelled.${reason}`;
+      return {
+        subject: `Booking cancelled — ${ref} · ${inSubject}`,
+        heading: "A booking was cancelled — the slot is free",
+        intro: `${who} The time slot is open for new bookings again.`,
+        highlight: freed,
+      };
+    }
+    case "EXPIRED":
+      return {
+        subject: `Booking expired — ${ref} · ${inSubject}`,
+        heading: "A booking expired — the slot is free",
+        intro: `No payment proof was uploaded within ${s.booking_expiration_minutes} minutes, so the hold was released. The time slot is open for new bookings again.`,
+        highlight: freed,
+      };
+    default:
+      return {
+        subject: `New booking — ${ref} · ${inSubject}`,
         heading: "New reservation request",
         intro: "A new booking is waiting for payment. You'll get another email when the payment proof is uploaded.",
-        highlight,
+        highlight: reservedFor,
       };
+  }
 }
 
 function detailRows(b: BookingDetail): [string, string][] {
@@ -103,9 +137,10 @@ export function renderBookingEmail(opts: {
   booking: BookingDetail;
   settings: Settings;
   link: string;
+  cancelledBy?: CancelledBy;
 }) {
   const { event, audience, booking: b, settings: s, link } = opts;
-  const copy = audience === "CUSTOMER" ? customerCopy(event, b, s) : ownerCopy(event, b);
+  const copy = audience === "CUSTOMER" ? customerCopy(event, b, s) : ownerCopy(event, b, s, opts.cancelledBy);
   const rows = detailRows(b);
   if (audience === "OWNER") rows.push(["Mobile", b.customer_mobile], ["Email", b.customer_email]);
   const contact = [
