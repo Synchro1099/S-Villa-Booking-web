@@ -74,11 +74,13 @@ export async function register(_prev: ActionResult | null, formData: FormData): 
   return { ok: true };
 }
 
-export async function logout() {
+/** Signs out, then goes to the form's `next` field (same-site paths only) or home. */
+export async function logout(formData?: FormData) {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/");
+  const next = formData?.get("next");
+  redirect(typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/");
 }
 
 export async function updateProfile(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {

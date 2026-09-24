@@ -37,7 +37,8 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
 export async function requireOwner(): Promise<Viewer> {
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/owner");
-  if (!viewer.isOwner) redirect("/?denied=owner");
+  // Signed in with a customer account: the login page offers to switch accounts.
+  if (!viewer.isOwner) redirect("/login?next=/owner");
   return viewer;
 }
 
