@@ -49,7 +49,7 @@ function ConfirmDialog({ bookingId }: { bookingId: string }) {
           <CheckCircle2 /> Confirm booking
         </Button>
       </DialogTrigger>
-      <DialogContent title="Confirm this booking?" description="The payment will be marked as verified and the customer will get a confirmation email.">
+      <DialogContent title="Confirm this booking?" description="The payment will be marked as verified, and the customer's booking page will show it's confirmed.">
         <div className="flex justify-end gap-3">
           <DialogClose asChild>
             <Button variant="ghost">Back</Button>
@@ -60,7 +60,7 @@ function ConfirmDialog({ bookingId }: { bookingId: string }) {
               start(async () => {
                 const res = await confirmBooking(bookingId);
                 if (res.ok) {
-                  toast.success("Booking confirmed. The customer has been notified.");
+                  toast.success("Booking confirmed. The customer's booking page now shows it.");
                   setOpen(false);
                   router.refresh();
                 } else toast.error(res.error);
@@ -93,7 +93,7 @@ function ReasonDialog({ mode, bookingId }: { mode: "reject" | "cancel"; bookingI
       </DialogTrigger>
       <DialogContent
         title={isReject ? "Reject this booking" : "Cancel this booking"}
-        description="The customer will receive this reason by email, and the time slot becomes available again."
+        description="The customer will see this reason on their booking page, and the time slot becomes available again."
       >
         <fieldset className="grid gap-2">
           <legend className="mb-2 text-sm font-semibold">Reason</legend>
@@ -126,7 +126,7 @@ function ReasonDialog({ mode, bookingId }: { mode: "reject" | "cancel"; bookingI
               start(async () => {
                 const res = isReject ? await rejectBooking(bookingId, reason) : await cancelBooking(bookingId, reason);
                 if (res.ok) {
-                  toast.success(isReject ? "Booking rejected. The customer has been notified." : "Booking cancelled. The customer has been notified.");
+                  toast.success(isReject ? "Booking rejected. The customer will see the reason on their booking page." : "Booking cancelled. The customer will see the reason on their booking page.");
                   setOpen(false);
                   router.refresh();
                 } else toast.error(res.error);

@@ -11,7 +11,7 @@ const STEPS = [
   ["Choose", "Pick a date, a start time and your facilities."],
   ["Pay", "Send the exact amount by GCash or bank transfer."],
   ["Upload", "Upload a screenshot of your receipt."],
-  ["Confirmed", "We verify your payment and email your confirmation."],
+  ["Confirmed", "We verify your payment and confirm your booking. Check its status anytime with your reference."],
 ];
 
 /** Live price list — reads services.price, the single source of truth. */

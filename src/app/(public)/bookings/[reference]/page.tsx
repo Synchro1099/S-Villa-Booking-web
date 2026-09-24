@@ -9,6 +9,7 @@ import { BookingDetails } from "@/components/booking/booking-details";
 import { PaymentPanel } from "@/components/booking/payment-panel";
 import { CancelBookingButton } from "@/components/booking/cancel-booking-button";
 import { ContactActions } from "@/components/contact/contact-actions";
+import { KeepInTouch } from "@/components/booking/keep-in-touch";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -33,7 +34,7 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
 
   const hero = {
     PENDING: awaitingReview
-      ? { icon: Clock, title: "Reservation request received", body: `Your reservation is pending confirmation. We received your booking and payment information. You will receive an email when ${settings.business_name} confirms or rejects your reservation.` }
+      ? { icon: Clock, title: "Reservation request received", body: "We received your booking and payment proof. We'll review it and update this page, usually within a few hours. Check back here or use Find my booking to see if it's confirmed." }
       : { icon: Clock, title: "Almost done — complete your payment", body: "Your time slot is being held. Send your payment and upload the receipt to finish your reservation." },
     CONFIRMED: { icon: CheckCircle2, title: "Your reservation is confirmed", body: "Your payment has been verified. We look forward to hosting your group!" },
     REJECTED: { icon: XCircle, title: "Reservation not approved", body: booking.status_reason ? `Reason: ${booking.status_reason}` : "Please contact us for details." },
@@ -52,14 +53,14 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
         </div>
       </div>
 
-      {via === "token" ? (
-        <p className="mt-6 rounded-xl bg-info-bg px-4 py-3 text-sm text-info">
-          Bookmark this page — it&apos;s your private link to check this booking&apos;s status anytime. If you lose it, open{" "}
-          <Link href="/bookings/lookup" className="font-semibold underline underline-offset-2">
-            Find my booking
-          </Link>{" "}
-          and enter your reference <strong>{booking.booking_reference}</strong> with the email or mobile number you booked with.
-        </p>
+      {via !== "owner" ? (
+        <KeepInTouch
+          reference={booking.booking_reference}
+          privatePath={`/bookings/${booking.booking_reference}?t=${access.accessToken}`}
+          status={status}
+          awaitingReview={awaitingReview}
+          settings={settings}
+        />
       ) : null}
 
       <div className="mt-10 grid gap-8">

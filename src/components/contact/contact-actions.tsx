@@ -1,15 +1,28 @@
 import { MessageCircle, Phone, MessageSquareText, Mail } from "lucide-react";
 import type { Settings } from "@/types";
 import { cn } from "@/lib/utils";
+import { isPlaceholderEmail, isPlaceholderPhone, isPlaceholderUrl } from "@/lib/contact";
 
 /** Messenger / Call / SMS / Email buttons from the owner's contact settings. */
 export function ContactActions({ settings, className, tone = "light" }: { settings: Settings; className?: string; tone?: "light" | "dark" }) {
-  const tel = settings.contact_number.replace(/[^\d+]/g, "");
+  // Placeholder details (from the initial setup) are skipped rather than shown as dead links.
+  const tel = isPlaceholderPhone(settings.contact_number) ? "" : settings.contact_number.replace(/[^\d+]/g, "");
   const actions = [
-    settings.messenger_url && { href: settings.messenger_url, label: "Message us on Messenger", short: "Messenger", icon: MessageCircle, external: true },
+    !isPlaceholderUrl(settings.messenger_url) && {
+      href: settings.messenger_url,
+      label: "Message us on Messenger",
+      short: "Messenger",
+      icon: MessageCircle,
+      external: true,
+    },
     tel && { href: `tel:${tel}`, label: `Call ${settings.contact_number}`, short: "Call", icon: Phone },
     tel && { href: `sms:${tel}`, label: `Send an SMS to ${settings.contact_number}`, short: "SMS", icon: MessageSquareText },
-    settings.contact_email && { href: `mailto:${settings.contact_email}`, label: `Email ${settings.contact_email}`, short: "Email", icon: Mail },
+    !isPlaceholderEmail(settings.contact_email) && {
+      href: `mailto:${settings.contact_email}`,
+      label: `Email ${settings.contact_email}`,
+      short: "Email",
+      icon: Mail,
+    },
   ].filter(Boolean) as { href: string; label: string; short: string; icon: typeof Phone; external?: boolean }[];
 
   if (actions.length === 0) return null;

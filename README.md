@@ -43,9 +43,27 @@ Nobody can make themselves an owner from the website. New accounts are always `C
 
 1. Push the repo to GitHub and import it in Vercel.
 2. Add the variables from `.env.example` under *Settings → Environment Variables*, and set `NEXT_PUBLIC_SITE_URL` to your production URL.
-3. **Emails:** create a free [Resend](https://resend.com) account, verify your domain and set `RESEND_API_KEY` and `EMAIL_FROM`. Without a key, emails are only written to the server log. Before the domain is verified, use `EMAIL_FROM="S-Villa <onboarding@resend.dev>"` and set `EMAIL_REDIRECT_TO` to your Resend signup address; every email then goes there, marked with who it was meant for. Delivery attempts and errors are recorded in the `notifications` table.
+3. **Emails:** see [Email settings](#email-settings) below. Without a Resend key, emails are only written to the server log. Every delivery attempt and error is recorded in the `notifications` table.
 4. **Expiry emails:** `vercel.json` runs `/api/cron/expire` once a day (the Hobby plan limit). For faster "expired" emails, also call it every 5–10 minutes from a free service like cron-job.org, with the header `Authorization: Bearer <CRON_SECRET>`. Availability is always correct even without the cron. Lapsed holds are ignored and cleared automatically.
 5. **SMS (optional):** set `SEMAPHORE_API_KEY` to send SMS updates through Semaphore.
+
+### Email settings
+
+S-Villa runs on the free `svilla.vercel.app` address with no email domain. Resend's free test sender (`onboarding@resend.dev`) can only send to the address that owns the Resend account, so **the owner gets email alerts and customers don't**. Customers keep their reference and follow the booking on its status page or at **Find my booking**; the site tells them so.
+
+**To connect the owner's Resend account**, change these in Vercel → *Settings → Environment Variables*, then **redeploy** (*Deployments → ⋯ → Redeploy*). Paste only the value, with no quotes and no `NAME=` in front.
+
+| Variable | Value |
+| --- | --- |
+| `RESEND_API_KEY` | The owner's key from Resend → *API Keys* (starts with `re_`). |
+| `OWNER_NOTIFICATION_EMAIL` | The **exact** address the owner signed up to Resend with. Resend refuses any other address. |
+| `EMAIL_REDIRECT_TO` | **Delete it.** If it's set, every customer email is sent to that address as a test copy. |
+
+Leave `EMAIL_FROM` as `S-Villa <onboarding@resend.dev>`.
+
+**To check it works:** make a test booking. The owner should get "New booking — SV-…". In Supabase, the `notifications` table shows the owner email as `SENT` and the customer email as `SKIPPED` ("Customer emails are off…"), which is expected. A `FAILED` row shows Resend's reason in the `error` column.
+
+**If you buy a domain later:** verify it in Resend, set `EMAIL_FROM` to e.g. `S-Villa <bookings@your-domain.com>` and redeploy. Customer emails then turn on automatically.
 
 ---
 

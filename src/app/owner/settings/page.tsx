@@ -1,4 +1,5 @@
 import { getSettings } from "@/lib/data/public";
+import { placeholderContactFields } from "@/lib/contact";
 import { PageHeader } from "@/components/owner/page-header";
 import { BookingRulesForm, ContactSettingsForm, PaymentSettingsForm } from "@/components/owner/settings-forms";
 
@@ -6,10 +7,17 @@ export const metadata = { title: "Settings" };
 
 export default async function OwnerSettingsPage() {
   const settings = await getSettings();
+  const placeholders = placeholderContactFields(settings);
   return (
     <>
       <PageHeader title="Settings" intro="Your contact details appear across the website and in customer emails." />
       <div className="grid max-w-3xl gap-8">
+        {placeholders.length > 0 ? (
+          <p role="status" className="rounded-xl border border-warn/30 bg-warn-bg px-4 py-3 text-sm text-warn">
+            <strong>Still using sample details:</strong> {placeholders.join(", ")}. Customers use these to reach you about their booking,
+            so please enter your real ones below. Until then, those contact buttons are hidden on the website.
+          </p>
+        ) : null}
         <section className="rounded-[var(--radius-card)] border border-line/70 bg-cream p-6 sm:p-8">
           <h2 className="text-2xl">Business & contact</h2>
           <ContactSettingsForm settings={settings} />

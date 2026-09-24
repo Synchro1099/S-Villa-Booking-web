@@ -100,6 +100,13 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
           </ul>
 
           <div className="hidden items-center gap-2 lg:flex">
+            {account.href === "/login" ? (
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/bookings/lookup" aria-current={pathname === "/bookings/lookup" ? "page" : undefined}>
+                  Find my booking
+                </Link>
+              </Button>
+            ) : null}
             <Button asChild variant="ghost" size="sm">
               <Link href={account.href}>{account.label}</Link>
             </Button>

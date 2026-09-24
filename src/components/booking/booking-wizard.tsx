@@ -277,7 +277,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
 
               {step === 3 && (
                 <>
-                  <StepTitle n={4} title="Guests & your details" sub="We'll send your confirmation to this email and mobile number." />
+                  <StepTitle n={4} title="Guests & your details" sub="We'll use these to find your booking and contact you if needed." />
                   <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-sand/60 p-5">
                     <div>
                       <p className="text-sm font-semibold" id="guests-label">

@@ -38,7 +38,9 @@ export const lookupSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^SV-\d{4}-\d{5}$/, "Booking references look like SV-2026-00125."),
+    // Pages show "Booking #SV-…", so a copied reference may start with "#".
+    .transform((v) => v.replace(/^#\s*/, ""))
+    .pipe(z.string().regex(/^SV-\d{4}-\d{5}$/, "Booking references look like SV-2026-00125.")),
   contact: z.string().trim().min(3, "Enter the email or mobile number used for the booking.").max(254),
 });
 

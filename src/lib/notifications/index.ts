@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { toBookingDetail, DETAIL_COLUMNS } from "@/lib/data/bookings";
 import type { BookingDetail, Settings } from "@/types";
-import { envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
+import { customerEmailBlockedReason, envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
 import { planExpiryEmails, type Audience, type LoggedEmail } from "./expiry-plan";
 import { OWNER_EVENTS, renderBookingEmail, renderBookingSms, type BookingEvent, type CancelledBy } from "./templates";
 
@@ -65,8 +65,11 @@ export async function notifyBooking(
 
     // Customer: email (+ SMS when a provider is configured).
     if (to("CUSTOMER")) {
+      const blocked = customerEmailBlockedReason();
       const customerMail = renderBookingEmail({ event, audience: "CUSTOMER", booking, settings, link });
-      const mailResult = await email.send({ to: booking.customer_email, ...customerMail });
+      const mailResult: DeliveryResult = blocked
+        ? { status: "SKIPPED", error: blocked }
+        : await email.send({ to: booking.customer_email, ...customerMail });
       await log(admin, { bookingId, channel: "EMAIL", audience: "CUSTOMER", template: event, recipient: booking.customer_email, result: mailResult });
 
       if (sms.enabled && !opts.emailOnly && event !== "PROOF_SUBMITTED") {

@@ -169,6 +169,20 @@ export function getEmailProvider(): EmailProvider {
   return redirectTo ? new RedirectEmailProvider(provider, redirectTo) : provider;
 }
 
+/**
+ * Resend's test sender (…@resend.dev) only delivers to the Resend account's own
+ * address, so customer emails can't arrive unless they're redirected to a test
+ * inbox. In that case they're skipped (and logged as such) instead of failing.
+ * Owner emails still go out: the owner uses the Resend account's address.
+ */
+export function customerEmailBlockedReason(): string | null {
+  if (!envValue("RESEND_API_KEY") || envValue("EMAIL_REDIRECT_TO")) return null;
+  const from = envValue("EMAIL_FROM") || "S-Villa <onboarding@resend.dev>";
+  return /@resend\.dev>?$/i.test(from)
+    ? "Customer emails are off: Resend's test sender (onboarding@resend.dev) can only email the account owner."
+    : null;
+}
+
 export function getSmsProvider(): SmsProvider {
   const key = process.env.SEMAPHORE_API_KEY;
   return key ? new SemaphoreSmsProvider(key, process.env.SEMAPHORE_SENDER_NAME) : new DisabledSmsProvider();
