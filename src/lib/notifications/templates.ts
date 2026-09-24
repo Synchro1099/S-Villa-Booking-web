@@ -12,6 +12,13 @@ interface Copy {
   subject: string;
   heading: string;
   intro: string;
+  /** Shown prominently above the details table. */
+  highlight?: { label: string; value: string };
+}
+
+/** "September 30, 2026, 7:00 PM – 8:00 PM" */
+export function reservationWhen(b: Pick<BookingDetail, "booking_date" | "start_time" | "end_time">, dateStyle: "long" | "short" = "long") {
+  return `${formatDate(b.booking_date, dateStyle)}, ${formatTimeRange(b.start_time, b.end_time)}`;
 }
 
 function customerCopy(event: BookingEvent, b: BookingDetail, s: Settings): Copy {
@@ -57,16 +64,21 @@ function customerCopy(event: BookingEvent, b: BookingDetail, s: Settings): Copy 
 }
 
 function ownerCopy(event: BookingEvent, b: BookingDetail): Copy {
+  // When the reservation is for, up front: in the subject (for the inbox list) and highlighted in the body.
+  const highlight = { label: "Reservation for", value: reservationWhen(b) };
+  const inSubject = reservationWhen(b, "short");
   return event === "PROOF_SUBMITTED"
     ? {
-        subject: `Payment proof to review — ${b.booking_reference}`,
+        subject: `Payment proof to review — ${b.booking_reference} · ${inSubject}`,
         heading: "A customer uploaded a payment proof",
         intro: "Review the proof in the Owner Portal, then confirm or reject the booking.",
+        highlight,
       }
     : {
-        subject: `New booking — ${b.booking_reference}`,
+        subject: `New booking — ${b.booking_reference} · ${inSubject}`,
         heading: "New reservation request",
         intro: "A new booking is waiting for payment. You'll get another email when the payment proof is uploaded.",
+        highlight,
       };
 }
 
@@ -110,6 +122,7 @@ export function renderBookingEmail(opts: {
     "",
     copy.intro,
     "",
+    ...(copy.highlight ? [`${copy.highlight.label}: ${copy.highlight.value}`, ""] : []),
     ...rows.map(([k, v]) => `${k}: ${v}`),
     "",
     `${buttonLabel}: ${link}`,
@@ -126,7 +139,17 @@ export function renderBookingEmail(opts: {
 <tr><td style="padding:32px">
 <h1 style="font-family:Georgia,serif;font-weight:normal;font-size:24px;margin:0 0 12px">${escape(copy.heading)}</h1>
 <p style="font-size:15px;line-height:1.6;margin:0 0 24px;color:#3d4a42">${escape(copy.intro)}</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-top:1px solid #e8e1d4">
+${
+  copy.highlight
+    ? `<div style="margin:0 0 24px;padding:16px 20px;background:#f5f1ea;border-left:4px solid #b08d57;border-radius:8px">
+<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b746e">${escape(copy.highlight.label)}</div>
+<div style="margin-top:4px;font-family:Georgia,serif;font-size:20px;color:#1d2a22">${escape(copy.highlight.value).replace(
+        /\d{1,2}:\d{2} [AP]M – \d{1,2}:\d{2} [AP]M/,
+        (range) => `<span style="white-space:nowrap">${range}</span>`, // keep the time range on one line
+      )}</div></div>
+`
+    : ""
+}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-top:1px solid #e8e1d4">
 ${rows
   .map(
     ([k, v]) =>
