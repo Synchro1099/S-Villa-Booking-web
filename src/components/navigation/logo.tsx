@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 
 // Same artwork as public/logo/logo-mark-{light,dark}.svg, drawn inline: an SVG loaded
 // through <img> can't use the page's web fonts, so its "S" would fall back to Georgia.
+// The rings stay a full screen pixel wide at any size so they read crisply on 1x screens.
 const MARK_COLORS = {
   dark: { outer: "#A9895A", inner: "#D9C79E", letter: "#16241B" }, // logo-mark-light.svg, for light backgrounds
   light: { outer: "#C4A265", inner: "#5A6B54", letter: "#F1ECE1" }, // logo-mark-dark.svg, for dark backgrounds
@@ -18,8 +19,8 @@ export function Logo({ tone = "dark", className, href = "/" }: { tone?: "dark" |
         className="size-10 shrink-0 transition-transform group-hover:rotate-6"
         aria-hidden
       >
-        <circle cx="32" cy="32" r="31" stroke={mark.outer} strokeWidth="1" />
-        <circle cx="32" cy="32" r="26.5" stroke={mark.inner} strokeWidth="0.75" />
+        <circle cx="32" cy="32" r="31" stroke={mark.outer} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        <circle cx="32" cy="32" r="26.5" stroke={mark.inner} strokeWidth="1" vectorEffect="non-scaling-stroke" />
         <text
           x="32"
           y="41"
