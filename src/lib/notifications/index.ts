@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { toBookingDetail, DETAIL_COLUMNS } from "@/lib/data/bookings";
 import type { BookingDetail, Settings } from "@/types";
-import { getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
+import { envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
 import { renderBookingEmail, renderBookingSms, type BookingEvent } from "./templates";
 
 /**
@@ -43,7 +43,7 @@ function customerLink(booking: BookingDetail, token: string) {
 }
 
 function ownerRecipient(settings: Settings) {
-  return process.env.OWNER_NOTIFICATION_EMAIL || settings.contact_email;
+  return envValue("OWNER_NOTIFICATION_EMAIL") || settings.contact_email.trim();
 }
 
 export async function notifyBooking(bookingId: string, event: BookingEvent) {

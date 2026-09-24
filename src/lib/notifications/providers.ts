@@ -113,11 +113,33 @@ class DisabledSmsProvider implements SmsProvider {
   }
 }
 
+/**
+ * Reads an env var, forgiving what hosting dashboards often keep from a pasted
+ * .env line: surrounding whitespace/newlines and wrapping quotes.
+ */
+export function envValue(name: string): string | undefined {
+  const raw = process.env[name]?.trim();
+  if (!raw) return undefined;
+  const unquoted = /^(["'])([\s\S]*)\1$/.exec(raw)?.[2].trim() ?? raw;
+  return unquoted || undefined;
+}
+
+/** "name@domain" or "Display Name <name@domain>", as Resend requires. */
+const FROM_FORMAT = /^(?:[^<>@\r\n]*<[^<>@\s]+@[^<>@\s]+>|[^<>@\s]+@[^<>@\s]+)$/;
+let warnedFrom = false;
+
 export function getEmailProvider(): EmailProvider {
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || "S-Villa <onboarding@resend.dev>";
+  const key = envValue("RESEND_API_KEY");
+  const from = envValue("EMAIL_FROM") || "S-Villa <onboarding@resend.dev>";
+  if (!warnedFrom && !FROM_FORMAT.test(from)) {
+    warnedFrom = true;
+    console.error(
+      `[s-villa] EMAIL_FROM looks malformed ("${from.slice(0, 60)}"). Use e.g. S-Villa <onboarding@resend.dev> — ` +
+        "only the value, without EMAIL_FROM= in front.",
+    );
+  }
   const provider = key ? new ResendEmailProvider(key, from) : new ConsoleEmailProvider();
-  const redirectTo = process.env.EMAIL_REDIRECT_TO?.trim();
+  const redirectTo = envValue("EMAIL_REDIRECT_TO");
   return redirectTo ? new RedirectEmailProvider(provider, redirectTo) : provider;
 }
 

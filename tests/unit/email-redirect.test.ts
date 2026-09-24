@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { RedirectEmailProvider } = await import("@/lib/notifications/providers");
+const { RedirectEmailProvider, envValue } = await import("@/lib/notifications/providers");
 
 describe("RedirectEmailProvider", () => {
   it("sends to the test inbox and names the real recipient", async () => {
@@ -28,5 +28,18 @@ describe("RedirectEmailProvider", () => {
     const send = vi.fn().mockResolvedValue({ status: "SENT" });
     await new RedirectEmailProvider({ send }, "me@test.dev").send({ to: "<b>x</b>", subject: "s", text: "t", html: "" });
     expect(send.mock.calls[0][0].html).not.toContain("<b>");
+  });
+});
+
+describe("envValue", () => {
+  it("drops whitespace, trailing newlines and wrapping quotes pasted from a .env line", () => {
+    vi.stubEnv("SV_TEST_FROM", '"S-Villa <onboarding@resend.dev>"\n');
+    vi.stubEnv("SV_TEST_OWNER", "owner@gmail.com\n");
+    vi.stubEnv("SV_TEST_EMPTY", "  ''  ");
+    expect(envValue("SV_TEST_FROM")).toBe("S-Villa <onboarding@resend.dev>");
+    expect(envValue("SV_TEST_OWNER")).toBe("owner@gmail.com");
+    expect(envValue("SV_TEST_EMPTY")).toBeUndefined();
+    expect(envValue("SV_TEST_MISSING")).toBeUndefined();
+    vi.unstubAllEnvs();
   });
 });
