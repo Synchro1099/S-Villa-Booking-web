@@ -19,7 +19,10 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/owner/proof
   if (!proof) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { data, error } = await createAdminClient().storage.from("payment-proofs").createSignedUrl(proof.file_path, 60);
-  if (error || !data) return NextResponse.json({ error: "Unavailable" }, { status: 500 });
+  if (error || !data) {
+    console.error(`[s-villa] proof ${id}: couldn't create signed URL:`, error?.message ?? "no URL returned");
+    return NextResponse.json({ error: "Unavailable" }, { status: 500 });
+  }
 
   return NextResponse.redirect(data.signedUrl, { headers: { "Cache-Control": "no-store" } });
 }
