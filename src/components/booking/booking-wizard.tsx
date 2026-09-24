@@ -68,6 +68,19 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [banner, setBanner] = useState<string | null>(null);
+  const bannerRef = useRef<HTMLParagraphElement>(null);
+  const showBanner = useRef(false);
+
+  // A failed submit happens at the bottom of the card, while the error shows at
+  // the top: bring it into view (and focus it) so it can't go unnoticed on phones.
+  useEffect(() => {
+    if (!banner || !showBanner.current) return;
+    showBanner.current = false;
+    const el = bannerRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.focus({ preventScroll: true });
+  }, [banner, step]);
   const [pending, startTransition] = useTransition();
 
   const day = date ? av.dayAvailability(date) : null;
@@ -129,6 +142,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
         return;
       }
       setBanner(result.error);
+      showBanner.current = true;
       // The slot may have just been taken — reload and send them back to pick a time.
       // Not awaited, so the button leaves "Submitting…" as soon as the error arrives.
       void av.refresh();
@@ -147,7 +161,13 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem]">
         <section className="rounded-[var(--radius-card)] border border-line/70 bg-cream p-5 shadow-soft sm:p-8" aria-labelledby="step-title">
           {banner ? (
-            <p role="alert" className="mb-6 rounded-xl border border-bad/25 bg-bad-bg px-4 py-3 text-sm text-bad">
+            <p
+              ref={bannerRef}
+              id="wizard-error"
+              role="alert"
+              tabIndex={-1}
+              className="mb-6 scroll-mt-28 rounded-xl border border-bad/25 bg-bad-bg px-4 py-3 text-sm text-bad outline-none"
+            >
               {banner}
             </p>
           ) : null}
@@ -368,6 +388,13 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
               )}
             </motion.div>
           </AnimatePresence>
+
+          {/* Same error beside the Submit button (the top banner is the one announced to screen readers). */}
+          {banner && step === 5 ? (
+            <p className="mt-8 rounded-xl border border-bad/25 bg-bad-bg px-4 py-3 text-sm text-bad">
+              <strong>Your reservation wasn&apos;t submitted.</strong> {banner}
+            </p>
+          ) : null}
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
             {step > 0 ? (
