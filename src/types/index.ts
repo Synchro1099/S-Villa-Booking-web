@@ -109,6 +109,8 @@ export interface Booking {
   expires_at: string | null;
   confirmed_at: string | null;
   created_at: string;
+  /** Hidden from the owner's default lists; never deleted. */
+  archived_at: string | null;
 }
 
 export interface BookingDetail extends Booking {

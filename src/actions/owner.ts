@@ -70,6 +70,29 @@ export async function cancelBooking(bookingId: string, reason: string): Promise<
   return { ok: true };
 }
 
+/** Hide settled bookings dated before `before` from the default lists. Nothing is deleted. */
+export async function archiveBookings(beforeDate: string): Promise<ActionResult<{ count: number }>> {
+  await requireOwner();
+  const before = z.iso.date().safeParse(beforeDate);
+  if (!before.success) return { ok: false, error: "Please choose a date." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("owner_archive_bookings", { p_before: before.data });
+  if (error) return { ok: false, error: friendlyError(error, { action: "archiveBookings", before: before.data }) };
+  revalidatePath("/owner/bookings");
+  return { ok: true, data: { count: Number(data ?? 0) } };
+}
+
+export async function unarchiveBooking(bookingId: string): Promise<ActionResult> {
+  await requireOwner();
+  if (!uuid.safeParse(bookingId).success) return { ok: false, error: "Invalid booking." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("owner_unarchive_booking", { p_booking_id: bookingId });
+  if (error) return { ok: false, error: friendlyError(error) };
+  revalidatePath("/owner/bookings");
+  revalidatePath(`/owner/bookings/${bookingId}`);
+  return { ok: true };
+}
+
 // --- Services & pricing -----------------------------------------------------------
 
 export async function updateService(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {

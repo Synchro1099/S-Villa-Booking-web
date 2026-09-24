@@ -6,7 +6,7 @@ import { getViewer } from "@/lib/auth";
 import type { Booking, BookingDetail, BookingItem, BookingStatus, Payment, PaymentProof } from "@/types";
 
 export const BOOKING_COLUMNS =
-  "id, booking_reference, customer_id, customer_name, customer_email, customer_mobile, booking_date, start_time, end_time, guest_count, status, status_reason, subtotal, total_amount, payment_method, notes, expires_at, confirmed_at, created_at";
+  "id, booking_reference, customer_id, customer_name, customer_email, customer_mobile, booking_date, start_time, end_time, guest_count, status, status_reason, subtotal, total_amount, payment_method, notes, expires_at, confirmed_at, created_at, archived_at";
 
 export const DETAIL_COLUMNS = `${BOOKING_COLUMNS},
   booking_items (id, service_name_snapshot, pricing_unit_snapshot, unit_price, quantity, subtotal),
@@ -112,9 +112,19 @@ export async function getMyBookings(): Promise<BookingDetail[]> {
 // Owner reads — use the session client so RLS (is_owner) also applies.
 // ---------------------------------------------------------------------------
 
-export async function listBookings(opts: { status?: BookingStatus | "ALL"; q?: string; from?: string; to?: string; limit?: number }) {
+/** `archived`: true = only archived, false = hide archived, omitted = both. */
+export async function listBookings(opts: {
+  status?: BookingStatus | "ALL";
+  q?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+  archived?: boolean;
+}) {
   const supabase = await createClient();
   let query = supabase.from("bookings").select(DETAIL_COLUMNS);
+  if (opts.archived === true) query = query.not("archived_at", "is", null);
+  if (opts.archived === false) query = query.is("archived_at", null);
   if (opts.status && opts.status !== "ALL") query = query.eq("status", opts.status);
   if (opts.from) query = query.gte("booking_date", opts.from);
   if (opts.to) query = query.lte("booking_date", opts.to);
@@ -151,14 +161,23 @@ export async function getBookingById(id: string): Promise<BookingDetail | null> 
   return booking;
 }
 
-export async function countBookingsByStatus() {
+/** Counts per status. With `excludeArchived`, archived bookings are left out of the status counts. */
+export async function countBookingsByStatus(opts: { excludeArchived?: boolean } = {}) {
   const supabase = await createClient();
   const statuses: BookingStatus[] = ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED", "EXPIRED"];
   const counts = await Promise.all(
     statuses.map(async (s) => {
-      const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", s);
+      let query = supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", s);
+      if (opts.excludeArchived) query = query.is("archived_at", null);
+      const { count } = await query;
       return [s, count ?? 0] as const;
     }),
   );
   return Object.fromEntries(counts) as Record<BookingStatus, number>;
+}
+
+export async function countArchivedBookings() {
+  const supabase = await createClient();
+  const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).not("archived_at", "is", null);
+  return count ?? 0;
 }

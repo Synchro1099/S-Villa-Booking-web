@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/time";
 import { formatPeso } from "@/lib/pricing";
 import { BookingDetails } from "@/components/booking/booking-details";
 import { BookingActions } from "@/components/owner/booking-actions";
+import { RestoreBookingButton } from "@/components/owner/archive-controls";
 import { PageHeader } from "@/components/owner/page-header";
 
 export const metadata = { title: "Booking" };
@@ -27,6 +28,15 @@ export default async function OwnerBookingPage(props: PageProps<"/owner/bookings
         <ArrowLeft className="size-4" aria-hidden /> All bookings
       </Link>
       <PageHeader title={`Booking #${booking.booking_reference}`} intro={`Created ${dateTime.format(new Date(booking.created_at))}`} />
+
+      {booking.archived_at ? (
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-sand/60 px-4 py-3 text-sm">
+          <p>
+            <strong>Archived</strong> on {dateTime.format(new Date(booking.archived_at))}. It&apos;s hidden from the main lists but kept in full.
+          </p>
+          <RestoreBookingButton bookingId={booking.id} />
+        </div>
+      ) : null}
 
       <div className="grid gap-8 xl:grid-cols-[1.4fr_1fr]">
         <div className="space-y-8">

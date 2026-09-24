@@ -246,3 +246,39 @@ describe("status state machine", () => {
     await createBooking(db, { date: day, start: "12:00", services: [jacuzzi] });
   });
 });
+
+describe("archive", () => {
+  it("archives settled bookings before a date, keeps pending ones, and can restore", async () => {
+    const owner = await createUser(db, "owner@example.com", "OWNER");
+    const [jacuzzi] = await serviceIds(db, "jacuzzi");
+    const pending = await createBooking(db, { date: day, start: "10:00", services: [jacuzzi] });
+    const cancelled = await createBooking(db, { date: day, start: "12:00", services: [jacuzzi] });
+    await db.query(`update bookings set status = 'CANCELLED' where id = $1`, [cancelled.booking_id]);
+    // Move both into the past (create_booking only accepts future dates).
+    await db.query(`update bookings set booking_date = $1 where id = any($2)`, [manilaDate(-10), [pending.booking_id, cancelled.booking_id]]);
+
+    const archive = (before: string) =>
+      asRole(db, "authenticated", owner, (tx) => tx.query<{ n: number }>(`select owner_archive_bookings($1::date) as n`, [before]));
+
+    await expectDbError(archive(manilaDate(1)), "SV_ARCHIVE_DATE_INVALID");
+    expect((await archive(manilaDate(0))).rows[0].n).toBe(1);
+
+    const rows = (await db.query<{ id: string; archived: boolean; total: string }>(
+      `select id, archived_at is not null as archived, total_amount::text as total from bookings`)).rows;
+    expect(rows.find((r) => r.id === cancelled.booking_id)?.archived).toBe(true);
+    expect(rows.find((r) => r.id === pending.booking_id)?.archived).toBe(false);
+    // Nothing is deleted: the price snapshot is still there.
+    expect((await db.query(`select 1 from booking_items where booking_id = $1`, [cancelled.booking_id])).rows).toHaveLength(1);
+
+    await asRole(db, "authenticated", owner, (tx) => tx.query(`select owner_unarchive_booking($1)`, [cancelled.booking_id]));
+    expect((await db.query<{ a: string | null }>(`select archived_at as a from bookings where id = $1`, [cancelled.booking_id])).rows[0].a).toBeNull();
+  });
+
+  it("only the owner can archive", async () => {
+    const customer = await createUser(db, "c@example.com");
+    await expectDbError(
+      asRole(db, "authenticated", customer, (tx) => tx.query(`select owner_archive_bookings($1::date)`, [manilaDate(0)])),
+      "SV_FORBIDDEN",
+    );
+  });
+});

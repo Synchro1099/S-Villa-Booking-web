@@ -24,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   SV_REASON_REQUIRED: "Please give a reason.",
   SV_FORBIDDEN: "You don't have permission to do that.",
   SV_NOT_FOUND: "We couldn't find that booking.",
+  SV_ARCHIVE_DATE_INVALID: "Please choose today or an earlier date. Upcoming bookings can't be archived.",
   SV_NOT_CONFIGURED: "Bookings are temporarily unavailable. Please contact us directly.",
 };
 
