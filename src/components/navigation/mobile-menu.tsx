@@ -24,14 +24,25 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    // Keep the page behind the open menu from scrolling.
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      root.style.overflow = previous;
+    };
   }, [open]);
+
+  const signedOut = account.href === "/login";
 
   return (
     <div className="lg:hidden">
       <div className="flex items-center gap-2">
-        <Button asChild size="sm">
-          <Link href="/book">Book Now</Link>
+        <Button asChild size="sm" className="h-11 px-5">
+          <Link href="/book" aria-current={pathname === "/book" ? "page" : undefined}>
+            Book Now
+          </Link>
         </Button>
         <button
           type="button"
@@ -39,7 +50,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="relative grid size-10 place-items-center overflow-hidden rounded-full border border-line transition-colors hover:border-ink"
+          className="relative grid size-11 place-items-center overflow-hidden rounded-full border border-line transition-colors hover:border-ink"
         >
           <AnimatePresence initial={false} mode="wait">
             <motion.span
@@ -85,7 +96,7 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
                 animate="shown"
                 variants={{ shown: { transition: { staggerChildren: 0.03, delayChildren: 0.04 } } }}
               >
-                {[...links, account].map((l) => {
+                {links.map((l) => {
                   const active = isActive(pathname, l.href);
                   return (
                     <motion.li
@@ -107,6 +118,25 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
                     </motion.li>
                   );
                 })}
+                {/* Account actions, set apart from the page links. */}
+                <motion.li
+                  variants={{ hidden: { opacity: 0, x: -8 }, shown: { opacity: 1, x: 0 } }}
+                  transition={{ duration: DURATION.fast, ease: EASE }}
+                  className={cn("grid gap-3 pt-6", signedOut && "grid-cols-2")}
+                >
+                  <Button asChild variant="outline" className="h-12">
+                    <Link href={account.href} aria-current={isActive(pathname, account.href) ? "page" : undefined}>
+                      {account.label}
+                    </Link>
+                  </Button>
+                  {signedOut ? (
+                    <Button asChild variant="ghost" className="h-12 bg-sand/60">
+                      <Link href="/bookings/lookup" aria-current={pathname === "/bookings/lookup" ? "page" : undefined}>
+                        Find my booking
+                      </Link>
+                    </Button>
+                  ) : null}
+                </motion.li>
               </motion.ul>
             </motion.div>
           </>
