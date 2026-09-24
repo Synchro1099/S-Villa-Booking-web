@@ -28,6 +28,14 @@ const STEP_MOTION = {
 
 const STEPS = ["Date", "Time", "Services", "Guests", "Review", "Payment"] as const;
 
+/** Why Continue/Submit is disabled on each step (shown next to the button). */
+const BLOCKED_HINT: Partial<Record<number, string>> = {
+  0: "Choose a date to continue.",
+  1: "Choose a start time to continue.",
+  2: "Choose at least one facility to continue.",
+  5: "Choose GCash or Bank Transfer to submit.",
+};
+
 export interface WizardProps {
   config: AvailabilityConfig;
   initial: AvailabilitySnapshot;
@@ -301,6 +309,26 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                       </div>
                     ))}
                   </dl>
+                  {/* Prices here too: on phones the summary panel sits below the buttons. */}
+                  <div className="mt-6 rounded-2xl border border-line bg-white px-5 py-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Price</h3>
+                    <ul className="mt-3 space-y-2 text-sm">
+                      {estimate.lines.map((l) => (
+                        <li key={l.serviceId} className="flex justify-between gap-4">
+                          <span>
+                            {l.name}
+                            {l.unit === "HOUR" ? <span className="text-muted"> · {formatPeso(l.unitPrice)} × {l.quantity}h</span> : null}
+                          </span>
+                          <span className="font-semibold tabular-nums">{formatPeso(l.subtotal)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 flex items-baseline justify-between border-t border-line pt-3">
+                      <span className="text-sm font-bold uppercase tracking-wider">Total</span>
+                      <span className="font-display text-2xl tabular-nums">{formatPeso(estimate.total)}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-muted">Current rates. Your final total is confirmed when you submit.</p>
+                  </div>
                 </>
               )}
 
@@ -349,12 +377,17 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
             ) : (
               <span />
             )}
+            {!canContinue && BLOCKED_HINT[step] ? (
+              <p className="order-last w-full text-center text-sm text-muted sm:order-none sm:ml-auto sm:w-auto sm:text-right" aria-live="polite">
+                {BLOCKED_HINT[step]}
+              </p>
+            ) : null}
             {step < 5 ? (
-              <Button size="lg" onClick={next} disabled={!canContinue}>
+              <Button size="lg" className="max-sm:grow" onClick={next} disabled={!canContinue}>
                 Continue <ArrowRight />
               </Button>
             ) : (
-              <Button size="lg" variant="brass" onClick={submit} disabled={!canContinue || pending}>
+              <Button size="lg" variant="brass" className="max-sm:grow" onClick={submit} disabled={!canContinue || pending}>
                 {pending ? <Loader2 className="animate-spin" /> : null}
                 {pending ? "Submitting…" : "Submit reservation"}
               </Button>

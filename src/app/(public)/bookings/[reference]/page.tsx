@@ -33,7 +33,7 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
 
   const hero = {
     PENDING: awaitingReview
-      ? { icon: Clock, title: "Reservation Request Received", body: `Your reservation is pending confirmation. We received your booking and payment information. You will receive an email when ${settings.business_name} confirms or rejects your reservation.` }
+      ? { icon: Clock, title: "Reservation request received", body: `Your reservation is pending confirmation. We received your booking and payment information. You will receive an email when ${settings.business_name} confirms or rejects your reservation.` }
       : { icon: Clock, title: "Almost done — complete your payment", body: "Your time slot is being held. Send your payment and upload the receipt to finish your reservation." },
     CONFIRMED: { icon: CheckCircle2, title: "Your reservation is confirmed", body: "Your payment has been verified. We look forward to hosting your group!" },
     REJECTED: { icon: XCircle, title: "Reservation not approved", body: booking.status_reason ? `Reason: ${booking.status_reason}` : "Please contact us for details." },
@@ -54,7 +54,11 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
 
       {via === "token" ? (
         <p className="mt-6 rounded-xl bg-info-bg px-4 py-3 text-sm text-info">
-          Bookmark this page — it&apos;s your private link to check this booking&apos;s status anytime.
+          Bookmark this page — it&apos;s your private link to check this booking&apos;s status anytime. If you lose it, open{" "}
+          <Link href="/bookings/lookup" className="font-semibold underline underline-offset-2">
+            Find my booking
+          </Link>{" "}
+          and enter your reference <strong>{booking.booking_reference}</strong> with the email or mobile number you booked with.
         </p>
       ) : null}
 

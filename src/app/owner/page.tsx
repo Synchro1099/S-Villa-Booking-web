@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CalendarDays, FileCheck2, Clock, CheckCircle2 } from "lucide-react";
-import { countBookingsByStatus, listBookings } from "@/lib/data/bookings";
+import { countUpcomingConfirmed, listBookings } from "@/lib/data/bookings";
 import { getBlockedDates } from "@/lib/data/owner";
 import { getActiveServices, getSettings } from "@/lib/data/public";
 import { formatPeso, unitLabel } from "@/lib/pricing";
@@ -14,8 +14,8 @@ export const metadata = { title: "Dashboard" };
 export default async function OwnerDashboard() {
   const settings = await getSettings();
   const today = nowIn(settings.timezone).date;
-  const [counts, pending, todays, upcoming, services, closedToday] = await Promise.all([
-    countBookingsByStatus(),
+  const [upcomingConfirmed, pending, todays, upcoming, services, closedToday] = await Promise.all([
+    countUpcomingConfirmed(today),
     listBookings({ status: "PENDING", limit: 50 }),
     listBookings({ status: "CONFIRMED", from: today, to: today }),
     listBookings({ status: "CONFIRMED", from: addDays(today, 1), to: addDays(today, 14), limit: 8 }),
@@ -39,7 +39,7 @@ export default async function OwnerDashboard() {
         <Stat icon={FileCheck2} label="Payments to review" value={toReview.length} href="/owner/payments" tone="info" />
         <Stat icon={Clock} label="Awaiting payment" value={awaitingPayment.length} href="/owner/bookings?status=PENDING" tone="warn" />
         <Stat icon={CalendarDays} label="Today's bookings" value={todays.length} href="/owner/calendar" tone="neutral" />
-        <Stat icon={CheckCircle2} label="Confirmed (all time)" value={counts.CONFIRMED} href="/owner/bookings?status=CONFIRMED" tone="ok" />
+        <Stat icon={CheckCircle2} label="Confirmed · upcoming" value={upcomingConfirmed} href="/owner/bookings?status=CONFIRMED" tone="ok" />
       </div>
 
       <div className="mt-10 grid gap-10 xl:grid-cols-[1.4fr_1fr]">

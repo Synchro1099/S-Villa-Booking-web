@@ -18,7 +18,7 @@ export function BookingRow({ booking: b }: { booking: BookingDetail }) {
           #{b.booking_reference} · {formatDate(b.booking_date, "short")} · {formatTimeRange(b.start_time, b.end_time)}
         </p>
         <p className="mt-1 truncate text-lg font-semibold">
-          {b.customer_name} <span className="font-normal text-muted">· {b.guest_count} guests</span>
+          {b.customer_name} <span className="font-normal text-muted">· {b.guest_count} guest{b.guest_count === 1 ? "" : "s"}</span>
         </p>
         <p className="truncate text-sm text-muted">{b.items.map((i) => i.service_name_snapshot).join(", ")}</p>
       </div>

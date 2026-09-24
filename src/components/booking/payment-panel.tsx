@@ -102,7 +102,7 @@ export function PaymentPanel({
           >
             <Upload className="size-6 text-brass-deep" aria-hidden />
             <span className="font-semibold">{fileName ?? "Choose a screenshot or PDF"}</span>
-            <span className="text-xs text-muted">Tap to select from your phone</span>
+            <span className="text-xs text-muted">Tap or click to choose a file</span>
             <input
               id="file"
               name="file"
@@ -132,10 +132,10 @@ function CopyButton({ value, label }: { value: string; label: string }) {
     <button
       type="button"
       onClick={() => navigator.clipboard.writeText(value).then(() => toast.success(`${label} copied`))}
-      className="rounded-full p-1.5 text-ivory/60 hover:bg-ivory/10 hover:text-ivory"
+      className="-my-2 grid size-11 shrink-0 place-items-center rounded-full text-ivory/60 hover:bg-ivory/10 hover:text-ivory active:bg-ivory/15"
       aria-label={`Copy ${label}`}
     >
-      <Copy className="size-4" />
+      <Copy className="size-5" />
     </button>
   );
 }
@@ -163,7 +163,7 @@ function Countdown({ expiresAt }: { expiresAt: string }) {
     <p className="mt-2 text-sm text-warn" role="timer" aria-live="off">
       {remaining > 0 ? (
         <>
-          Your slot is held for <strong className="tabular-nums">{m}:{String(s).padStart(2, "0")}</strong> more minutes.
+          Time left to pay and upload your receipt: <strong className="tabular-nums">{m}:{String(s).padStart(2, "0")}</strong>
         </>
       ) : (
         "The payment window has ended."

@@ -179,6 +179,17 @@ export async function countBookingsByStatus(opts: { excludeArchived?: boolean } 
   return Object.fromEntries(counts) as Record<BookingStatus, number>;
 }
 
+/** Confirmed bookings dated `today` or later. */
+export async function countUpcomingConfirmed(today: string) {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "CONFIRMED")
+    .gte("booking_date", today);
+  return count ?? 0;
+}
+
 export async function countArchivedBookings() {
   const supabase = await createClient();
   const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).not("archived_at", "is", null);

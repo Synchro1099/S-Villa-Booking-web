@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarPlus } from "lucide-react";
 import { requireCustomer } from "@/lib/auth";
 import { getMyBookings } from "@/lib/data/bookings";
+import { effectiveStatus } from "@/lib/booking/status";
 import { formatPeso } from "@/lib/pricing";
 import { formatDate, formatTimeRange, nowIn } from "@/lib/time";
 import { BookingStatusBadge, PaymentStatusBadge } from "@/components/ui/status-badge";
@@ -14,8 +15,9 @@ export const metadata: Metadata = { title: "My Bookings", robots: { index: false
 
 export default async function MyBookingsPage() {
   const viewer = await requireCustomer("/my-bookings");
-  const bookings = await getMyBookings();
   const today = nowIn("Asia/Manila").date;
+  // Same display status as the booking page (a lapsed payment window shows as Expired).
+  const bookings = (await getMyBookings()).map((b) => ({ ...b, status: effectiveStatus(b) }));
   const upcoming = bookings.filter((b) => b.booking_date >= today && (b.status === "PENDING" || b.status === "CONFIRMED")).reverse();
   const past = bookings.filter((b) => !upcoming.includes(b));
 
@@ -79,7 +81,7 @@ function BookingList({ title, bookings, empty }: { title: string; bookings: Book
                   <p className="text-xs font-bold uppercase tracking-wider text-muted">#{b.booking_reference}</p>
                   <p className="mt-1 font-display text-2xl">{formatDate(b.booking_date, "full")}</p>
                   <p className="text-sm text-muted">
-                    {formatTimeRange(b.start_time, b.end_time)} · {b.guest_count} guests · {b.items.map((i) => i.service_name_snapshot).join(", ")}
+                    {formatTimeRange(b.start_time, b.end_time)} · {b.guest_count} guest{b.guest_count === 1 ? "" : "s"} · {b.items.map((i) => i.service_name_snapshot).join(", ")}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">

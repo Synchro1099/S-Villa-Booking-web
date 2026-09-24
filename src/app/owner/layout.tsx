@@ -23,6 +23,22 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
       <aside className="border-b border-ivory/10 bg-ink text-ivory lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0">
         <div className="flex items-center justify-between gap-4 px-5 py-4 lg:py-6">
           <Logo tone="light" href="/owner" />
+          {/* Small screens: the sidebar footer is hidden, so offer these here. */}
+          <div className="flex items-center gap-1 lg:hidden">
+            <Link
+              href="/"
+              target="_blank"
+              className="grid size-11 place-items-center rounded-full text-ivory/80 hover:bg-ivory/10 hover:text-brass"
+              aria-label="View website (opens in a new tab)"
+            >
+              <ExternalLink className="size-5" aria-hidden />
+            </Link>
+            <form action={logout}>
+              <button type="submit" className="flex h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-ivory/80 hover:bg-ivory/10 hover:text-brass">
+                <LogOut className="size-5" aria-hidden /> Sign out
+              </button>
+            </form>
+          </div>
         </div>
         <OwnerNav />
         <div className="mt-auto hidden border-t border-ivory/10 p-5 text-sm lg:block">
