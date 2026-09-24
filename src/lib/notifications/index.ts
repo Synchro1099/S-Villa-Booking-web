@@ -4,6 +4,7 @@ import { publicEnv } from "@/lib/env";
 import { toBookingDetail, DETAIL_COLUMNS } from "@/lib/data/bookings";
 import type { BookingDetail, Settings } from "@/types";
 import { envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
+import { planExpiryEmails, type Audience, type LoggedEmail } from "./expiry-plan";
 import { OWNER_EVENTS, renderBookingEmail, renderBookingSms, type BookingEvent, type CancelledBy } from "./templates";
 
 /**
@@ -46,7 +47,16 @@ function ownerRecipient(settings: Settings) {
   return envValue("OWNER_NOTIFICATION_EMAIL") || settings.contact_email.trim();
 }
 
-export async function notifyBooking(bookingId: string, event: BookingEvent, opts: { cancelledBy?: CancelledBy } = {}) {
+/**
+ * `audiences` limits who is emailed (default: everyone); `emailOnly` skips SMS.
+ * Both are used when resending an email that failed earlier.
+ */
+export async function notifyBooking(
+  bookingId: string,
+  event: BookingEvent,
+  opts: { cancelledBy?: CancelledBy; audiences?: Audience[]; emailOnly?: boolean } = {},
+) {
+  const to = (audience: Audience) => !opts.audiences || opts.audiences.includes(audience);
   try {
     const { admin, booking, token, settings } = await loadContext(bookingId);
     const email = getEmailProvider();
@@ -54,18 +64,20 @@ export async function notifyBooking(bookingId: string, event: BookingEvent, opts
     const link = customerLink(booking, token);
 
     // Customer: email (+ SMS when a provider is configured).
-    const customerMail = renderBookingEmail({ event, audience: "CUSTOMER", booking, settings, link });
-    const mailResult = await email.send({ to: booking.customer_email, ...customerMail });
-    await log(admin, { bookingId, channel: "EMAIL", audience: "CUSTOMER", template: event, recipient: booking.customer_email, result: mailResult });
+    if (to("CUSTOMER")) {
+      const customerMail = renderBookingEmail({ event, audience: "CUSTOMER", booking, settings, link });
+      const mailResult = await email.send({ to: booking.customer_email, ...customerMail });
+      await log(admin, { bookingId, channel: "EMAIL", audience: "CUSTOMER", template: event, recipient: booking.customer_email, result: mailResult });
 
-    if (sms.enabled && event !== "PROOF_SUBMITTED") {
-      const smsResult = await sms.send(booking.customer_mobile, renderBookingSms(event, booking, settings, link));
-      await log(admin, { bookingId, channel: "SMS", audience: "CUSTOMER", template: event, recipient: booking.customer_mobile, result: smsResult });
+      if (sms.enabled && !opts.emailOnly && event !== "PROOF_SUBMITTED") {
+        const smsResult = await sms.send(booking.customer_mobile, renderBookingSms(event, booking, settings, link));
+        await log(admin, { bookingId, channel: "SMS", audience: "CUSTOMER", template: event, recipient: booking.customer_mobile, result: smsResult });
+      }
     }
 
     // Owner: new bookings and uploaded proofs need attention; cancellations and expiries free a slot.
     const ownerTo = ownerRecipient(settings);
-    if (OWNER_EVENTS.includes(event) && ownerTo) {
+    if (to("OWNER") && OWNER_EVENTS.includes(event) && ownerTo) {
       const ownerMail = renderBookingEmail({
         event,
         audience: "OWNER",
@@ -93,6 +105,8 @@ export const sendBookingExpiredEmail = (bookingId: string) => notifyBooking(book
 /**
  * Expire lapsed pending bookings and email every expired booking that hasn't
  * been told yet (bookings can also be expired inside create_booking()).
+ * Emails that failed earlier are resent, up to MAX_EXPIRY_EMAIL_ATTEMPTS.
+ * Returns the number of bookings emailed.
  */
 export async function sweepExpiredBookings() {
   const admin = createAdminClient();
@@ -103,14 +117,16 @@ export async function sweepExpiredBookings() {
   if (!expired?.length) return 0;
 
   const ids = expired.map((b) => b.id as string);
-  const { data: sent } = await admin
+  const { data: logged } = await admin
     .from("notifications")
-    .select("booking_id")
+    .select("booking_id, audience, status")
     .in("booking_id", ids)
     .eq("template", "EXPIRED")
-    .eq("audience", "CUSTOMER");
-  const already = new Set((sent ?? []).map((n) => n.booking_id));
-  const pending = ids.filter((id) => !already.has(id));
-  for (const id of pending) await sendBookingExpiredEmail(id);
-  return pending.length;
+    .eq("channel", "EMAIL");
+  const plan = planExpiryEmails(ids, (logged ?? []) as LoggedEmail[]);
+  for (const { bookingId, audiences } of plan) {
+    if (audiences === "ALL") await sendBookingExpiredEmail(bookingId);
+    else await notifyBooking(bookingId, "EXPIRED", { audiences, emailOnly: true });
+  }
+  return plan.length;
 }

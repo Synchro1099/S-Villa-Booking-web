@@ -5,6 +5,7 @@ import "server-only";
  * can be swapped in by changing only this file.
  *
  *   EMAIL  → Resend (RESEND_API_KEY) — otherwise logged to the server console.
+ *            Temporary failures are retried once.
  *            EMAIL_REDIRECT_TO sends everything to one test inbox.
  *   SMS    → Semaphore, a Philippine SMS gateway (SEMAPHORE_API_KEY) — otherwise disabled.
  *   IN_APP → the booking status page and dashboards read status straight from
@@ -21,6 +22,8 @@ export interface EmailMessage {
 export interface DeliveryResult {
   status: "SENT" | "SKIPPED" | "FAILED";
   error?: string;
+  /** A temporary failure (network drop, provider busy/down) worth trying again. */
+  retryable?: boolean;
 }
 
 export interface EmailProvider {
@@ -45,11 +48,34 @@ class ResendEmailProvider implements EmailProvider {
         headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({ from: this.from, to: [message.to], subject: message.subject, html: message.html, text: message.text }),
       });
-      if (!res.ok) return { status: "FAILED", error: `Resend ${res.status}: ${(await res.text()).slice(0, 300)}` };
+      if (!res.ok) {
+        return {
+          status: "FAILED",
+          error: `Resend ${res.status}: ${(await res.text()).slice(0, 300)}`,
+          // Rate limits and server errors pass; validation errors (4xx) would fail the same way again.
+          retryable: res.status === 429 || res.status >= 500,
+        };
+      }
       return { status: "SENT" };
     } catch (e) {
-      return { status: "FAILED", error: (e as Error).message };
+      return { status: "FAILED", error: (e as Error).message, retryable: true };
     }
+  }
+}
+
+/** Tries a temporarily failed send once more after a short pause. */
+export class RetryOnceEmailProvider implements EmailProvider {
+  constructor(
+    private inner: EmailProvider,
+    private delayMs = 1500,
+  ) {}
+
+  async send(message: EmailMessage): Promise<DeliveryResult> {
+    const first = await this.inner.send(message);
+    if (first.status !== "FAILED" || !first.retryable) return first;
+    await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    const second = await this.inner.send(message);
+    return second.status === "FAILED" ? { ...second, error: `Failed twice. First: ${first.error} · Retry: ${second.error}` } : second;
   }
 }
 
@@ -138,7 +164,7 @@ export function getEmailProvider(): EmailProvider {
         "only the value, without EMAIL_FROM= in front.",
     );
   }
-  const provider = key ? new ResendEmailProvider(key, from) : new ConsoleEmailProvider();
+  const provider = key ? new RetryOnceEmailProvider(new ResendEmailProvider(key, from)) : new ConsoleEmailProvider();
   const redirectTo = envValue("EMAIL_REDIRECT_TO");
   return redirectTo ? new RedirectEmailProvider(provider, redirectTo) : provider;
 }
