@@ -61,11 +61,13 @@ export interface BookingAccess {
 export async function getBookingForViewer(reference: string, token?: string | null): Promise<BookingAccess | null> {
   if (!/^SV-\d{4}-\d{5}$/.test(reference)) return null;
   const admin = createAdminClient();
-  const { data } = await admin
+  const { data, error } = await admin
     .from("bookings")
     .select(`${DETAIL_COLUMNS}, access_token`)
     .eq("booking_reference", reference)
     .maybeSingle();
+  // A failed query would otherwise look like "no such booking" (a 404).
+  if (error) console.error(`[s-villa] booking lookup failed for ${reference}:`, error.message, error.code ?? "");
   if (!data) return null;
 
   const accessToken = String(data.access_token);
@@ -84,11 +86,12 @@ export async function getBookingForViewer(reference: string, token?: string | nu
 /** Booking reference + email or mobile → secret token (for the lookup page). */
 export async function findBookingToken(reference: string, contact: string): Promise<string | null> {
   const admin = createAdminClient();
-  const { data } = await admin
+  const { data, error } = await admin
     .from("bookings")
     .select("customer_email, customer_mobile, access_token")
     .eq("booking_reference", reference)
     .maybeSingle();
+  if (error) console.error(`[s-villa] booking token lookup failed for ${reference}:`, error.message, error.code ?? "");
   if (!data) return null;
   const normalized = contact.trim().toLowerCase();
   const mobile = normalized.replace(/[\s-]/g, "").replace(/^\+?63/, "0");
