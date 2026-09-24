@@ -2,6 +2,7 @@ import type { BookingDetail, Settings } from "@/types";
 import { formatPeso } from "@/lib/pricing";
 import { formatDate, formatTimeRange } from "@/lib/time";
 import { PAYMENT_METHOD_LABEL, PAYMENT_STATUS_LABEL, BOOKING_STATUS_LABEL } from "@/lib/booking/labels";
+import { isPlaceholderEmail, isPlaceholderPhone, isPlaceholderUrl } from "@/lib/contact";
 
 export type BookingEvent = "PENDING" | "PROOF_SUBMITTED" | "CONFIRMED" | "REJECTED" | "CANCELLED" | "EXPIRED";
 
@@ -143,10 +144,11 @@ export function renderBookingEmail(opts: {
   const copy = audience === "CUSTOMER" ? customerCopy(event, b, s) : ownerCopy(event, b, s, opts.cancelledBy);
   const rows = detailRows(b);
   if (audience === "OWNER") rows.push(["Mobile", b.customer_mobile], ["Email", b.customer_email]);
+  // Placeholder details (from the initial setup) are left out, as on the website.
   const contact = [
-    s.contact_number && `Call/SMS: ${s.contact_number}`,
-    s.messenger_url && `Messenger: ${s.messenger_url}`,
-    s.contact_email && `Email: ${s.contact_email}`,
+    !isPlaceholderPhone(s.contact_number) && `Call/SMS: ${s.contact_number}`,
+    !isPlaceholderUrl(s.messenger_url) && `Messenger: ${s.messenger_url}`,
+    !isPlaceholderEmail(s.contact_email) && `Email: ${s.contact_email}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -163,7 +165,7 @@ export function renderBookingEmail(opts: {
     `${buttonLabel}: ${link}`,
     "",
     s.business_name,
-    contact,
+    ...(contact ? [contact] : []),
   ].join("\n");
 
   const html = `<!doctype html><html><body style="margin:0;background:#f5f1ea;font-family:Helvetica,Arial,sans-serif;color:#1d2a22">
@@ -194,7 +196,7 @@ ${rows
 </table>
 <p style="margin:28px 0 0"><a href="${escape(link)}" style="display:inline-block;background:#1d2a22;color:#f5f1ea;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:14px">${buttonLabel}</a></p>
 </td></tr>
-<tr><td style="padding:20px 32px;background:#faf7f2;font-size:12px;line-height:1.6;color:#6b746e;white-space:pre-line">${escape(contact)}</td></tr>
+${contact ? `<tr><td style="padding:20px 32px;background:#faf7f2;font-size:12px;line-height:1.6;color:#6b746e;white-space:pre-line">${escape(contact)}</td></tr>` : ""}
 </table></td></tr></table></body></html>`;
 
   return { subject: copy.subject, html, text };

@@ -27,7 +27,14 @@ const booking = {
   payment: null,
 } as unknown as BookingDetail;
 
-const settings = { business_name: "S-Villa", booking_expiration_minutes: 30 } as unknown as Settings;
+const settings = {
+  business_name: "S-Villa",
+  booking_expiration_minutes: 30,
+  contact_number: "",
+  contact_email: "",
+  messenger_url: "",
+  facebook_url: "",
+} as unknown as Settings;
 const render = (event: "PENDING" | "PROOF_SUBMITTED", audience: "OWNER" | "CUSTOMER") =>
   renderBookingEmail({ event, audience, booking, settings, link: "https://example.com/x" });
 
@@ -51,6 +58,33 @@ describe("owner booking emails", () => {
     const mail = render("PENDING", "CUSTOMER");
     expect(mail.subject).toBe("Reservation received — SV-2026-00012");
     expect(mail.text).not.toContain("Reservation for:");
+  });
+});
+
+describe("email footer contact details", () => {
+  const withContact = (contact: Partial<Settings>) =>
+    renderBookingEmail({ event: "PENDING", audience: "CUSTOMER", booking, settings: { ...settings, ...contact }, link: "https://example.com/x" });
+
+  it("leaves out the sample details from the initial setup", () => {
+    const mail = withContact({ contact_number: "09XXXXXXXXX", messenger_url: "https://m.me/", contact_email: "hello@example.com" });
+    for (const placeholder of ["09XXXXXXXXX", "m.me", "hello@example.com"]) {
+      expect(mail.text).not.toContain(placeholder);
+      expect(mail.html).not.toContain(placeholder);
+    }
+    expect(mail.html).not.toContain("background:#faf7f2"); // no empty footer box
+  });
+
+  it("shows real details", () => {
+    const mail = withContact({ contact_number: "0905 252 7340", messenger_url: "https://m.me/svilla", contact_email: "society22ph@gmail.com" });
+    expect(mail.text).toContain("Call/SMS: 0905 252 7340\nMessenger: https://m.me/svilla\nEmail: society22ph@gmail.com");
+    expect(mail.html).toContain("society22ph@gmail.com");
+  });
+
+  it("shows only the real ones when some are still placeholders", () => {
+    const mail = withContact({ contact_number: "09XXXXXXXXX", messenger_url: "https://m.me/svilla", contact_email: "hello@example.com" });
+    expect(mail.text).toContain("Messenger: https://m.me/svilla");
+    expect(mail.text).not.toContain("Call/SMS");
+    expect(mail.text).not.toContain("Email: ");
   });
 });
 
