@@ -50,7 +50,21 @@ export async function createBooking(
     })
     .single<{ booking_id: string; booking_reference: string; access_token: string }>();
 
-  if (error || !data) return { ok: false, error: friendlyError(error) };
+  if (error || !data) {
+    return {
+      ok: false,
+      error: friendlyError(error, {
+        action: "createBooking",
+        date: d.date,
+        startTime: d.startTime,
+        durationHours: d.durationHours,
+        guestCount: d.guestCount,
+        serviceCount: d.serviceIds.length,
+        paymentMethod: d.paymentMethod,
+        signedIn: !!viewer,
+      }),
+    };
+  }
 
   after(() => notifyBooking(data.booking_id, "PENDING"));
   revalidatePath("/availability");

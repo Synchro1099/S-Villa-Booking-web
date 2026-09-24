@@ -122,7 +122,8 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
       }
       setBanner(result.error);
       // The slot may have just been taken — reload and send them back to pick a time.
-      await av.refresh();
+      // Not awaited, so the button leaves "Submitting…" as soon as the error arrives.
+      void av.refresh();
       if (/schedule|time|date|closed|opening/i.test(result.error)) {
         setStart(null);
         setDir(-1);

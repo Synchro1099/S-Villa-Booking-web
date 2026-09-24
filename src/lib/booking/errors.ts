@@ -29,10 +29,30 @@ const MESSAGES: Record<string, string> = {
 
 const GENERIC = "Something went wrong on our side. Please try again, or contact S-Villa if it keeps happening.";
 
-export function friendlyError(error: unknown): string {
-  const message = error && typeof error === "object" && "message" in error ? String(error.message) : "";
+/**
+ * `context` names the operation and may carry non-sensitive details (no
+ * contact info or tokens). Unexpected errors are logged with a short incident
+ * id that is also shown to the customer, so a support report can be matched
+ * to the exact server log line.
+ */
+export function friendlyError(error: unknown, context?: { action: string; [key: string]: unknown }): string {
+  const e = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+  const message = "message" in e ? String(e.message) : "";
   const code = message.match(/SV_[A-Z_]+/)?.[0];
   if (code && MESSAGES[code]) return MESSAGES[code];
-  console.error("[s-villa] unexpected error:", error);
-  return GENERIC;
+
+  const incident = crypto.randomUUID().slice(0, 8).toUpperCase();
+  console.error(
+    `[s-villa] unexpected error (incident ${incident})`,
+    JSON.stringify({
+      incident,
+      ...context,
+      message: message || (error == null ? "no error object (empty result)" : String(error)),
+      code: e.code,
+      details: e.details,
+      hint: e.hint,
+      status: e.status,
+    }),
+  );
+  return `${GENERIC} (Reference: ${incident})`;
 }
