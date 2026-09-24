@@ -109,10 +109,24 @@ export const sendBookingExpiredEmail = (bookingId: string) => notifyBooking(book
  * Expire lapsed pending bookings and email every expired booking that hasn't
  * been told yet (bookings can also be expired inside create_booking()).
  * Emails that failed earlier are resent, up to MAX_EXPIRY_EMAIL_ATTEMPTS.
- * Returns the number of bookings emailed.
+ * Returns the number of bookings emailed, or null when skipped because another
+ * sweep ran within the last minute.
  */
-export async function sweepExpiredBookings() {
+export async function sweepExpiredBookings(): Promise<number | null> {
+  // Several Owner Portal pages (and the cron job) can trigger this at the same
+  // moment; overlapping sweeps would email the same booking twice. The shared
+  // counter lets only one sweep through per minute, across all server instances.
+  // Unlike the request rate limits, this fails closed: if the check itself
+  // errors, skip (the next sweep sends the emails) rather than risk duplicates.
   const admin = createAdminClient();
+  const { data: mayRun, error: guardError } = await admin.rpc("hit_rate_limit", {
+    p_key: "sweep:expired-bookings",
+    p_limit: 1,
+    p_window_seconds: 60,
+  });
+  if (guardError) console.error("[s-villa] expiry sweep guard failed; skipping this sweep:", guardError.message);
+  if (mayRun !== true) return null;
+
   await admin.rpc("expire_stale_bookings");
 
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();

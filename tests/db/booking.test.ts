@@ -247,6 +247,19 @@ describe("status state machine", () => {
   });
 });
 
+describe("hit_rate_limit", () => {
+  it("with a limit of 1, lets one call through per window (used to run one expiry sweep at a time)", async () => {
+    const hit = async (key: string) =>
+      (await db.query<{ ok: boolean }>(`select hit_rate_limit($1, 1, 60) as ok`, [key])).rows[0].ok;
+    expect(await hit("sweep:test")).toBe(true);
+    expect(await hit("sweep:test")).toBe(false);
+    expect(await hit("sweep:other")).toBe(true);
+    // Once the window has passed, the next call goes through again.
+    await db.query(`update rate_limits set window_start = now() - interval '61 seconds' where key = 'sweep:test'`);
+    expect(await hit("sweep:test")).toBe(true);
+  });
+});
+
 describe("archive", () => {
   it("archives settled bookings before a date, keeps pending ones, and can restore", async () => {
     const owner = await createUser(db, "owner@example.com", "OWNER");

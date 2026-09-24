@@ -15,5 +15,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const notified = await sweepExpiredBookings();
-  return NextResponse.json({ ok: true, notified });
+  // null: another sweep ran within the last minute and has already handled it.
+  return NextResponse.json({ ok: true, notified: notified ?? 0, skipped: notified === null });
 }
