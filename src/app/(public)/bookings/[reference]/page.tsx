@@ -10,6 +10,7 @@ import { PaymentPanel } from "@/components/booking/payment-panel";
 import { CancelBookingButton } from "@/components/booking/cancel-booking-button";
 import { ContactActions } from "@/components/contact/contact-actions";
 import { KeepInTouch } from "@/components/booking/keep-in-touch";
+import { customersReceiveEmails } from "@/lib/notifications/providers";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -60,6 +61,7 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
           status={status}
           awaitingReview={awaitingReview}
           settings={settings}
+          emailedTo={customersReceiveEmails() ? booking.customer_email : null}
         />
       ) : null}
 

@@ -20,7 +20,7 @@ describe("placeholder contact details", () => {
     expect(isPlaceholderUrl("https://m.me/svillapickleball")).toBe(false);
     expect(isPlaceholderUrl("https://www.facebook.com/svilla/")).toBe(false);
     expect(isPlaceholderPhone("0905 252 7340")).toBe(false);
-    expect(isPlaceholderEmail("renzyanes@gmail.com")).toBe(false);
+    expect(isPlaceholderEmail("society22ph@gmail.com")).toBe(false);
   });
 });
 

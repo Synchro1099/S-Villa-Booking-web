@@ -1,10 +1,12 @@
 import "server-only";
+import { createTransport, type Transporter } from "nodemailer";
 
 /**
  * Delivery providers. Each channel has a small interface so another provider
  * can be swapped in by changing only this file.
  *
- *   EMAIL  → Resend (RESEND_API_KEY) — otherwise logged to the server console.
+ *   EMAIL  → Gmail (GMAIL_USER + GMAIL_APP_PASSWORD) when set, else Resend
+ *            (RESEND_API_KEY), else logged to the server console.
  *            Temporary failures are retried once.
  *            EMAIL_REDIRECT_TO sends everything to one test inbox.
  *   SMS    → Semaphore, a Philippine SMS gateway (SEMAPHORE_API_KEY) — otherwise disabled.
@@ -33,6 +35,48 @@ export interface EmailProvider {
 export interface SmsProvider {
   readonly enabled: boolean;
   send(to: string, text: string): Promise<DeliveryResult>;
+}
+
+/**
+ * Sends through a Gmail account over SMTP with an app password. Mail comes from
+ * that Gmail address, so it reaches any inbox without an email domain.
+ */
+export class GmailEmailProvider implements EmailProvider {
+  private transporter: Transporter;
+
+  constructor(
+    private user: string,
+    appPassword: string,
+    private fromName: string,
+    transporter?: Transporter,
+  ) {
+    // Google shows app passwords in groups of four ("abcd efgh ijkl mnop").
+    this.transporter = transporter ?? createTransport({ service: "gmail", auth: { user, pass: appPassword.replace(/\s+/g, "") } });
+  }
+
+  async send(message: EmailMessage): Promise<DeliveryResult> {
+    try {
+      await this.transporter.sendMail({
+        from: { name: this.fromName, address: this.user },
+        to: message.to,
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+      });
+      return { status: "SENT" };
+    } catch (e) {
+      const err = e as { code?: string; responseCode?: number; message?: string };
+      if (err.code === "EAUTH") {
+        return {
+          status: "FAILED",
+          error: `Gmail rejected the sign-in (${err.message ?? "EAUTH"}). Check GMAIL_USER and GMAIL_APP_PASSWORD; app passwords stop working when the Google password changes.`,
+        };
+      }
+      // SMTP 5xx replies are permanent (bad recipient, policy); 4xx and dropped connections are temporary.
+      const permanent = typeof err.responseCode === "number" && err.responseCode >= 500;
+      return { status: "FAILED", error: `Gmail: ${(err.message ?? String(e)).slice(0, 300)}`, retryable: !permanent };
+    }
+  }
 }
 
 class ResendEmailProvider implements EmailProvider {
@@ -154,17 +198,33 @@ export function envValue(name: string): string | undefined {
 const FROM_FORMAT = /^(?:[^<>@\r\n]*<[^<>@\s]+@[^<>@\s]+>|[^<>@\s]+@[^<>@\s]+)$/;
 let warnedFrom = false;
 
+function gmailCredentials() {
+  const user = envValue("GMAIL_USER");
+  const pass = envValue("GMAIL_APP_PASSWORD");
+  return user && pass ? { user, pass } : null;
+}
+
+/** The display name from EMAIL_FROM ("S-Villa <…>" → "S-Villa"), for Gmail's From line. */
+function senderName() {
+  return /^\s*"?([^"<]+?)"?\s*</.exec(envValue("EMAIL_FROM") ?? "")?.[1] ?? "S-Villa";
+}
+
 export function getEmailProvider(): EmailProvider {
+  const gmail = gmailCredentials();
   const key = envValue("RESEND_API_KEY");
   const from = envValue("EMAIL_FROM") || "S-Villa <onboarding@resend.dev>";
-  if (!warnedFrom && !FROM_FORMAT.test(from)) {
+  if (!gmail && key && !warnedFrom && !FROM_FORMAT.test(from)) {
     warnedFrom = true;
     console.error(
       `[s-villa] EMAIL_FROM looks malformed ("${from.slice(0, 60)}"). Use e.g. S-Villa <onboarding@resend.dev> — ` +
         "only the value, without EMAIL_FROM= in front.",
     );
   }
-  const provider = key ? new RetryOnceEmailProvider(new ResendEmailProvider(key, from)) : new ConsoleEmailProvider();
+  const provider = gmail
+    ? new RetryOnceEmailProvider(new GmailEmailProvider(gmail.user, gmail.pass, senderName()))
+    : key
+      ? new RetryOnceEmailProvider(new ResendEmailProvider(key, from))
+      : new ConsoleEmailProvider();
   const redirectTo = envValue("EMAIL_REDIRECT_TO");
   return redirectTo ? new RedirectEmailProvider(provider, redirectTo) : provider;
 }
@@ -174,13 +234,20 @@ export function getEmailProvider(): EmailProvider {
  * address, so customer emails can't arrive unless they're redirected to a test
  * inbox. In that case they're skipped (and logged as such) instead of failing.
  * Owner emails still go out: the owner uses the Resend account's address.
+ * Gmail has no such limit.
  */
 export function customerEmailBlockedReason(): string | null {
-  if (!envValue("RESEND_API_KEY") || envValue("EMAIL_REDIRECT_TO")) return null;
+  if (gmailCredentials() || !envValue("RESEND_API_KEY") || envValue("EMAIL_REDIRECT_TO")) return null;
   const from = envValue("EMAIL_FROM") || "S-Villa <onboarding@resend.dev>";
   return /@resend\.dev>?$/i.test(from)
     ? "Customer emails are off: Resend's test sender (onboarding@resend.dev) can only email the account owner."
     : null;
+}
+
+/** Whether customers themselves get booking emails (drives the wording on their booking page). */
+export function customersReceiveEmails(): boolean {
+  const configured = !!gmailCredentials() || !!envValue("RESEND_API_KEY");
+  return configured && !envValue("EMAIL_REDIRECT_TO") && !customerEmailBlockedReason();
 }
 
 export function getSmsProvider(): SmsProvider {

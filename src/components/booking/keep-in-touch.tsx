@@ -5,10 +5,10 @@ import { hasContactOptions } from "@/lib/contact";
 import { CopyLinkButton } from "./copy-link-button";
 
 /**
- * Near the top of the customer's booking page. S-Villa doesn't send customer
- * emails, so this page (and the reference) is how customers follow their
- * booking — say so plainly, make saving it easy, and put the contact buttons
- * right here rather than only at the bottom of the page.
+ * Near the top of the customer's booking page. Unless customer emails are set
+ * up (Gmail), this page and the reference are how customers follow their
+ * booking — say which applies, make saving it easy, and put the contact
+ * buttons right here rather than only at the bottom of the page.
  */
 export function KeepInTouch({
   reference,
@@ -16,12 +16,15 @@ export function KeepInTouch({
   status,
   awaitingReview,
   settings,
+  emailedTo,
 }: {
   reference: string;
   privatePath: string;
   status: BookingStatus;
   awaitingReview: boolean;
   settings: Settings;
+  /** The customer's address when booking emails reach customers; otherwise null. */
+  emailedTo: string | null;
 }) {
   const active = status === "PENDING" || status === "CONFIRMED";
   // No real contact details saved yet: skip the "message us" prompt rather than show it with no buttons.
@@ -49,8 +52,17 @@ export function KeepInTouch({
         <CopyLinkButton path={privatePath} />
       </div>
       <p className="mt-4 text-sm leading-relaxed">
-        <strong>We don&apos;t send confirmation emails</strong>, so please keep this reference or save this page (bookmark it, or copy the link to your
-        notes). You can check your status anytime at{" "}
+        {emailedTo ? (
+          <>
+            We&apos;ll email updates to <strong className="break-all">{emailedTo}</strong>. Please also keep this reference or save this page, in case an
+            email goes to spam. You can check your status anytime at{" "}
+          </>
+        ) : (
+          <>
+            <strong>We don&apos;t send confirmation emails</strong>, so please keep this reference or save this page (bookmark it, or copy the link to
+            your notes). You can check your status anytime at{" "}
+          </>
+        )}
         <Link href="/bookings/lookup" className="font-semibold underline underline-offset-2">
           Find my booking
         </Link>{" "}

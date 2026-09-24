@@ -49,21 +49,26 @@ Nobody can make themselves an owner from the website. New accounts are always `C
 
 ### Email settings
 
-S-Villa runs on the free `svilla.vercel.app` address with no email domain. Resend's free test sender (`onboarding@resend.dev`) can only send to the address that owns the Resend account, so **the owner gets email alerts and customers don't**. Customers keep their reference and follow the booking on its status page or at **Find my booking**; the site tells them so.
+S-Villa runs on the free `svilla.vercel.app` address with no email domain. Emails are sent through the business's **Gmail account, society22ph@gmail.com**, so both customers and the owner get them, from that address.
 
-**To connect the owner's Resend account**, change these in Vercel → *Settings → Environment Variables*, then **redeploy** (*Deployments → ⋯ → Redeploy*). Paste only the value, with no quotes and no `NAME=` in front.
+**One-time Google setup (signed in as society22ph@gmail.com):**
+1. Turn on **2-Step Verification**: Google Account → *Security*.
+2. Open <https://myaccount.google.com/apppasswords>, create an app password named e.g. "S-Villa website", and copy the 16-letter code. App passwords stop working if the Google password is changed; then make a new one and update `GMAIL_APP_PASSWORD`.
+
+**In Vercel → *Settings → Environment Variables*,** set these, then **redeploy** (*Deployments → ⋯ → Redeploy*). Paste only the value, with no quotes and no `NAME=` in front.
 
 | Variable | Value |
 | --- | --- |
-| `RESEND_API_KEY` | The owner's key from Resend → *API Keys* (starts with `re_`). |
-| `OWNER_NOTIFICATION_EMAIL` | The **exact** address the owner signed up to Resend with. Resend refuses any other address. |
-| `EMAIL_REDIRECT_TO` | **Delete it.** If it's set, every customer email is sent to that address as a test copy. |
+| `GMAIL_USER` | `society22ph@gmail.com` |
+| `GMAIL_APP_PASSWORD` | The 16-letter app password (spaces are fine). |
+| `OWNER_NOTIFICATION_EMAIL` | `society22ph@gmail.com` (where owner alerts go). |
+| `EMAIL_REDIRECT_TO` | **Delete it.** If it's set, every customer email goes to that address as a test copy instead. |
 
-Leave `EMAIL_FROM` as `S-Villa <onboarding@resend.dev>`.
+With `GMAIL_USER` and `GMAIL_APP_PASSWORD` set, Gmail is used and the Resend settings (`RESEND_API_KEY`, `EMAIL_FROM`) are ignored, so you can leave or delete them. Gmail allows about 500 emails a day, far more than the site needs.
 
-**To check it works:** make a test booking. The owner should get "New booking — SV-…". In Supabase, the `notifications` table shows the owner email as `SENT` and the customer email as `SKIPPED` ("Customer emails are off…"), which is expected. A `FAILED` row shows Resend's reason in the `error` column.
+**To check it works:** make a test booking using a *different* email address. The customer should get "Reservation received" and society22ph@gmail.com should get "New booking — SV-…". The booking page should say "We'll email updates to …". In Supabase, the `notifications` table shows each email as `SENT`. A `FAILED` row has the reason in the `error` column; a rejected sign-in means the app password is wrong or was revoked.
 
-**If you buy a domain later:** verify it in Resend, set `EMAIL_FROM` to e.g. `S-Villa <bookings@your-domain.com>` and redeploy. Customer emails then turn on automatically.
+**Using Resend instead** (Gmail settings empty): set `RESEND_API_KEY`, keep `EMAIL_FROM` as `S-Villa <onboarding@resend.dev>`, and set `OWNER_NOTIFICATION_EMAIL` to the exact address the Resend account was created with. Without a verified domain, Resend's test sender can only email that address, so customer emails are skipped (logged `SKIPPED`) and the booking page tells customers to keep their reference instead. With a verified domain, set `EMAIL_FROM` to e.g. `S-Villa <bookings@your-domain.com>` and customer emails turn on.
 
 ---
 
