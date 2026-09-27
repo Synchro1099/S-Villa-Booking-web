@@ -402,9 +402,9 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
             </p>
           ) : null}
 
-          {/* Phones and tablets: pinned to the bottom of the screen while the card is in view, so
+          {/* Phones, tablets and iPad landscape: pinned to the bottom of the screen while the card is in view, so
               Continue is always within reach; the running total rides along. */}
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 max-lg:sticky max-lg:bottom-0 max-lg:z-20 max-lg:-mx-5 max-lg:-mb-5 max-lg:bg-cream/95 max-lg:px-5 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4 max-lg:backdrop-blur-md sm:max-lg:-mx-8 sm:max-lg:-mb-8 sm:max-lg:px-8">
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 max-xl:sticky max-xl:bottom-0 max-xl:z-20 max-xl:-mx-5 max-xl:-mb-5 max-xl:bg-cream/95 max-xl:px-5 max-xl:pb-[max(1rem,env(safe-area-inset-bottom))] max-xl:pt-4 max-xl:backdrop-blur-md sm:max-xl:-mx-8 sm:max-xl:-mb-8 sm:max-xl:px-8">
             {step > 0 ? (
               <Button variant="ghost" onClick={() => go(step - 1)} disabled={pending}>
                 <ArrowLeft /> Back
@@ -465,7 +465,7 @@ function StepIndicator({ step, onJump }: { step: number; onJump: (i: number) => 
               className="flex w-full flex-col gap-2 text-left disabled:cursor-default"
             >
               <span className={cn("h-1 rounded-full transition-colors", i <= step ? "bg-forest" : "bg-line")} />
-              <span className={cn("truncate text-[11px] font-bold uppercase tracking-wider", i === step ? "text-ink" : "text-muted")}>
+              <span className={cn("truncate text-xs font-bold uppercase tracking-wide", i === step ? "text-ink" : "text-muted")}>
                 <span className="sr-only">Step </span>
                 {i + 1}
                 <span className="hidden sm:inline">. {label}</span>

@@ -47,17 +47,17 @@ export default async function OwnerCalendarPage(props: PageProps<"/owner/calenda
       <div className="grid gap-8 2xl:grid-cols-[1.3fr_1fr]">
         <section className="rounded-[var(--radius-card)] border border-line/70 bg-cream p-4 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
-            <Link href={`/owner/calendar?month=${addDays(first, -1)}&day=${day}`} className="grid size-10 place-items-center rounded-full border border-line hover:border-ink" aria-label="Previous month">
+            <Link href={`/owner/calendar?month=${addDays(first, -1)}&day=${day}`} className="grid size-11 place-items-center rounded-full border border-line hover:border-ink" aria-label="Previous month">
               <ChevronLeft className="size-5" />
             </Link>
             <h2 className="text-2xl">{formatMonth(first)}</h2>
-            <Link href={`/owner/calendar?month=${addDays(last, 1)}&day=${day}`} className="grid size-10 place-items-center rounded-full border border-line hover:border-ink" aria-label="Next month">
+            <Link href={`/owner/calendar?month=${addDays(last, 1)}&day=${day}`} className="grid size-11 place-items-center rounded-full border border-line hover:border-ink" aria-label="Next month">
               <ChevronRight className="size-5" />
             </Link>
           </div>
           <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
             {WEEKDAYS.map((w) => (
-              <div key={w} className="pb-1 text-center text-[11px] font-bold uppercase tracking-wider text-muted" aria-hidden>
+              <div key={w} className="pb-1 text-center text-xs font-bold uppercase tracking-wide text-muted" aria-hidden>
                 {w}
               </div>
             ))}

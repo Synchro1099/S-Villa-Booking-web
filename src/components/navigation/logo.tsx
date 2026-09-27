@@ -23,7 +23,7 @@ export function Logo({
 }) {
   const mark = MARK_COLORS[tone];
   return (
-    <Link href={href} className={cn("group flex items-center gap-3", className)} aria-label="S-Villa home">
+    <Link href={href} className={cn("group flex min-h-11 items-center gap-3", className)} aria-label="S-Villa home">
       <svg
         viewBox="0 0 64 64"
         fill="none"

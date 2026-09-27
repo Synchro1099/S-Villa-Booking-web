@@ -24,7 +24,7 @@ export default async function OwnerBookingPage(props: PageProps<"/owner/bookings
 
   return (
     <>
-      <Link href="/owner/bookings" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-ink">
+      <Link href="/owner/bookings" className="mb-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-muted hover:text-ink">
         <ArrowLeft className="size-4" aria-hidden /> All bookings
       </Link>
       <PageHeader title={`Booking #${booking.booking_reference}`} intro={`Created ${dateTime.format(new Date(booking.created_at))}`} />

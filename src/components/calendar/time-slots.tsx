@@ -65,7 +65,8 @@ export function TimeSlots({
           No open times left on this day.
         </p>
       ) : null}
-      <ul className="grid gap-2 sm:grid-cols-2">
+      {/* One column at 1024–1279px, where the booking summary leaves too little width for two. */}
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         {shown.map((slot) => {
           const Icon = SLOT_ICON[slot.status];
           const available = slot.status === "AVAILABLE";
@@ -100,7 +101,7 @@ export function TimeSlots({
                   inRange && "!border-forest !bg-forest !text-ivory",
                 )}
               >
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
                   {formatTimeRange(slot.start, slot.end)}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">

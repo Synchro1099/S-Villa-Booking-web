@@ -70,7 +70,8 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
             Private indoor pickleball
           </p>
           <h1 className="mt-6 text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
-            <span className="block animate-fade-up" style={step(1)}>
+            {/* Balanced so a wide screen never leaves "court." alone on the second line. */}
+            <span className="block animate-fade-up text-balance" style={step(1)}>
               Your private pickleball court.
             </span>
             <em className="block animate-fade-up text-brass" style={step(2)}>
@@ -178,7 +179,7 @@ function Slideshow({ slides, drift, still }: { slides: HeroSlide[]; drift?: Moti
           onFocus={() => setHeld(true)}
           onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}
         >
-          <p className="min-w-0 truncate text-sm font-medium text-ivory/85" aria-live={auto ? "off" : "polite"}>
+          <p className="min-w-0 truncate text-xs font-medium text-ivory/85 sm:text-sm" aria-live={auto ? "off" : "polite"}>
             {slides[active].label}
           </p>
           <div className="flex shrink-0 items-center">
@@ -189,7 +190,8 @@ function Slideshow({ slides, drift, still }: { slides: HeroSlide[]; drift?: Moti
                 onClick={() => setActive(i)}
                 aria-label={`Show slide ${i + 1}: ${s.label}`}
                 aria-current={i === active}
-                className="group grid size-11 place-items-center"
+                // Narrower on phones so the caption keeps room; still 44px tall.
+                className="group grid h-11 w-9 place-items-center sm:w-11"
               >
                 <span
                   className={cn(

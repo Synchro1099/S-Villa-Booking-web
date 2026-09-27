@@ -81,8 +81,8 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
                     href={l.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      // py-3: a 44px-tall tap area for touch laptops and iPads.
-                      "group relative py-3 text-sm font-medium transition-colors duration-200 hover:text-ink",
+                      // A 44px-tall tap area for touch laptops and iPads.
+                      "group relative inline-flex min-h-11 items-center text-sm font-medium transition-colors duration-200 hover:text-ink",
                       active ? "text-ink" : "text-ink/70",
                     )}
                   >
