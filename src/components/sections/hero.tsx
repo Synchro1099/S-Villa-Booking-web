@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
-import { ArrowRight, CalendarCheck, Pause, Play, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, Pause, Play, ShieldCheck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MediaFrame } from "@/components/media/media-frame";
 import { HERO_SLIDES, type HeroSlide } from "@/lib/media";
@@ -23,8 +23,9 @@ const HINT_KEY = "svilla-hero-swipe-hint";
  *   them. Phones and tablets stack photo over panel (the panel's rounded top
  *   overlaps the photo like a sheet); desktops split the screen, text left,
  *   photo right. Slides change with a soft parallax wipe, each zooming slowly
- *   and drifting on scroll; progress bars show the timing; visitors can pause,
- *   pick a slide, or swipe the photo on touch screens.
+ *   and drifting on scroll; a thin progress line shows the timing, with a
+ *   03 / 08 counter; visitors can pause, step through with the arrows, or swipe
+ *   the photo on touch screens.
  * - Without slides, the illustrated court floats beside the text instead.
  * - Text entrance is pure CSS (staggered fade-up), so the headline is visible
  *   even before JavaScript loads — no blank hero on slow connections.
@@ -227,14 +228,16 @@ function SlideStage({ slides, show, drift }: { slides: HeroSlide[]; show: Show; 
 }
 
 /**
- * "01 / 08 · The court" (plus the one-time swipe hint) on one line, then the progress bars and pause
- * button on the next. The bars share the row's width, so any number of slides fits — even in the
- * narrow desktop column.
+ * "03 / 08 · Add-on: Jacuzzi" (plus the one-time swipe hint) on one line; on the next, a thin
+ * display-only progress line and the ‹ › and pause buttons — all 44px, however many slides there are.
+ * The line fills over the current slide's time (its animationend advances the show), freezing while
+ * paused; with reduced motion it shows how far through the set you are instead.
  */
 function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show: Show; className?: string }) {
   const { active, run, turn, still } = show;
   if (slides.length < 2) return null;
   const total = String(slides.length).padStart(2, "0");
+  const arrow = "grid size-11 shrink-0 place-items-center rounded-full border border-ivory/25 text-ivory transition-colors hover:border-ivory/60 hover:bg-ivory/10";
   return (
     <div
       className={cn("flex flex-col gap-1", className)}
@@ -243,7 +246,7 @@ function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show:
       onFocus={() => show.setHeld(true)}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && show.setHeld(false)}
     >
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="relative">
         <p className="min-w-0 truncate text-sm font-medium text-ivory/85" aria-live={show.running ? "off" : "polite"}>
           {/* Rises in with each slide. */}
           <span key={`${active}-${turn}`} className="inline-block motion-safe:animate-hero-caption">
@@ -256,51 +259,41 @@ function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show:
             {slides[active].label}
           </span>
         </p>
-        {/* One-time hint on touch screens (phones and tablets). */}
+        {/* One-time hint on touch screens (phones and tablets). Floats over the end of the caption
+            line — the first slide's caption is short — so it never takes width from longer captions. */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none shrink-0 text-xs font-semibold uppercase tracking-wider text-ivory/80 transition-opacity duration-500 lg:hidden",
+            "pointer-events-none absolute bottom-0 right-0 bg-forest pl-3 text-xs font-semibold uppercase tracking-wider text-ivory/80 transition-opacity duration-500 lg:hidden",
             show.hint ? "opacity-100" : "opacity-0",
           )}
         >
           Swipe for more
         </span>
       </div>
-      <div className="flex items-center gap-1">
-        {slides.map((s, i) => (
-          <button
-            key={s.media.src}
-            type="button"
-            onClick={() => show.goTo(i, i < active ? "prev" : "next")}
-            aria-label={`Show slide ${i + 1}: ${s.label}`}
-            aria-current={i === active}
-            // 44px tall; the bars split the row between them.
-            className="group grid h-11 min-w-0 flex-1 place-items-center"
-          >
-            <span className="relative block h-[3px] w-full overflow-hidden rounded-full bg-ivory/25 transition-colors group-hover:bg-ivory/45">
-              {i < active || (i === active && still) ? (
-                // Done, or reduced motion (no timer): full.
-                <span className={cn("absolute inset-0 rounded-full", i === active ? "bg-brass" : "bg-ivory/70")} />
-              ) : i === active ? (
-                // Filling over this slide's time; freezes while paused.
-                <span
-                  key={run}
-                  className="absolute inset-0 origin-left rounded-full bg-brass"
-                  style={{ animation: `hero-progress ${slideMs(i)}ms linear both`, animationPlayState: show.running ? "running" : "paused" }}
-                  onAnimationEnd={show.advance}
-                />
-              ) : null}
-            </span>
-          </button>
-        ))}
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="relative mr-2 block h-0.5 min-w-0 flex-1 overflow-hidden rounded-full bg-ivory/20">
+          {still ? (
+            // Reduced motion (no timer): how far through the set.
+            <span className="absolute inset-y-0 left-0 rounded-full bg-brass" style={{ width: `${((active + 1) / slides.length) * 100}%` }} />
+          ) : (
+            // Filling over this slide's time; freezes while paused.
+            <span
+              key={run}
+              className="absolute inset-0 origin-left rounded-full bg-brass"
+              style={{ animation: `hero-progress ${slideMs(active)}ms linear both`, animationPlayState: show.running ? "running" : "paused" }}
+              onAnimationEnd={show.advance}
+            />
+          )}
+        </span>
+        <button type="button" onClick={() => show.goTo(active - 1, "prev")} aria-label="Previous photo" className={arrow}>
+          <ChevronLeft className="size-5" aria-hidden />
+        </button>
+        <button type="button" onClick={() => show.goTo(active + 1, "next")} aria-label="Next photo" className={arrow}>
+          <ChevronRight className="size-5" aria-hidden />
+        </button>
         {still ? null : (
-          <button
-            type="button"
-            onClick={show.togglePause}
-            aria-label={show.paused ? "Play slideshow" : "Pause slideshow"}
-            className="ml-2 grid size-11 shrink-0 place-items-center rounded-full border border-ivory/25 text-ivory transition-colors hover:border-ivory/60 hover:bg-ivory/10"
-          >
+          <button type="button" onClick={show.togglePause} aria-label={show.paused ? "Play slideshow" : "Pause slideshow"} className={arrow}>
             {show.paused ? <Play className="size-4 translate-x-px fill-current" aria-hidden /> : <Pause className="size-4 fill-current" aria-hidden />}
           </button>
         )}
@@ -328,6 +321,8 @@ function useSlideshow(count: number, still: boolean) {
   const [held, setHeld] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [hint, setHint] = useState(false);
+  // Set on the first tap or swipe: someone who has already found the controls doesn't need the hint.
+  const interacted = useRef(false);
 
   useEffect(() => {
     const onVisibility = () => setHidden(document.visibilityState === "hidden");
@@ -344,7 +339,7 @@ function useSlideshow(count: number, still: boolean) {
     } catch {
       return; // storage blocked: skip the hint rather than show it on every visit
     }
-    const show = window.setTimeout(() => setHint(true), 2500);
+    const show = window.setTimeout(() => !interacted.current && setHint(true), 2500);
     const hide = window.setTimeout(() => setHint(false), 6500);
     return () => {
       window.clearTimeout(show);
@@ -352,7 +347,7 @@ function useSlideshow(count: number, still: boolean) {
     };
   }, [still, count]);
 
-  const goTo = (i: number, dir: Direction) => {
+  const change = (i: number, dir: Direction) => {
     const target = (i + count) % count;
     if (target === active) return setRun((r) => r + 1);
     setPrev(active);
@@ -361,6 +356,11 @@ function useSlideshow(count: number, still: boolean) {
     setTurn((t) => t + 1);
     setRun((r) => r + 1);
     setHint(false);
+  };
+  // A visitor's own pick (arrows, swipe) — as opposed to the timer moving on.
+  const goTo = (i: number, dir: Direction) => {
+    interacted.current = true;
+    change(i, dir);
   };
 
   // Touch swipes on the photo: left for the next slide, right for the previous one.
@@ -394,9 +394,13 @@ function useSlideshow(count: number, still: boolean) {
     still,
     running: !still && !paused && !held && !hidden && count > 1,
     goTo,
-    togglePause: () => setPaused((p) => !p),
+    togglePause: () => {
+      interacted.current = true;
+      setHint(false);
+      setPaused((p) => !p);
+    },
     setHeld,
-    advance: () => goTo(active + 1, "next"),
+    advance: () => change(active + 1, "next"),
     swipe,
   };
 }
