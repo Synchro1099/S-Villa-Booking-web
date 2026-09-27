@@ -93,8 +93,14 @@ export const GALLERY: Media[] = [
   photo("gallery/court.jpg", "The indoor court with its high steel roof and bright lights"),
   clip("gallery/walkthrough.mp4", "Walking through the villa from the entrance", { portrait: true }),
   clip("gallery/bar-lounge.mp4", "The KTV lounge glowing in pink neon", { portrait: true }),
+  // Facility photos can appear here too; the same file serves both.
+  photo("facilities/ktv-lounge.jpg", "The KTV lounge with its neon-lit bar, big screen and sofas"),
+  photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true }),
+  clip("gallery/courtyard-walk.mp4", "A walk through the courtyard, past the lounge windows", { portrait: true }),
   photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"),
   clip("gallery/grounds.mp4", "The court seen from the far baseline", { portrait: true }),
   clip("gallery/courtyard.mp4", "A tree-lined corner of the courtyard", { portrait: true }),
+  clip("gallery/entrance-to-court.mp4", "From the entrance through the courtyard onto the court", { portrait: true }),
   clip("gallery/lounge-to-court.mp4", "From the KTV lounge out to the court", { portrait: true }),
+  clip("gallery/courtyard-pan.mp4", "Panning across the courtyard between the lounge and the court", { portrait: true }),
 ];

@@ -14,7 +14,7 @@ export function Gallery() {
             Take a look <em>around.</em>
           </>
         }
-        intro="The court, the courtyard and the lounge — tap any photo or clip to see it in full."
+        intro="The court, the courtyard, the KTV lounge and the jacuzzi — tap any photo or clip to see it in full."
       />
       <GalleryGrid items={GALLERY} layout={GALLERY_LAYOUT} />
     </section>

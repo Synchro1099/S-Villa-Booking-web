@@ -5,8 +5,14 @@ import { formatPeso, unitLabel } from "@/lib/pricing";
 import { FACILITY_PHOTOS } from "@/lib/media";
 import { ServiceIcon } from "@/components/services/service-icon";
 import { MediaFrame } from "@/components/media/media-frame";
+import { cn } from "@/lib/utils";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { SectionHeading } from "./section-heading";
+
+// Two columns on tablets, three on desktop. A wrapping flex row (not a grid)
+// so a short last row, e.g. 3 + 2 cards, sits centred instead of leaving a gap.
+const LIST = "mt-14 flex flex-wrap justify-center gap-6";
+const ITEM = "w-full sm:w-[calc((100%_-_1.5rem)/2)] lg:w-[calc((100%_-_3rem)/3)]";
 
 /** Facilities with their current live prices from the database. */
 export function Facilities({ services, headingAs = "h2" }: { services: Service[]; headingAs?: "h1" | "h2" }) {
@@ -23,18 +29,18 @@ export function Facilities({ services, headingAs = "h2" }: { services: Service[]
           <p className="mt-12 text-muted">Facilities will be listed here soon.</p>
         ) : (
           headingAs === "h2" ? (
-            <Stagger as="ul" className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <Stagger as="ul" className={LIST}>
               {services.map((s) => (
-                <StaggerItem as="li" key={s.id}>
+                <StaggerItem as="li" key={s.id} className={ITEM}>
                   <FacilityCard service={s} />
                 </StaggerItem>
               ))}
             </Stagger>
           ) : (
             // Top of /facilities: CSS entrance so cards show even before JS loads.
-            <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className={LIST}>
               {services.map((s, i) => (
-                <li key={s.id} className="animate-fade-up" style={{ animationDelay: `${120 + i * 70}ms` }}>
+                <li key={s.id} className={cn(ITEM, "animate-fade-up")} style={{ animationDelay: `${120 + i * 70}ms` }}>
                   <FacilityCard service={s} />
                 </li>
               ))}
