@@ -88,7 +88,9 @@ export interface HeroSlide {
  * illustrated court.
  */
 export const HERO_SLIDES: HeroSlide[] = [
-  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights"), label: "The court" },
+  // Hero photos are framed in a narrower window than the photo itself (a phone-width strip, or the
+  // right-hand column on desktop), so each gets a focus point that keeps its subject in view.
+  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights", { focus: "30% 60%" }), label: "The court" },
   { media: photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit"), label: "Add-on: KTV Lounge" },
   { media: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, focus: "50% 62%" }), label: "Add-on: Jacuzzi" },
   { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard" },
