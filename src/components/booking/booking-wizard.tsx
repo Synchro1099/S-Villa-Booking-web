@@ -322,7 +322,13 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                         <dt className="text-sm text-muted">{k}</dt>
                         <dd className="flex items-start gap-3 text-right text-sm font-semibold">
                           <span>{v}</span>
-                          <button type="button" className="text-xs font-bold text-brass-deep underline-offset-2 hover:underline" onClick={() => go(target as number)} aria-label={`Edit ${k}`}>
+                          <button
+                            type="button"
+                            // 44px tap area without changing the row's look.
+                            className="-my-3 -mr-2 inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-bold text-brass-deep underline-offset-2 hover:underline"
+                            onClick={() => go(target as number)}
+                            aria-label={`Edit ${k}`}
+                          >
                             Edit
                           </button>
                         </dd>
@@ -345,7 +351,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                     </ul>
                     <div className="mt-3 flex items-baseline justify-between border-t border-line pt-3">
                       <span className="text-sm font-bold uppercase tracking-wider">Total</span>
-                      <span className="font-display text-2xl tabular-nums">{formatPeso(estimate.total)}</span>
+                      <span className="font-display text-2xl lining-nums tabular-nums">{formatPeso(estimate.total)}</span>
                     </div>
                     <p className="mt-2 text-xs text-muted">Current rates. Your final total is confirmed when you submit.</p>
                   </div>
@@ -396,7 +402,9 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
             </p>
           ) : null}
 
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
+          {/* Phones and tablets: pinned to the bottom of the screen while the card is in view, so
+              Continue is always within reach; the running total rides along. */}
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 max-lg:sticky max-lg:bottom-0 max-lg:z-20 max-lg:-mx-5 max-lg:-mb-5 max-lg:bg-cream/95 max-lg:px-5 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4 max-lg:backdrop-blur-md sm:max-lg:-mx-8 sm:max-lg:-mb-8 sm:max-lg:px-8">
             {step > 0 ? (
               <Button variant="ghost" onClick={() => go(step - 1)} disabled={pending}>
                 <ArrowLeft /> Back
@@ -404,6 +412,12 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
             ) : (
               <span />
             )}
+            {estimate.total > 0 ? (
+              <p className="text-sm lg:hidden">
+                <span className="text-muted">Total </span>
+                <span className="font-semibold">{formatPeso(estimate.total)}</span>
+              </p>
+            ) : null}
             {!canContinue && BLOCKED_HINT[step] ? (
               <p className="order-last w-full text-center text-sm text-muted sm:order-none sm:ml-auto sm:w-auto sm:text-right" aria-live="polite">
                 {BLOCKED_HINT[step]}
@@ -422,7 +436,16 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
           </div>
         </section>
 
-        <Summary date={date} start={start} hours={hours} guests={guests} lines={estimate.lines} total={estimate.total} />
+        {/* Review and Payment already show every detail and the total, so phones skip the repeat. */}
+        <Summary
+          className={step >= 4 ? "max-lg:hidden" : undefined}
+          date={date}
+          start={start}
+          hours={hours}
+          guests={guests}
+          lines={estimate.lines}
+          total={estimate.total}
+        />
       </div>
     </div>
   );
@@ -499,6 +522,7 @@ function Stepper({
 }
 
 function Summary({
+  className,
   date,
   start,
   hours,
@@ -506,6 +530,7 @@ function Summary({
   lines,
   total,
 }: {
+  className?: string;
   date: string | null;
   start: number | null;
   hours: number;
@@ -514,7 +539,7 @@ function Summary({
   total: number;
 }) {
   return (
-    <aside className="h-fit rounded-[var(--radius-card)] bg-forest p-2 text-ivory shadow-lift lg:sticky lg:top-28" aria-label="Your reservation">
+    <aside className={cn("h-fit rounded-[var(--radius-card)] bg-forest p-2 text-ivory shadow-lift lg:sticky lg:top-28", className)} aria-label="Your reservation">
       <div className="rounded-[calc(var(--radius-card)-6px)] border border-brass/25 p-6">
         <p className="eyebrow !text-brass">Your reservation</p>
         <p className="mt-4 font-display text-2xl">{date ? formatDate(date, "long") : "Choose a date"}</p>
@@ -543,7 +568,7 @@ function Summary({
         </div>
         <div className="mt-4 flex items-baseline justify-between border-t border-ivory/10 pt-4">
           <span className="text-sm font-bold uppercase tracking-wider">Total</span>
-          <AnimatedPeso value={total} className="font-display text-3xl tabular-nums" />
+          <AnimatedPeso value={total} className="font-display text-3xl lining-nums tabular-nums" />
         </div>
         <p className="mt-3 text-xs text-ivory/50">Current rates. Your final total is confirmed when you submit.</p>
       </div>

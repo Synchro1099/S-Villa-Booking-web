@@ -33,7 +33,7 @@ export function Experience({ headingAs = "h2" }: { headingAs?: "h1" | "h2" }) {
         }
         intro="S-Villa is built for small groups who want space to play and relax without sharing it with anyone else."
       />
-      <Stagger enabled={headingAs === "h2"} className="mt-14 grid gap-6 md:grid-cols-3">
+      <Stagger enabled={headingAs === "h2"} className="mt-14 grid gap-6 lg:grid-cols-3">
         {PILLARS.map((p) => (
           <StaggerItem key={p.title}>
             <article className="group h-full rounded-[var(--radius-card)] border border-line/70 bg-cream p-8 transition-[transform,box-shadow,border-color] duration-300 ease-soft hover:-translate-y-1 hover:border-brass/40 hover:shadow-lift">

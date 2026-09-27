@@ -38,7 +38,7 @@ export function CourtArt() {
         ))}
       </g>
       <path d="M70 430 Q 200 452 350 430" fill="none" stroke="#c3a06a" strokeOpacity=".4" />
-      <text x="315" y="400" textAnchor="middle" fill="#f7f3ec" fillOpacity=".55" fontSize="11" letterSpacing="3" fontFamily="sans-serif">
+      <text x="315" y="400" textAnchor="middle" fill="#f7f3ec" fillOpacity=".55" fontSize="15" letterSpacing="3" fontFamily="sans-serif">
         JACUZZI
       </text>
     </svg>

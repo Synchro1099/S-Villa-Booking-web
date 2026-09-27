@@ -79,7 +79,8 @@ export function MobileMenu({ links, account }: { links: NavLink[]; account: NavL
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: DURATION.fast }}
-              className="absolute inset-x-0 top-full h-dvh bg-ink/25"
+              // Dark enough to read as a backdrop over the dark hero too.
+              className="absolute inset-x-0 top-full h-dvh bg-ink/50 backdrop-blur-[2px]"
             />
             <motion.div
               key="panel"

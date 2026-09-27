@@ -19,7 +19,7 @@ export default function ExperiencePage() {
     <>
       <Experience headingAs="h1" />
       <section className="container-page pb-24">
-        <ol className="grid gap-6 border-t border-line pt-12 md:grid-cols-3">
+        <ol className="grid gap-6 border-t border-line pt-12 lg:grid-cols-3">
           {MOMENTS.map(([time, text]) => (
             <li key={time}>
               <p className="eyebrow">{time}</p>

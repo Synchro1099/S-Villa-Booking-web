@@ -56,6 +56,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHeading
             eyebrow="Availability"
+            eyebrowClassName="!text-brass"
             title={<span className="text-ivory">This week at S-Villa</span>}
             intro={<span className="text-ivory/70">Live from our booking calendar. Pick a day to see open time slots.</span>}
           />

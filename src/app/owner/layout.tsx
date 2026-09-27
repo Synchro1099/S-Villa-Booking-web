@@ -22,7 +22,7 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <aside className="border-b border-ivory/10 bg-ink text-ivory lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0">
         <div className="flex items-center justify-between gap-4 px-5 py-4 lg:py-6">
-          <Logo tone="light" href="/owner" />
+          <Logo tone="light" href="/owner" tagline={false} />
           {/* Small screens: the sidebar footer is hidden, so offer these here. */}
           <div className="flex items-center gap-1 lg:hidden">
             <Link

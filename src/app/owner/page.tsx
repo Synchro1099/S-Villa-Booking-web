@@ -107,7 +107,7 @@ function Stat({
         <Icon className="size-5" aria-hidden />
       </span>
       <span>
-        <span className="block font-display text-4xl leading-none tabular-nums">{value}</span>
+        <span className="block font-display text-4xl leading-none lining-nums">{value}</span>
         <span className="text-sm text-muted">{label}</span>
       </span>
     </Link>

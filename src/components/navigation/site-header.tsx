@@ -81,7 +81,8 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
                     href={l.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative py-2 text-sm font-medium transition-colors duration-200 hover:text-ink",
+                      // py-3: a 44px-tall tap area for touch laptops and iPads.
+                      "group relative py-3 text-sm font-medium transition-colors duration-200 hover:text-ink",
                       active ? "text-ink" : "text-ink/70",
                     )}
                   >
@@ -89,7 +90,7 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
                     <span
                       aria-hidden
                       className={cn(
-                        "absolute inset-x-0 bottom-0.5 h-px origin-left bg-brass-deep transition-transform duration-300 ease-out group-hover:scale-x-100",
+                        "absolute inset-x-0 bottom-2 h-px origin-left bg-brass-deep transition-transform duration-300 ease-out group-hover:scale-x-100",
                         active ? "scale-x-100" : "scale-x-0",
                       )}
                     />
@@ -102,16 +103,17 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
           <div className="hidden items-center gap-2 lg:flex">
             {account.href === "/login" ? (
               // Small laptops: no room beside seven links; it stays in the footer and phone menu.
-              <Button asChild variant="ghost" size="sm" className="hidden xl:inline-flex">
+              <Button asChild variant="ghost" size="sm" className="hidden xl:inline-flex relative after:absolute after:inset-x-0 after:-inset-y-1">
                 <Link href="/bookings/lookup" aria-current={pathname === "/bookings/lookup" ? "page" : undefined}>
                   Find my booking
                 </Link>
               </Button>
             ) : null}
-            <Button asChild variant="ghost" size="sm">
+            {/* The ::after strip stretches each tap area to 44px without changing the look. */}
+            <Button asChild variant="ghost" size="sm" className="relative after:absolute after:inset-x-0 after:-inset-y-1">
               <Link href={account.href}>{account.label}</Link>
             </Button>
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="relative after:absolute after:inset-x-0 after:-inset-y-1">
               <Link href="/book">Book Now</Link>
             </Button>
           </div>

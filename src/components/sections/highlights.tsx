@@ -18,7 +18,7 @@ export function Highlights({ facilities, maxGuests, hoursDaily }: { facilities: 
               <span className="block font-semibold">{i.label}</span>
               <span className="text-sm text-muted">{i.note}</span>
             </dt>
-            <dd className="order-1 font-display text-6xl leading-none text-brass-deep tabular-nums">
+            <dd className="order-1 font-display text-6xl leading-none text-brass-deep lining-nums">
               <CountUp value={i.value} />
             </dd>
           </StaggerItem>

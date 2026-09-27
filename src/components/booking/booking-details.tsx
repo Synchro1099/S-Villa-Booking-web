@@ -59,7 +59,7 @@ export function BookingDetails({ booking, showContact = false }: { booking: Book
         </ul>
         <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
           <span className="text-sm font-bold uppercase tracking-wider">Total</span>
-          <span className="font-display text-3xl tabular-nums">{formatPeso(booking.total_amount)}</span>
+          <span className="font-display text-3xl lining-nums tabular-nums">{formatPeso(booking.total_amount)}</span>
         </div>
       </div>
     </div>

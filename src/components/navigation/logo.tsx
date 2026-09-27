@@ -9,7 +9,18 @@ const MARK_COLORS = {
   light: { outer: "#C4A265", inner: "#5A6B54", letter: "#F1ECE1" }, // logo-mark-dark.svg, for dark backgrounds
 };
 
-export function Logo({ tone = "dark", className, href = "/" }: { tone?: "dark" | "light"; className?: string; href?: string }) {
+export function Logo({
+  tone = "dark",
+  className,
+  href = "/",
+  tagline = true,
+}: {
+  tone?: "dark" | "light";
+  className?: string;
+  href?: string;
+  /** The "Pickleball & Courtyard" line under the name (from 640px up). */
+  tagline?: boolean;
+}) {
   const mark = MARK_COLORS[tone];
   return (
     <Link href={href} className={cn("group flex items-center gap-3", className)} aria-label="S-Villa home">
@@ -35,9 +46,11 @@ export function Logo({ tone = "dark", className, href = "/" }: { tone?: "dark" |
       </svg>
       <span className="flex flex-col leading-none">
         <span className={cn("font-display text-2xl tracking-wide", tone === "dark" ? "text-ink" : "text-ivory")}>S-Villa</span>
-        <span className={cn("mt-1 hidden text-[10px] font-bold uppercase tracking-[0.2em] sm:block", tone === "dark" ? "text-muted" : "text-ivory/60")}>
-          Pickleball &amp; Courtyard
-        </span>
+        {tagline ? (
+          <span className={cn("mt-1 hidden text-xs font-bold uppercase tracking-[0.12em] sm:block", tone === "dark" ? "text-muted" : "text-ivory/60")}>
+            Pickleball &amp; Courtyard
+          </span>
+        ) : null}
       </span>
     </Link>
   );

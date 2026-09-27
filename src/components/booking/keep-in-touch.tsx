@@ -47,7 +47,7 @@ export function KeepInTouch({
           <h2 id="keep-title" className="text-xs font-bold uppercase tracking-wider text-muted">
             Your booking reference
           </h2>
-          <p className="mt-1 select-all font-display text-3xl tabular-nums sm:text-4xl">{reference}</p>
+          <p className="mt-1 select-all font-display text-3xl lining-nums tabular-nums sm:text-4xl">{reference}</p>
         </div>
         <CopyLinkButton path={privatePath} />
       </div>

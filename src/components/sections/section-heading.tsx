@@ -3,6 +3,7 @@ import { Reveal } from "@/components/motion/reveal";
 
 export function SectionHeading({
   eyebrow,
+  eyebrowClassName,
   title,
   intro,
   align = "left",
@@ -10,6 +11,8 @@ export function SectionHeading({
   className,
 }: {
   eyebrow: string;
+  /** e.g. "!text-brass" on dark backgrounds, where the default brass-deep is too dark. */
+  eyebrowClassName?: string;
   title: React.ReactNode;
   intro?: React.ReactNode;
   align?: "left" | "center";
@@ -19,7 +22,7 @@ export function SectionHeading({
   // Page titles (h1) are above the fold and must not wait for JS; section titles reveal on scroll.
   return (
     <Reveal enabled={Tag === "h2"} className={cn("flex flex-col gap-4", align === "center" && "items-center text-center", className)}>
-      <p className="eyebrow">{eyebrow}</p>
+      <p className={cn("eyebrow", eyebrowClassName)}>{eyebrow}</p>
       <Tag className="max-w-3xl text-4xl sm:text-5xl">{title}</Tag>
       {intro ? <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{intro}</p> : null}
     </Reveal>

@@ -71,7 +71,7 @@ export function MonthCalendar({
           type="button"
           onClick={() => onMonthChange(addDays(first, -1))}
           disabled={!canGoBack}
-          className="grid size-10 place-items-center rounded-full border border-line hover:border-ink disabled:opacity-30"
+          className="grid size-11 place-items-center rounded-full border border-line hover:border-ink disabled:opacity-30"
           aria-label="Previous month"
         >
           <ChevronLeft className="size-5" />
@@ -84,16 +84,16 @@ export function MonthCalendar({
           type="button"
           onClick={() => onMonthChange(addDays(last, 1))}
           disabled={!canGoForward}
-          className="grid size-10 place-items-center rounded-full border border-line hover:border-ink disabled:opacity-30"
+          className="grid size-11 place-items-center rounded-full border border-line hover:border-ink disabled:opacity-30"
           aria-label="Next month"
         >
           <ChevronRight className="size-5" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="pb-1 text-center text-[11px] font-bold uppercase tracking-wider text-muted" aria-hidden>
+          <div key={w} className="pb-1 text-center text-xs font-bold uppercase tracking-wide text-muted" aria-hidden>
             {w}
           </div>
         ))}
@@ -114,7 +114,8 @@ export function MonthCalendar({
               aria-label={`${formatDate(date, "full")} — ${DAY_STATUS_LABEL[status]}`}
               onClick={() => onSelect(date)}
               className={cn(
-                "relative flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border text-sm font-semibold tabular-nums transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-soft sm:text-base",
+                // Phones: seven across leaves ~41px of width, so give the height the full tap size.
+                "relative flex min-h-12 aspect-square flex-col items-center justify-center gap-1 rounded-xl border text-sm font-semibold tabular-nums transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-soft sm:text-base",
                 style.cell,
                 selectable && "hover:-translate-y-px active:scale-95 active:duration-100",
                 !selectable && "cursor-not-allowed",

@@ -92,7 +92,7 @@ function FacilityCard({ service: s }: { service: Service }) {
           </p>
         </div>
         <p className="mt-3 flex-1 leading-relaxed text-muted">{s.description}</p>
-        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brass-deep opacity-70 transition-[opacity,transform] duration-300 ease-soft group-hover:translate-x-1 group-hover:opacity-100">
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brass-deep transition-transform duration-300 ease-soft group-hover:translate-x-1">
           Book with {s.name} <ArrowRight className="size-4" aria-hidden />
         </span>
       </div>

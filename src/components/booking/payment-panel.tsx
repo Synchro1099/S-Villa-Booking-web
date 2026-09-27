@@ -71,7 +71,7 @@ export function PaymentPanel({
 
           <div className="mt-6 rounded-2xl bg-forest p-6 text-ivory">
             <p className="text-sm text-ivory/70">Amount to pay</p>
-            <p className="font-display text-5xl tabular-nums">{formatPeso(amount)}</p>
+            <p className="font-display text-5xl lining-nums tabular-nums">{formatPeso(amount)}</p>
             <dl className="mt-5 space-y-3 border-t border-ivory/10 pt-5">
               {lines.map(([k, v]) => (
                 <div key={k} className="flex items-center justify-between gap-3">
