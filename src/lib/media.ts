@@ -77,7 +77,7 @@ export const FACILITY_PHOTOS: Record<string, Photo | undefined> = {
   badminton: photo("facilities/badminton.jpg", "Badminton net set up across the court"),
   "music-room": undefined,
   jacuzzi: undefined,
-  "bar-lounge": photo("facilities/bar-lounge.jpg", "Lounge seating by the neon-lit bar"),
+  "bar-lounge": undefined,
   "villa-courtyard": photo("facilities/villa-courtyard.jpg", "Trees and lounge chairs in the open-air courtyard"),
 };
 
