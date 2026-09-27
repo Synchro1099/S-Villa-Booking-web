@@ -82,8 +82,10 @@ export interface HeroSlide {
 
 /**
  * Homepage hero slideshow, first slide first. The first slide loads right away
- * and leads the pitch, so keep the pickleball court there. Use wide landscape
- * shots (3000 px wide or more is ideal). An empty list shows the illustrated court.
+ * and leads the pitch, so keep the pickleball court there; it also stays up
+ * longest (8s, the rest 6s — FIRST_SLIDE_MS / SLIDE_MS in hero.tsx). Use wide
+ * landscape shots (3000 px wide or more is ideal). An empty list shows the
+ * illustrated court.
  */
 export const HERO_SLIDES: HeroSlide[] = [
   { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights"), label: "The court" },

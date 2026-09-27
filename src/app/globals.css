@@ -47,10 +47,69 @@
   --animate-glow: glow 9s ease-in-out infinite;
   /* Hero photo/video: a slow push in, then back out. */
   --animate-ken-burns: ken-burns 26s ease-in-out infinite alternate;
+  /* Hero slideshow: the incoming photo is uncovered by a soft-edged wipe while
+     both photos drift a little the same way (parallax); see .hero-wipe below. */
+  --animate-hero-wipe-next: hero-wipe-in 1.1s cubic-bezier(0.65, 0, 0.35, 1) both, hero-shift-in-next 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-hero-wipe-prev: hero-wipe-in-reverse 1.1s cubic-bezier(0.65, 0, 0.35, 1) both, hero-shift-in-prev 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-hero-leave-next: hero-shift-out-next 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-hero-leave-prev: hero-shift-out-prev 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-hero-caption: hero-caption 0.5s var(--ease-soft) 0.35s both;
+  --animate-hero-nudge: hero-nudge 1.2s var(--ease-soft) both;
 
   @keyframes ken-burns {
     to {
       transform: scale(1.08);
+    }
+  }
+  @keyframes hero-wipe-in {
+    from {
+      -webkit-mask-position: 0% 0;
+      mask-position: 0% 0;
+    }
+    to {
+      -webkit-mask-position: 100% 0;
+      mask-position: 100% 0;
+    }
+  }
+  @keyframes hero-wipe-in-reverse {
+    from {
+      -webkit-mask-position: 100% 0;
+      mask-position: 100% 0;
+    }
+    to {
+      -webkit-mask-position: 0% 0;
+      mask-position: 0% 0;
+    }
+  }
+  @keyframes hero-shift-in-next {
+    from {
+      transform: translateX(6%);
+    }
+  }
+  @keyframes hero-shift-in-prev {
+    from {
+      transform: translateX(-6%);
+    }
+  }
+  @keyframes hero-shift-out-next {
+    to {
+      transform: translateX(-5%);
+    }
+  }
+  @keyframes hero-shift-out-prev {
+    to {
+      transform: translateX(5%);
+    }
+  }
+  @keyframes hero-caption {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  @keyframes hero-nudge {
+    40% {
+      transform: translateX(-16px);
     }
   }
   @keyframes float {
@@ -100,6 +159,14 @@
       opacity: 1;
       transform: none;
     }
+  }
+}
+
+/* Hero progress bars: used from an inline style (its duration varies per slide), so it lives
+   outside @theme, which only emits keyframes that a utility class references. */
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
   }
 }
 
@@ -168,6 +235,23 @@
     .scroller-bleed {
       --page-pad: 2rem;
     }
+  }
+  /* Hero wipe masks: a gradient 2.5× the slide's width with a soft edge in the middle; sliding
+     it across uncovers the photo from the right (next) or the left (previous). */
+  .hero-mask-next,
+  .hero-mask-prev {
+    -webkit-mask-size: 250% 100%;
+    mask-size: 250% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  .hero-mask-next {
+    -webkit-mask-image: linear-gradient(to right, transparent 44%, #000 56%);
+    mask-image: linear-gradient(to right, transparent 44%, #000 56%);
+  }
+  .hero-mask-prev {
+    -webkit-mask-image: linear-gradient(to left, transparent 44%, #000 56%);
+    mask-image: linear-gradient(to left, transparent 44%, #000 56%);
   }
   .eyebrow {
     font-size: 0.75rem;
