@@ -2,8 +2,9 @@
 
 /* =============================================================================
    S-Villa design system
-   Palette: deep forest ink, warm ivory, sand lines and a brass accent —
-   quiet, resort-like and high contrast. Status colours always pair with an
+   Palette: graphite, warm ivory, sand lines and a champagne accent —
+   quiet, resort-like and high contrast. (Token names are historical:
+   "forest" is the graphite, "brass" the champagne.) Status colours always pair with an
    icon + label so meaning never depends on colour alone.
    ============================================================================= */
 
@@ -11,16 +12,16 @@
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
 
-  --color-ink: #17221c;
-  --color-forest: #1f3329;
-  --color-forest-soft: #2c4638;
+  --color-ink: #1c1e20;
+  --color-forest: #2a2c2e;
+  --color-forest-soft: #3a3d40;
   --color-ivory: #f7f3ec;
   --color-cream: #fbf9f5;
   --color-sand: #e9e1d3;
   --color-line: #ddd3c2;
-  --color-muted: #5b665f;
-  --color-brass: #c3a06a;
-  --color-brass-deep: #8a6634;
+  --color-muted: #5f6164;
+  --color-brass: #cbbfa8;
+  --color-brass-deep: #6f6656;
 
   --color-ok: #2f6b4f;
   --color-ok-bg: #e4efe7;
@@ -34,8 +35,8 @@
   --color-off-bg: #ebe9e4;
 
   --radius-card: 1.25rem;
-  --shadow-soft: 0 1px 2px rgb(23 34 28 / 0.04), 0 8px 24px -8px rgb(23 34 28 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(23 34 28 / 0.05), 0 20px 40px -16px rgb(23 34 28 / 0.25);
+  --shadow-soft: 0 1px 2px rgb(28 30 32 / 0.04), 0 8px 24px -8px rgb(28 30 32 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(28 30 32 / 0.05), 0 20px 40px -16px rgb(28 30 32 / 0.25);
 
   /* Same curve as EASE in src/lib/motion.ts → Tailwind `ease-soft`. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -262,8 +263,8 @@
   }
   .court-lines {
     background-image:
-      linear-gradient(to right, rgb(195 160 106 / 0.16) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(195 160 106 / 0.16) 1px, transparent 1px);
+      linear-gradient(to right, rgb(203 191 168 / 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(203 191 168 / 0.16) 1px, transparent 1px);
     background-size: 88px 88px;
   }
   .grain {

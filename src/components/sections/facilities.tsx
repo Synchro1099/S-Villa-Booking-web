@@ -80,7 +80,7 @@ function FacilityCard({ service: s }: { service: Service }) {
         {/* Soft brass light that fades in on hover. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_120%,rgb(195_160_106/0.35),transparent_60%)] opacity-0 transition-opacity duration-500 ease-soft group-hover:opacity-100"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_120%,rgb(203_191_168/0.35),transparent_60%)] opacity-0 transition-opacity duration-500 ease-soft group-hover:opacity-100"
         />
       </div>
       <div className="flex flex-1 flex-col p-7">

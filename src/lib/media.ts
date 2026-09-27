@@ -98,7 +98,10 @@ export const HERO_SLIDES: HeroSlide[] = [
   { media: photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"), label: "The courtyard, beside the court" },
   { media: photo("facilities/ktv-lounge.jpg", "The whole KTV lounge: big screen, sofas and the neon-lit bar", { focus: "45% 50%" }), label: "Add-on: KTV Lounge" },
   { media: photo("gallery/plunge-pool.jpg", "The plunge pool and stepping-stone garden", { portrait: true, focus: "50% 60%" }), label: "Add-on: Jacuzzi & plunge pool" },
-  { media: photo("facilities/villa-courtyard.jpg", "Trees and lounge chairs in the open-air courtyard"), label: "Add-on: Villa & Courtyard" },
+  // Hero copy of gallery/pool-exterior.jpg trimmed just above the COZIER INTERIORS mark, so the zoom and
+  // scroll drift can never show a sliver of it; the gallery keeps the original with the mark in full.
+  { media: photo("hero/pool-lawn.jpg", "The pool and lawn beside the villa", { portrait: true, focus: "45% 55%" }), label: "Add-on: Villa & Courtyard" },
+  { media: photo("gallery/balcony.jpg", "Looking down on the courtyard and its blue lounge chairs", { portrait: true, focus: "50% 65%" }), label: "The courtyard from above" },
   { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard at dusk" },
 ];
 

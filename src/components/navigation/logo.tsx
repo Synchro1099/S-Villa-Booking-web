@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 // through <img> can't use the page's web fonts, so its "S" would fall back to Georgia.
 // The rings stay a full screen pixel wide at any size so they read crisply on 1x screens.
 const MARK_COLORS = {
-  dark: { outer: "#A9895A", inner: "#D9C79E", letter: "#16241B" }, // logo-mark-light.svg, for light backgrounds
-  light: { outer: "#C4A265", inner: "#5A6B54", letter: "#F1ECE1" }, // logo-mark-dark.svg, for dark backgrounds
+  dark: { outer: "#8F8672", inner: "#D8D0C1", letter: "#1C1E20" }, // logo-mark-light.svg, for light backgrounds
+  light: { outer: "#CBBFA8", inner: "#5F6164", letter: "#F1ECE1" }, // logo-mark-dark.svg, for dark backgrounds
 };
 
 export function Logo({

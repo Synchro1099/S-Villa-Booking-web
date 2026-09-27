@@ -14,7 +14,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-forest text-ivory shadow-soft hover:-translate-y-px hover:bg-ink hover:shadow-lift active:translate-y-0",
-        brass: "bg-brass text-ink shadow-soft hover:-translate-y-px hover:bg-[#d2b27f] hover:shadow-lift active:translate-y-0",
+        brass: "bg-brass text-ink shadow-soft hover:-translate-y-px hover:bg-[#d9cfbd] hover:shadow-lift active:translate-y-0",
         outline: "border border-line bg-cream/60 text-ink hover:-translate-y-px hover:border-ink hover:bg-cream active:translate-y-0",
         ghost: "text-ink hover:bg-sand/70",
         light: "border border-ivory/30 text-ivory hover:-translate-y-px hover:border-ivory/60 hover:bg-ivory/10 active:translate-y-0",

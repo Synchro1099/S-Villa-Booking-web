@@ -168,19 +168,19 @@ export function renderBookingEmail(opts: {
     ...(contact ? [contact] : []),
   ].join("\n");
 
-  const html = `<!doctype html><html><body style="margin:0;background:#f5f1ea;font-family:Helvetica,Arial,sans-serif;color:#1d2a22">
+  const html = `<!doctype html><html><body style="margin:0;background:#f5f1ea;font-family:Helvetica,Arial,sans-serif;color:#1c1e20">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#1d2a22;padding:28px 32px;color:#f5f1ea">
+<tr><td style="background:#1c1e20;padding:28px 32px;color:#f5f1ea">
 <div style="font-family:Georgia,serif;font-size:22px;letter-spacing:.04em">${escape(s.business_name)}</div></td></tr>
 <tr><td style="padding:32px">
 <h1 style="font-family:Georgia,serif;font-weight:normal;font-size:24px;margin:0 0 12px">${escape(copy.heading)}</h1>
-<p style="font-size:15px;line-height:1.6;margin:0 0 24px;color:#3d4a42">${escape(copy.intro)}</p>
+<p style="font-size:15px;line-height:1.6;margin:0 0 24px;color:#3a3d40">${escape(copy.intro)}</p>
 ${
   copy.highlight
-    ? `<div style="margin:0 0 24px;padding:16px 20px;background:#f5f1ea;border-left:4px solid #b08d57;border-radius:8px">
-<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b746e">${escape(copy.highlight.label)}</div>
-<div style="margin-top:4px;font-family:Georgia,serif;font-size:20px;color:#1d2a22">${escape(copy.highlight.value).replace(
+    ? `<div style="margin:0 0 24px;padding:16px 20px;background:#f5f1ea;border-left:4px solid #a89c84;border-radius:8px">
+<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5f6164">${escape(copy.highlight.label)}</div>
+<div style="margin-top:4px;font-family:Georgia,serif;font-size:20px;color:#1c1e20">${escape(copy.highlight.value).replace(
         /\d{1,2}:\d{2} [AP]M – \d{1,2}:\d{2} [AP]M/,
         (range) => `<span style="white-space:nowrap">${range}</span>`, // keep the time range on one line
       )}</div></div>
@@ -190,13 +190,13 @@ ${
 ${rows
   .map(
     ([k, v]) =>
-      `<tr><td style="padding:10px 0;color:#6b746e;border-bottom:1px solid #e8e1d4;width:40%">${escape(k)}</td><td style="padding:10px 0;border-bottom:1px solid #e8e1d4;font-weight:600">${escape(v)}</td></tr>`,
+      `<tr><td style="padding:10px 0;color:#5f6164;border-bottom:1px solid #e8e1d4;width:40%">${escape(k)}</td><td style="padding:10px 0;border-bottom:1px solid #e8e1d4;font-weight:600">${escape(v)}</td></tr>`,
   )
   .join("")}
 </table>
-<p style="margin:28px 0 0"><a href="${escape(link)}" style="display:inline-block;background:#1d2a22;color:#f5f1ea;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:14px">${buttonLabel}</a></p>
+<p style="margin:28px 0 0"><a href="${escape(link)}" style="display:inline-block;background:#1c1e20;color:#f5f1ea;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:14px">${buttonLabel}</a></p>
 </td></tr>
-${contact ? `<tr><td style="padding:20px 32px;background:#faf7f2;font-size:12px;line-height:1.6;color:#6b746e;white-space:pre-line">${escape(contact)}</td></tr>` : ""}
+${contact ? `<tr><td style="padding:20px 32px;background:#faf7f2;font-size:12px;line-height:1.6;color:#5f6164;white-space:pre-line">${escape(contact)}</td></tr>` : ""}
 </table></td></tr></table></body></html>`;
 
   return { subject: copy.subject, html, text };
