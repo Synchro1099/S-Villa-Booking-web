@@ -81,28 +81,30 @@ export interface HeroSlide {
 }
 
 /**
- * Homepage hero slideshow, first slide first. The first slide loads right away
- * and leads the pitch, so keep the pickleball court there; it also stays up
- * longest (8s, the rest 6s — FIRST_SLIDE_MS / SLIDE_MS in hero.tsx). The progress bars and
- * captions follow however many slides are listed. Use wide
- * landscape shots (3000 px wide or more is ideal). An empty list shows the
- * illustrated court.
+ * Homepage hero slideshow, first slide first. Whichever slide is first loads
+ * right away and stays up longest (8s, the rest 6s — FIRST_SLIDE_MS / SLIDE_MS
+ * in hero.tsx); it opens with the courtyard beside the court, with the court
+ * itself close behind. The counter, captions and progress line follow however
+ * many slides are listed. Use wide landscape shots (3000 px wide or more is
+ * ideal). An empty list shows the illustrated court.
  */
 export const HERO_SLIDES: HeroSlide[] = [
   // Hero photos are framed in a narrower window than the photo itself (a phone-width strip, a wide
   // tablet strip, or the right-hand column on desktop), so each can set a focus point that keeps its
-  // subject in view. Order alternates areas so similar shots never sit side by side.
-  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights", { focus: "30% 75%" }), label: "The court" },
-  { media: photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit"), label: "Add-on: KTV Lounge" },
-  { media: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, focus: "50% 62%" }), label: "Add-on: Jacuzzi" },
+  // subject in view. Order alternates areas so similar shots never sit side by side — including the
+  // wrap from the last slide back to the first. The court is third, not second: the opening
+  // courtyard photo already shows the court floor, so back to back they'd look alike.
   { media: photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"), label: "The courtyard, beside the court" },
+  { media: photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit"), label: "Add-on: KTV Lounge" },
+  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights", { focus: "30% 75%" }), label: "The court" },
+  { media: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, focus: "50% 62%" }), label: "Add-on: Jacuzzi" },
+  { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard at dusk" },
   { media: photo("facilities/ktv-lounge.jpg", "The whole KTV lounge: big screen, sofas and the neon-lit bar", { focus: "45% 50%" }), label: "Add-on: KTV Lounge" },
-  { media: photo("gallery/plunge-pool.jpg", "The plunge pool and stepping-stone garden", { portrait: true, focus: "50% 60%" }), label: "Add-on: Jacuzzi & plunge pool" },
   // Hero copy of gallery/pool-exterior.jpg trimmed just above the COZIER INTERIORS mark, so the zoom and
   // scroll drift can never show a sliver of it; the gallery keeps the original with the mark in full.
   { media: photo("hero/pool-lawn.jpg", "The pool and lawn beside the villa", { portrait: true, focus: "45% 55%" }), label: "Add-on: Villa & Courtyard" },
   { media: photo("gallery/balcony.jpg", "Looking down on the courtyard and its blue lounge chairs", { portrait: true, focus: "50% 65%" }), label: "The courtyard from above" },
-  { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard at dusk" },
+  { media: photo("gallery/plunge-pool.jpg", "The plunge pool and stepping-stone garden", { portrait: true, focus: "50% 60%" }), label: "Add-on: Jacuzzi & plunge pool" },
 ];
 
 /**

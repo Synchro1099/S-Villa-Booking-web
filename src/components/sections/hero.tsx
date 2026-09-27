@@ -10,7 +10,7 @@ import { HERO_SLIDES, type HeroSlide } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { CourtArt } from "./court-art";
 
-/** How long each slide stays up. The first slide (the court) leads the pitch, so it stays longer. */
+/** How long each slide stays up. Whichever slide is first leads the rotation, so it stays longer. */
 const FIRST_SLIDE_MS = 8000;
 const SLIDE_MS = 6000;
 const slideMs = (i: number) => (i === 0 ? FIRST_SLIDE_MS : SLIDE_MS);
