@@ -1,22 +1,32 @@
-import { GALLERY, GALLERY_LAYOUT } from "@/lib/media";
-import { GalleryGrid } from "@/components/media/gallery-grid";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { GALLERY } from "@/lib/media";
+import { GalleryCarousel } from "@/components/media/gallery-carousel";
+import { Button } from "@/components/ui/button";
 import { SectionHeading } from "./section-heading";
 
-/** Photo and video gallery. Contents and layout come from src/lib/media.ts. */
+/** Homepage gallery: a compact sideways carousel; the full set lives on /gallery. */
 export function Gallery() {
   if (GALLERY.length === 0) return null;
   return (
-    <section className="container-page py-20 md:py-28" id="gallery">
-      <SectionHeading
-        eyebrow="Gallery"
-        title={
-          <>
-            Take a look <em>around.</em>
-          </>
-        }
-        intro="The court, the courtyard, the KTV lounge and the jacuzzi — tap any photo or clip to see it in full."
-      />
-      <GalleryGrid items={GALLERY} layout={GALLERY_LAYOUT} />
+    <section className="py-20 md:py-28" id="gallery">
+      <div className="container-page flex flex-wrap items-end justify-between gap-6">
+        <SectionHeading
+          eyebrow="Gallery"
+          title={
+            <>
+              Take a look <em>around.</em>
+            </>
+          }
+          intro="The court, the courtyard, the KTV lounge and the jacuzzi. Swipe through, or tap any photo or clip to see it in full."
+        />
+        <Button asChild variant="outline">
+          <Link href="/gallery">
+            View all {GALLERY.length} <ArrowRight />
+          </Link>
+        </Button>
+      </div>
+      <GalleryCarousel items={GALLERY} moreHref="/gallery" className="mt-10 md:mt-12" />
     </section>
   );
 }

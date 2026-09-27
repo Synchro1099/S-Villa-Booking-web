@@ -68,11 +68,11 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
             condensed ? "h-14 md:h-16" : "h-16 md:h-20",
           )}
         >
-          <div className={cn("origin-left transition-transform duration-300 ease-out", condensed && "scale-[0.92]")}>
+          <div className={cn("shrink-0 origin-left transition-transform duration-300 ease-out", condensed && "scale-[0.92]")}>
             <Logo />
           </div>
 
-          <ul className="hidden items-center gap-7 lg:flex">
+          <ul className="hidden items-center gap-4 lg:flex xl:gap-6">
             {links.map((l) => {
               const active = isActive(pathname, l.href);
               return (
@@ -101,7 +101,8 @@ export function SiteHeader({ links, account }: { links: NavLink[]; account: NavL
 
           <div className="hidden items-center gap-2 lg:flex">
             {account.href === "/login" ? (
-              <Button asChild variant="ghost" size="sm">
+              // Small laptops: no room beside seven links; it stays in the footer and phone menu.
+              <Button asChild variant="ghost" size="sm" className="hidden xl:inline-flex">
                 <Link href="/bookings/lookup" aria-current={pathname === "/bookings/lookup" ? "page" : undefined}>
                   Find my booking
                 </Link>

@@ -146,6 +146,23 @@
       padding-inline: 2rem;
     }
   }
+  /* A sideways scroller that runs to the screen edges but starts (and snaps)
+     in line with .container-page content. */
+  .scroller-bleed {
+    --page-pad: 1.25rem;
+    --bleed: max(var(--page-pad), calc((100% - 76rem) / 2 + var(--page-pad)));
+    padding-inline: var(--bleed);
+    scroll-padding-inline: var(--bleed);
+    scrollbar-width: none;
+  }
+  .scroller-bleed::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .scroller-bleed {
+      --page-pad: 2rem;
+    }
+  }
   .eyebrow {
     font-size: 0.72rem;
     font-weight: 700;

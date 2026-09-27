@@ -47,7 +47,12 @@ A facility photo URL saved in the database (`services.image_url`) takes preceden
 
 ## Gallery layout
 
-`GALLERY_LAYOUT` in `src/lib/media.ts` switches how mixed shapes are arranged:
+Everything in `GALLERY` appears in two places, in the same order:
+
+- **Homepage:** a single sideways-scrolling row (swipe on phones, arrows on computers), ending with a "View all" card. Put the strongest shots first, since most visitors only see the first few.
+- **`/gallery` page:** the full set as a grid, arranged by `GALLERY_LAYOUT`.
+
+`GALLERY_LAYOUT` in `src/lib/media.ts` switches how the `/gallery` grid arranges mixed shapes:
 
 | Layout | Looks like | Good | Watch out for |
 | --- | --- | --- | --- |

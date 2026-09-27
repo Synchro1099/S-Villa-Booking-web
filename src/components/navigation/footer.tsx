@@ -24,6 +24,7 @@ export async function Footer() {
             {[
               ["/book", "Book a reservation"],
               ["/availability", "Check availability"],
+              ["/gallery", "Gallery"],
               ["/pricing", "Pricing"],
               ["/bookings/lookup", "Find my booking"],
               ["/contact", "Contact"],

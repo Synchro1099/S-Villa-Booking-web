@@ -5,6 +5,7 @@ export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/experience", label: "Experience" },
   { href: "/facilities", label: "Facilities" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/availability", label: "Availability" },
   { href: "/contact", label: "Contact" },
