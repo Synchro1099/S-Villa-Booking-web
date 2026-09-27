@@ -16,7 +16,13 @@ export function FilteredGallery({ items, layout }: { items: Media[]; layout: "ro
 
   return (
     <>
-      <div role="group" aria-label="Filter the gallery" className="mt-10 flex flex-wrap gap-2">
+      {/* Phones: one row that scrolls sideways (running to the screen edges) instead of three rows
+          of chips pushing the photos down; a fade at the right edge hints there are more. */}
+      <div
+        role="group"
+        aria-label="Filter the gallery"
+        className="-mx-5 mt-8 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,#000_85%,transparent)] sm:mx-0 sm:mt-10 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+      >
         {chips.map((c) => {
           const on = filter === c.id;
           return (
@@ -26,7 +32,7 @@ export function FilteredGallery({ items, layout }: { items: Media[]; layout: "ro
               aria-pressed={on}
               onClick={() => setFilter(c.id)}
               className={cn(
-                "inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors duration-200",
+                "inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors duration-200",
                 on ? "border-forest bg-forest text-ivory" : "border-line bg-cream/60 text-ink hover:border-ink",
               )}
             >

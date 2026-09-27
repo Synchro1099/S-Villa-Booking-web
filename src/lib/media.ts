@@ -83,17 +83,23 @@ export interface HeroSlide {
 /**
  * Homepage hero slideshow, first slide first. The first slide loads right away
  * and leads the pitch, so keep the pickleball court there; it also stays up
- * longest (8s, the rest 6s — FIRST_SLIDE_MS / SLIDE_MS in hero.tsx). Use wide
+ * longest (8s, the rest 6s — FIRST_SLIDE_MS / SLIDE_MS in hero.tsx). The progress bars and
+ * captions follow however many slides are listed. Use wide
  * landscape shots (3000 px wide or more is ideal). An empty list shows the
  * illustrated court.
  */
 export const HERO_SLIDES: HeroSlide[] = [
-  // Hero photos are framed in a narrower window than the photo itself (a phone-width strip, or the
-  // right-hand column on desktop), so each gets a focus point that keeps its subject in view.
-  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights", { focus: "30% 60%" }), label: "The court" },
+  // Hero photos are framed in a narrower window than the photo itself (a phone-width strip, a wide
+  // tablet strip, or the right-hand column on desktop), so each can set a focus point that keeps its
+  // subject in view. Order alternates areas so similar shots never sit side by side.
+  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights", { focus: "30% 75%" }), label: "The court" },
   { media: photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit"), label: "Add-on: KTV Lounge" },
   { media: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, focus: "50% 62%" }), label: "Add-on: Jacuzzi" },
-  { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard" },
+  { media: photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"), label: "The courtyard, beside the court" },
+  { media: photo("facilities/ktv-lounge.jpg", "The whole KTV lounge: big screen, sofas and the neon-lit bar", { focus: "45% 50%" }), label: "Add-on: KTV Lounge" },
+  { media: photo("gallery/plunge-pool.jpg", "The plunge pool and stepping-stone garden", { portrait: true, focus: "50% 60%" }), label: "Add-on: Jacuzzi & plunge pool" },
+  { media: photo("facilities/villa-courtyard.jpg", "Trees and lounge chairs in the open-air courtyard"), label: "Add-on: Villa & Courtyard" },
+  { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard at dusk" },
 ];
 
 /**

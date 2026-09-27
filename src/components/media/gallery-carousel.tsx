@@ -55,8 +55,9 @@ export function GalleryCarousel({
 
   // Phones: height follows screen width; landscape tiles are 4:3 there (most of the photos' own
   // shape) so one fills ~85% of the screen and the next still peeks in, portraits ~48%.
+  // Tablets: 19rem, so at 768px wide the second tile ends short of the edge and the next one peeks in.
   // Laptops/iPad landscape: capped by screen height so heading and row fit on one screen.
-  const tileHeight = "h-[min(20rem,64vw)] sm:h-80 lg:h-[min(26rem,44svh)]";
+  const tileHeight = "h-[min(20rem,64vw)] sm:h-[19rem] lg:h-[min(26rem,44svh)]";
 
   return (
     <div className={cn("relative", className)}>
@@ -69,7 +70,7 @@ export function GalleryCarousel({
           <li key={m.src} className={cn("shrink-0 snap-start", tileHeight, m.orientation === "landscape" ? "aspect-[4/3] sm:aspect-[3/2]" : "aspect-[3/4]")}>
             <GalleryTile
               media={m}
-              sizes={m.orientation === "landscape" ? "(min-width: 1024px) 624px, (min-width: 640px) 480px, 86vw" : "(min-width: 1024px) 312px, (min-width: 640px) 240px, 48vw"}
+              sizes={m.orientation === "landscape" ? "(min-width: 1024px) 624px, (min-width: 640px) 456px, 86vw" : "(min-width: 1024px) 312px, (min-width: 640px) 228px, 48vw"}
               onOpen={(el) => openAt(i, el)}
             />
           </li>

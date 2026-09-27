@@ -39,6 +39,12 @@ export function Lightbox({
   opener: React.RefObject<HTMLElement | null>;
 }) {
   const item = index === null ? null : items[index];
+  // Each item's real shape (width / height), learned when it loads; until then a guess from its orientation.
+  // The frame is sized to it, so the caption and arrows sit right under the photo instead of at the
+  // bottom of a tall screen.
+  const [ratios, setRatios] = useState<Record<string, number>>({});
+  const learn = (src: string, w: number, h: number) => w > 0 && h > 0 && setRatios((r) => (r[src] === w / h ? r : { ...r, [src]: w / h }));
+  const ratio = item ? (ratios[item.src] ?? (item.orientation === "landscape" ? 3 / 2 : 3 / 4)) : 1;
   const step = (by: number) => index !== null && onIndex((index + by + items.length) % items.length);
 
   // Fetch the neighbours in the background so previous/next (and swipes) show instantly.
@@ -126,10 +132,10 @@ export function Lightbox({
         >
           <D.Title className="sr-only">{item?.alt ?? "Gallery"}</D.Title>
           {item ? (
-            <>
-              {/* The whole item, uncropped (object-contain), as large as the screen allows.
+            <div className="flex max-w-full flex-col gap-3" style={{ width: `min(100%, 72rem, calc((100dvh - 8rem) * ${ratio}))` }}>
+              {/* The whole item, uncropped, as large as the screen allows at its own shape.
                   touch-action keeps pinch-zoom but hands one-finger drags to the swipe handlers. */}
-              <div ref={stage} {...swipe} className="relative h-[calc(100dvh-8rem)] w-full max-w-6xl touch-pinch-zoom select-none">
+              <div ref={stage} {...swipe} className="relative w-full touch-pinch-zoom select-none" style={{ aspectRatio: ratio }}>
                 {item.kind === "video" ? (
                   <video
                     key={item.src}
@@ -140,13 +146,24 @@ export function Lightbox({
                     muted
                     loop
                     playsInline
-                    className="mx-auto h-full w-auto max-w-full object-contain"
+                    onLoadedMetadata={(e) => learn(item.src, e.currentTarget.videoWidth, e.currentTarget.videoHeight)}
+                    className="size-full object-contain"
                   />
                 ) : (
-                  <Image key={item.src} src={item.src} alt={item.alt} fill sizes={LIGHTBOX_SIZES} quality={LIGHTBOX_QUALITY} draggable={false} className="object-contain" />
+                  <Image
+                    key={item.src}
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    sizes={LIGHTBOX_SIZES}
+                    quality={LIGHTBOX_QUALITY}
+                    draggable={false}
+                    onLoad={(e) => learn(item.src, e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+                    className="object-contain"
+                  />
                 )}
               </div>
-              <div className="flex w-full max-w-6xl items-center justify-between gap-3 text-ivory">
+              <div className="flex w-full items-center justify-between gap-3 text-ivory">
                 <p className="min-w-0 flex-1 truncate text-sm text-ivory/80">
                   <span className="mr-2 tabular-nums text-ivory/50">
                     {(index ?? 0) + 1} / {items.length}
@@ -169,7 +186,7 @@ export function Lightbox({
                   </D.Close>
                 </div>
               </div>
-            </>
+            </div>
           ) : null}
         </D.Content>
       </D.Portal>

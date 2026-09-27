@@ -61,7 +61,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
         className={cn(
           "mt-5 text-5xl leading-[1.02] sm:text-6xl",
           // Split layout: sized to its column so "just for your group." stays on one line.
-          hasSlides ? "lg:text-[clamp(3rem,4.1vw,4.25rem)]" : "lg:text-7xl",
+          hasSlides ? "lg:text-[clamp(2.75rem,4.1vw,4.25rem)]" : "lg:text-7xl",
         )}
       >
         {/* Balanced so a wide screen never leaves "court." alone on the second line. */}
@@ -74,11 +74,11 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
       </h1>
       {/* Stacked layout: the buttons come straight after the headline (closer to the first screen);
           the description and facts follow them. */}
-      <p className={cn("mt-6 max-w-xl animate-fade-up text-lg leading-relaxed text-ivory/80", hasSlides && "max-lg:order-last max-lg:mt-8")} style={step(3)}>
+      <p className={cn("mt-6 max-w-xl animate-fade-up text-lg leading-relaxed text-ivory/80", hasSlides && "max-lg:order-last max-lg:mt-8 lg:mt-4 lg:text-base xl:mt-6 xl:text-lg")} style={step(3)}>
         Book the court by the hour, then add the KTV lounge, jacuzzi or badminton when you want more. One booking keeps all of
         S-Villa private for up to {maxGuests} guests.
       </p>
-      <div className={cn("mt-9 flex animate-fade-up flex-wrap gap-3", hasSlides && "max-lg:mt-8")} style={step(4)}>
+      <div className={cn("mt-9 flex animate-fade-up flex-wrap gap-3", hasSlides && "max-lg:mt-8 lg:mt-6 xl:mt-8")} style={step(4)}>
         <Button asChild variant="brass" size="lg">
           <Link href="/book?service=pickleball">
             Book the court <ArrowRight />
@@ -88,7 +88,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
           <Link href="/availability">Check availability</Link>
         </Button>
       </div>
-      <ul className={cn("mt-10 flex animate-fade-up flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/75", hasSlides && "max-lg:order-last max-lg:mt-7")} style={step(5)}>
+      <ul className={cn("mt-10 flex animate-fade-up flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/75", hasSlides && "max-lg:order-last max-lg:mt-7 lg:mt-6 xl:mt-8")} style={step(5)}>
         <li className="flex items-center gap-2">
           <Users className="size-4 text-brass" aria-hidden /> Up to {maxGuests} guests
         </li>
@@ -131,13 +131,13 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
     <section
       ref={ref}
       data-hero
-      className="relative bg-forest text-ivory lg:grid lg:min-h-[max(40rem,calc(100svh-5rem))] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]"
+      className="relative bg-forest text-ivory lg:grid lg:min-h-[max(36rem,calc(100svh-5rem))] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]"
     >
       {/* The photo: clean and full-strength. Swipeable on touch screens (vertical drags still scroll). */}
       <div
         {...show.swipe}
         // Phones: tall enough to be the star, short enough that "Book the court" still makes the first screen.
-        className="relative h-[min(47svh,30rem)] touch-pan-y touch-pinch-zoom overflow-hidden md:h-[min(50svh,34rem)] lg:order-2 lg:h-auto"
+        className="relative h-[min(45svh,30rem)] touch-pan-y touch-pinch-zoom overflow-hidden md:h-[min(50svh,34rem)] lg:order-2 lg:h-auto"
       >
         <SlideStage slides={slides} show={show} drift={still ? undefined : mediaY} />
       </div>
@@ -151,10 +151,10 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
           <div className="size-[30rem] rounded-full bg-brass/15 blur-3xl motion-safe:animate-glow" />
         </motion.div>
 
-        <div className="container-page relative flex flex-col pb-14 pt-6 md:pb-20 md:pt-8 lg:mx-0 lg:max-w-none lg:py-20 lg:pl-[max(2rem,calc((100vw-76rem)/2+2rem))] lg:pr-14">
+        <div className="container-page relative flex flex-col pb-14 pt-5 md:pb-20 md:pt-8 lg:mx-0 lg:max-w-none lg:py-10 xl:py-16 lg:pl-[max(2rem,calc((100vw-76rem)/2+2rem))] lg:pr-14">
           {/* Slide caption, progress and pause: top of the sheet on phones/tablets, foot of the column on desktop. */}
-          <SlideControls slides={slides} show={show} className="border-b border-ivory/10 pb-4 lg:order-last lg:mt-14 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5" />
-          <motion.div style={textMotion} className="mt-8 flex max-w-2xl flex-col lg:mt-0">
+          <SlideControls slides={slides} show={show} className="border-b border-ivory/10 pb-3 lg:order-last lg:mt-6 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-3 xl:mt-12 xl:pt-4" />
+          <motion.div style={textMotion} className="mt-6 flex max-w-2xl flex-col md:mt-8 lg:mt-0">
             {copy}
           </motion.div>
         </div>
@@ -226,42 +226,48 @@ function SlideStage({ slides, show, drift }: { slides: HeroSlide[]; show: Show; 
   );
 }
 
-/** "01 / 04 · The court", the progress bars and the pause button. */
+/**
+ * "01 / 08 · The court" (plus the one-time swipe hint) on one line, then the progress bars and pause
+ * button on the next. The bars share the row's width, so any number of slides fits — even in the
+ * narrow desktop column.
+ */
 function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show: Show; className?: string }) {
   const { active, run, turn, still } = show;
   if (slides.length < 2) return null;
   const total = String(slides.length).padStart(2, "0");
   return (
     <div
-      className={cn("flex items-center justify-between gap-3", className)}
+      className={cn("flex flex-col gap-1", className)}
       onMouseEnter={() => show.setHeld(true)}
       onMouseLeave={() => show.setHeld(false)}
       onFocus={() => show.setHeld(true)}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && show.setHeld(false)}
     >
-      <p className="min-w-0 truncate text-sm font-medium text-ivory/85" aria-live={show.running ? "off" : "polite"}>
-        {/* Rises in with each slide. */}
-        <span key={`${active}-${turn}`} className="inline-block motion-safe:animate-hero-caption">
-          <span className="tabular-nums text-brass">
-            {String(active + 1).padStart(2, "0")} / {total}
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="min-w-0 truncate text-sm font-medium text-ivory/85" aria-live={show.running ? "off" : "polite"}>
+          {/* Rises in with each slide. */}
+          <span key={`${active}-${turn}`} className="inline-block motion-safe:animate-hero-caption">
+            <span className="tabular-nums text-brass">
+              {String(active + 1).padStart(2, "0")} / {total}
+            </span>
+            <span className="mx-2 text-ivory/40" aria-hidden>
+              ·
+            </span>
+            {slides[active].label}
           </span>
-          <span className="mx-2 text-ivory/40" aria-hidden>
-            ·
-          </span>
-          {slides[active].label}
-        </span>
-      </p>
-      <div className="relative flex shrink-0 items-center">
-        {/* Floats above the bars so it never takes room from the caption. */}
+        </p>
+        {/* One-time hint on touch screens (phones and tablets). */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute bottom-full left-0 mb-1 text-xs font-semibold uppercase tracking-wider text-ivory/80 transition-opacity duration-500 lg:hidden",
+            "pointer-events-none shrink-0 text-xs font-semibold uppercase tracking-wider text-ivory/80 transition-opacity duration-500 lg:hidden",
             show.hint ? "opacity-100" : "opacity-0",
           )}
         >
           Swipe for more
         </span>
+      </div>
+      <div className="flex items-center gap-1">
         {slides.map((s, i) => (
           <button
             key={s.media.src}
@@ -269,10 +275,10 @@ function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show:
             onClick={() => show.goTo(i, i < active ? "prev" : "next")}
             aria-label={`Show slide ${i + 1}: ${s.label}`}
             aria-current={i === active}
-            // 44px tall; narrower on phones so the caption keeps room.
-            className="group grid h-11 w-8 place-items-center sm:w-11"
+            // 44px tall; the bars split the row between them.
+            className="group grid h-11 min-w-0 flex-1 place-items-center"
           >
-            <span className="relative block h-[3px] w-6 overflow-hidden rounded-full bg-ivory/25 transition-colors group-hover:bg-ivory/45 sm:w-9">
+            <span className="relative block h-[3px] w-full overflow-hidden rounded-full bg-ivory/25 transition-colors group-hover:bg-ivory/45">
               {i < active || (i === active && still) ? (
                 // Done, or reduced motion (no timer): full.
                 <span className={cn("absolute inset-0 rounded-full", i === active ? "bg-brass" : "bg-ivory/70")} />
@@ -293,7 +299,7 @@ function SlideControls({ slides, show, className }: { slides: HeroSlide[]; show:
             type="button"
             onClick={show.togglePause}
             aria-label={show.paused ? "Play slideshow" : "Pause slideshow"}
-            className="ml-1 grid size-11 place-items-center rounded-full border border-ivory/25 text-ivory transition-colors hover:border-ivory/60 hover:bg-ivory/10"
+            className="ml-2 grid size-11 shrink-0 place-items-center rounded-full border border-ivory/25 text-ivory transition-colors hover:border-ivory/60 hover:bg-ivory/10"
           >
             {show.paused ? <Play className="size-4 translate-x-px fill-current" aria-hidden /> : <Pause className="size-4 fill-current" aria-hidden />}
           </button>
