@@ -43,12 +43,12 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
         <OwnerNav />
         <div className="mt-auto hidden border-t border-ivory/10 p-5 text-sm lg:block">
           <p className="truncate text-ivory/60">{owner.profile?.full_name || owner.email}</p>
-          <div className="mt-3 flex flex-col gap-2">
-            <Link href="/" className="flex items-center gap-2 text-ivory/80 hover:text-brass" target="_blank">
+          <div className="mt-2 flex flex-col">
+            <Link href="/" className="flex min-h-11 items-center gap-2 text-ivory/80 hover:text-brass" target="_blank">
               <ExternalLink className="size-4" aria-hidden /> View website
             </Link>
             <form action={logout}>
-              <button type="submit" className="flex items-center gap-2 text-ivory/80 hover:text-brass">
+              <button type="submit" className="flex min-h-11 w-full items-center gap-2 text-ivory/80 hover:text-brass">
                 <LogOut className="size-4" aria-hidden /> Sign out
               </button>
             </form>

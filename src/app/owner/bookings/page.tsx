@@ -45,7 +45,7 @@ export default async function OwnerBookingsPage(props: PageProps<"/owner/booking
                   href={`/owner/bookings?status=${s}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
                   aria-current={s === filter ? "page" : undefined}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                    "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
                     s === filter ? "border-forest bg-forest text-ivory" : "border-line bg-cream hover:border-ink",
                   )}
                 >
@@ -62,7 +62,7 @@ export default async function OwnerBookingsPage(props: PageProps<"/owner/booking
             Search bookings
           </label>
           <Input id="q" name="q" defaultValue={q} placeholder="Name, mobile, email or SV-…" className="h-11 sm:w-72" />
-          <Button type="submit" variant="outline" size="icon" aria-label="Search">
+          <Button type="submit" variant="outline" size="icon" className="size-11 shrink-0" aria-label="Search">
             <Search />
           </Button>
         </form>

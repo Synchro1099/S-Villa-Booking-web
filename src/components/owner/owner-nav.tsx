@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, CalendarOff, CreditCard, LayoutDashboard, ListChecks, Settings, Tags } from "lucide-react";
@@ -19,6 +19,23 @@ const ITEMS = [
 export function OwnerNav() {
   const pathname = usePathname();
   const activeRef = useRef<HTMLAnchorElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [edges, setEdges] = useState({ start: true, end: true });
+
+  // Which ends have more items off-screen, for the fades.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const update = () => setEdges({ start: list.scrollLeft < 4, end: list.scrollLeft + list.clientWidth > list.scrollWidth - 4 });
+    const frame = requestAnimationFrame(update);
+    list.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(frame);
+      list.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   // Small screens scroll the menu sideways: keep the current page's item in view.
   // (Scrolls only the list horizontally; scrollIntoView could also move the page.)
@@ -31,7 +48,7 @@ export function OwnerNav() {
 
   return (
     <nav aria-label="Owner Portal" className="relative">
-      <ul className="flex gap-1 overflow-x-auto px-3 pb-3 pr-10 lg:flex-col lg:px-3 lg:pb-0">
+      <ul ref={listRef} className="flex gap-1 overflow-x-auto px-3 pb-3 pr-10 [scrollbar-width:none] lg:flex-col lg:px-3 lg:pb-0">
         {ITEMS.map(({ href, label, icon: Icon }) => {
           const active = href === "/owner" ? pathname === href : pathname.startsWith(href);
           return (
@@ -52,8 +69,15 @@ export function OwnerNav() {
           );
         })}
       </ul>
-      {/* Fade at the edge so it's clear more items are off-screen. */}
-      <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-ink to-transparent lg:hidden" />
+      {/* Fades at whichever edge has more items off-screen. */}
+      <span
+        aria-hidden
+        className={cn("pointer-events-none absolute inset-y-0 left-0 w-12 bg-linear-to-r from-ink to-transparent transition-opacity lg:hidden", edges.start && "opacity-0")}
+      />
+      <span
+        aria-hidden
+        className={cn("pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-l from-ink to-transparent transition-opacity lg:hidden", edges.end && "opacity-0")}
+      />
     </nav>
   );
 }

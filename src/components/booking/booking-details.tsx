@@ -17,7 +17,7 @@ export function BookingDetails({ booking, showContact = false }: { booking: Book
     ["Payment method", PAYMENT_METHOD_LABEL[booking.payment_method]],
   ];
   if (showContact) {
-    rows.unshift(["Customer", booking.customer_name], ["Mobile", <a key="m" className="underline" href={`tel:${booking.customer_mobile}`}>{booking.customer_mobile}</a>], ["Email", <a key="e" className="underline break-all" href={`mailto:${booking.customer_email}`}>{booking.customer_email}</a>]);
+    rows.unshift(["Customer", booking.customer_name], ["Mobile", <a key="m" className="-my-3 inline-flex min-h-11 items-center underline" href={`tel:${booking.customer_mobile}`}>{booking.customer_mobile}</a>], ["Email", <a key="e" className="-my-3 inline-flex min-h-11 items-center underline break-all" href={`mailto:${booking.customer_email}`}>{booking.customer_email}</a>]);
   }
 
   return (

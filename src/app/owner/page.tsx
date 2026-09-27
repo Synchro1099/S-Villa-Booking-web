@@ -64,7 +64,7 @@ export default async function OwnerDashboard() {
         <aside className="h-fit rounded-[var(--radius-card)] border border-line/70 bg-cream p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl">Current prices</h2>
-            <Link href="/owner/services" className="text-sm font-semibold text-brass-deep hover:underline">
+            <Link href="/owner/services" className="-my-2 inline-flex min-h-11 items-center px-1 text-sm font-semibold text-brass-deep hover:underline">
               Edit
             </Link>
           </div>
@@ -119,7 +119,7 @@ function Section({ title, empty, href, children }: { title: string; empty: strin
     <section>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl">{title}</h2>
-        <Link href={href} className="flex items-center gap-1 text-sm font-semibold text-brass-deep hover:underline">
+        <Link href={href} className="-my-2 flex min-h-11 items-center gap-1 text-sm font-semibold text-brass-deep hover:underline">
           View all <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       </div>

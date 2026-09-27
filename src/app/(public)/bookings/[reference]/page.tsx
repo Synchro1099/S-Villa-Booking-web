@@ -81,7 +81,7 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
 
         {awaitingReview && via !== "owner" ? (
           <details className="rounded-[var(--radius-card)] border border-line/70 bg-cream p-6">
-            <summary className="cursor-pointer font-semibold">Uploaded the wrong receipt?</summary>
+            <summary className="-my-2.5 cursor-pointer py-2.5 font-semibold">Uploaded the wrong receipt?</summary>
             <PaymentPanel
               replacing
               reference={booking.booking_reference}

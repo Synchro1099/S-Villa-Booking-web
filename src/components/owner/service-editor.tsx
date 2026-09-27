@@ -61,7 +61,7 @@ function ServiceDialog({ service }: { service?: Service }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {service ? (
-          <Button variant="outline" size="sm" aria-label={`Edit ${service.name}`}>
+          <Button variant="outline" size="sm" className="h-11" aria-label={`Edit ${service.name}`}>
             <Pencil /> Edit
           </Button>
         ) : (

@@ -508,13 +508,13 @@ function Stepper({
 }) {
   return (
     <div className="flex items-center gap-3" role="group" aria-labelledby={labelledBy}>
-      <Button variant="outline" size="icon" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="Decrease">
+      <Button variant="outline" size="icon" className="size-11" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="Decrease">
         <Minus />
       </Button>
       <output className="min-w-24 text-center font-semibold tabular-nums" aria-live="polite">
         {format(value)}
       </output>
-      <Button variant="outline" size="icon" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="Increase">
+      <Button variant="outline" size="icon" className="size-11" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="Increase">
         <Plus />
       </Button>
     </div>
