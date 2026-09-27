@@ -11,7 +11,7 @@ insert into public.settings (
 ) values (
   1,
   'S-Villa Private Pickleball & Courtyard',
-  'A private villa and courtyard for small groups — pickleball, badminton, a KTV lounge and a jacuzzi, reserved exclusively for you.',
+  'A private indoor pickleball court for your group, with a KTV lounge, jacuzzi and badminton to add on. The whole venue is reserved for you alone.',
   'Philippines',
   '09XXXXXXXXX', 'hello@example.com', 'https://facebook.com/', 'https://m.me/',
   'S-Villa', '09XXXXXXXXX', 'BDO', 'S-Villa', 'XXXXXXXXXX',

@@ -1,10 +1,11 @@
 import { CountUp } from "@/components/motion/count-up";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 
-/** Three quick facts under the hero. Every number comes from live data. */
+/** Three quick facts under the hero, from live data (add-on count, guests, hours). */
 export function Highlights({ facilities, maxGuests, hoursDaily }: { facilities: number; maxGuests: number; hoursDaily: number }) {
   const items = [
-    { value: facilities, label: "Private facilities", note: "under one roof" },
+    // Court first; the rest of the live facility list counts as add-ons.
+    { value: facilities > 0 ? 1 : 0, label: "Private court", note: facilities > 1 ? `+ ${facilities - 1} add-on${facilities === 2 ? "" : "s"}` : "yours alone" },
     { value: maxGuests, label: "Guests per booking", note: "your group only" },
     { value: hoursDaily, label: "Hours open daily", note: "book by the hour" },
   ].filter((i) => i.value > 0);

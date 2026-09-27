@@ -20,7 +20,7 @@ const sans = Manrope({
 });
 
 const description =
-  "Reserve S-Villa's private villa and courtyard for your group — pickleball, badminton, a KTV lounge and a jacuzzi. Live availability, easy GCash or bank transfer payment.";
+  "Book S-Villa's private indoor pickleball court by the hour — add the KTV lounge, jacuzzi or badminton. Your group only, live availability, pay by GCash or bank transfer.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.siteUrl()),

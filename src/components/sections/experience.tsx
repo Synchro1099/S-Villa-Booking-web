@@ -1,22 +1,23 @@
-import { KeyRound, Trophy, Moon } from "lucide-react";
+import { KeyRound, Sparkles, Trophy } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { SectionHeading } from "./section-heading";
 
+// Court first; the other facilities are paid add-ons on the same booking.
 const PILLARS = [
+  {
+    icon: Trophy,
+    title: "A court that's yours",
+    body: "Paddles and balls ready, bright indoor lights, and nobody waiting for the next game.",
+  },
+  {
+    icon: Sparkles,
+    title: "Add what you like",
+    body: "Badminton, the KTV lounge for karaoke, or the jacuzzi to cool down — add them to the same booking.",
+  },
   {
     icon: KeyRound,
     title: "Completely private",
-    body: "One group at a time. When you book a time slot, the villa, courtyard and every facility are yours alone.",
-  },
-  {
-    icon: Trophy,
-    title: "Play together",
-    body: "A dedicated pickleball court, a badminton setup and a KTV lounge for karaoke — equipment included.",
-  },
-  {
-    icon: Moon,
-    title: "Unwind in style",
-    body: "Finish in the warm jacuzzi or settle into the KTV lounge. Perfect for barkada nights, birthdays and team outings.",
+    body: "One group at a time. While you're here, the court, courtyard and every room are yours alone.",
   },
 ];
 
@@ -28,10 +29,10 @@ export function Experience({ headingAs = "h2" }: { headingAs?: "h1" | "h2" }) {
         eyebrow="The experience"
         title={
           <>
-            A resort afternoon, <em>without the crowd.</em>
+            Your game, <em>then your evening.</em>
           </>
         }
-        intro="S-Villa is built for small groups who want space to play and relax without sharing it with anyone else."
+        intro="Start on your own indoor court, then make a night of it with the add-ons — no one else books while you're here."
       />
       <Stagger enabled={headingAs === "h2"} className="mt-14 grid gap-6 lg:grid-cols-3">
         {PILLARS.map((p) => (

@@ -22,8 +22,8 @@ export function Facilities({ services, headingAs = "h2" }: { services: Service[]
         <SectionHeading
           as={headingAs}
           eyebrow="Facilities"
-          title="Everything under one roof"
-          intro="Add any combination of facilities to your booking. Your group has the whole venue either way."
+          title="The court, plus the extras"
+          intro="Book the pickleball court, then add any of the others. Your group has the whole venue either way."
         />
         {services.length === 0 ? (
           <p className="mt-12 text-muted">Facilities will be listed here soon.</p>

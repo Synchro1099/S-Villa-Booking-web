@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "The Experience",
-  description: "A private villa, court and courtyard reserved for just your group — play, sing, soak and relax.",
+  description: "Your own indoor pickleball court for the afternoon — then karaoke, the jacuzzi or the courtyard if you add them. One group at a time.",
 };
 
 const MOMENTS = [
