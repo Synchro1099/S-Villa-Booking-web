@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react";
 import type { Media } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { MediaFrame, type Ratio } from "./media-frame";
+import { placeRows } from "./place-rows";
 
 type Layout = "rows" | "uniform" | "masonry";
 
@@ -23,8 +24,9 @@ export function GalleryGrid({ items, layout }: { items: Media[]; layout: Layout 
   const [open, setOpen] = useState<number | null>(null);
   // Opened from our own buttons (not a Dialog.Trigger), so return focus there ourselves.
   const opener = useRef<HTMLElement | null>(null);
+  const placements = layout === "rows" ? placeRows(items) : [];
 
-  const tile = (m: Media, i: number, ratio: Ratio | undefined, sizes: string, frameClass?: string) => (
+  const tile =(m: Media, i: number, ratio: Ratio | undefined, sizes: string, frameClass?: string) => (
     <button
       type="button"
       onClick={(e) => {
@@ -53,9 +55,17 @@ export function GalleryGrid({ items, layout }: { items: Media[]; layout: Layout 
       {layout === "rows" ? (
         // Spacing is padding inside each cell (not grid gap), so a two-column
         // 3:2 landscape cell is exactly as tall as a one-column 3:4 portrait cell.
-        <ul className="-mx-1.5 mt-12 grid grid-flow-dense grid-cols-2 sm:-mx-2 md:grid-cols-3 lg:grid-cols-4">
+        // The grid has two tracks per column so a short row can be centred by half a tile.
+        <ul className="-mx-1.5 mt-12 grid grid-cols-4 sm:-mx-2 md:grid-cols-6 lg:grid-cols-8">
           {items.map((m, i) => (
-            <li key={m.src} className={cn("p-1.5 sm:p-2", m.orientation === "landscape" ? "col-span-2 aspect-[3/2]" : "aspect-[3/4]")}>
+            <li
+              key={m.src}
+              className={cn(
+                "p-1.5 [grid-area:var(--at-2)] sm:p-2 md:[grid-area:var(--at-3)] lg:[grid-area:var(--at-4)]",
+                m.orientation === "landscape" ? "aspect-[3/2]" : "aspect-[3/4]",
+              )}
+              style={placements[i]}
+            >
               {tile(m, i, undefined, m.orientation === "landscape" ? "(min-width: 1024px) 50vw, (min-width: 768px) 67vw, 100vw" : "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw", "size-full")}
             </li>
           ))}
