@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+import { preload } from "react-dom";
+import Image, { getImageProps } from "next/image";
 import { Dialog as D } from "radix-ui";
 import { ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react";
 import type { Media } from "@/lib/media";
@@ -9,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { MediaFrame, type Ratio } from "./media-frame";
 
 type Layout = "rows" | "uniform" | "masonry";
+
+// The lightbox is at most max-w-6xl (1152px) wide.
+const LIGHTBOX_SIZES = "(min-width: 1152px) 1152px, 100vw";
 
 /**
  * Tiles are fixed shapes chosen from each item's orientation, so rows and
@@ -91,6 +95,73 @@ function Lightbox({
   const item = index === null ? null : items[index];
   const step = (by: number) => index !== null && onIndex((index + by + items.length) % items.length);
 
+  // Fetch the neighbours in the background so previous/next (and swipes) show instantly.
+  // Photos use the same srcset/sizes as the lightbox <Image>, so the browser reuses the file;
+  // clips only fetch their poster, not the whole video.
+  if (index !== null && items.length > 1) {
+    for (const i of new Set([(index + 1) % items.length, (index - 1 + items.length) % items.length])) {
+      const m = items[i];
+      if (m.kind === "video") {
+        preload(m.poster, { as: "image", fetchPriority: "low" });
+      } else {
+        const { props } = getImageProps({ src: m.src, alt: "", fill: true, sizes: LIGHTBOX_SIZES });
+        preload(props.src, { as: "image", imageSrcSet: props.srcSet, imageSizes: props.sizes, fetchPriority: "low" });
+      }
+    }
+  }
+
+  // Touch swipes: left/right steps through the set, down closes. The media follows the finger
+  // and springs back if the swipe is too short.
+  const stage = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const settle = () => {
+    const el = stage.current;
+    if (!el) return;
+    el.style.transition = "transform .25s var(--ease-soft), opacity .25s var(--ease-soft)";
+    el.style.transform = "";
+    el.style.opacity = "";
+  };
+  const swipe = {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType === "mouse" || !e.isPrimary) return;
+      // Pinch-zoomed in: leave the gesture to the browser.
+      if ((window.visualViewport?.scale ?? 1) > 1.01) return;
+      // Leave a clip's control bar (scrubbing) alone.
+      const t = e.target;
+      if (t instanceof HTMLVideoElement && e.clientY > t.getBoundingClientRect().bottom - 64) return;
+      drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const d = drag.current;
+      const el = stage.current;
+      if (!d || d.id !== e.pointerId || !el) return;
+      const dx = e.clientX - d.x;
+      const dy = e.clientY - d.y;
+      el.style.transition = "none";
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        el.style.transform = `translateX(${dx}px)`;
+        el.style.opacity = "";
+      } else if (dy > 0) {
+        el.style.transform = `translateY(${dy}px)`;
+        el.style.opacity = String(Math.max(0.4, 1 - dy / 400));
+      }
+    },
+    onPointerUp: (e: React.PointerEvent) => {
+      const d = drag.current;
+      drag.current = null;
+      if (!d || d.id !== e.pointerId) return;
+      const dx = e.clientX - d.x;
+      const dy = e.clientY - d.y;
+      settle();
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.3 && items.length > 1) step(dx < 0 ? 1 : -1);
+      else if (dy > 100 && dy > Math.abs(dx) * 1.3) onIndex(null);
+    },
+    onPointerCancel: () => {
+      drag.current = null;
+      settle();
+    },
+  };
+
   return (
     <D.Root open={item !== null} onOpenChange={(o) => !o && onIndex(null)}>
       <D.Portal>
@@ -110,8 +181,9 @@ function Lightbox({
           <D.Title className="sr-only">{item?.alt ?? "Gallery"}</D.Title>
           {item ? (
             <>
-              {/* The whole item, uncropped (object-contain), as large as the screen allows. */}
-              <div className="relative h-[calc(100dvh-8rem)] w-full max-w-6xl">
+              {/* The whole item, uncropped (object-contain), as large as the screen allows.
+                  touch-action keeps pinch-zoom but hands one-finger drags to the swipe handlers. */}
+              <div ref={stage} {...swipe} className="relative h-[calc(100dvh-8rem)] w-full max-w-6xl touch-pinch-zoom select-none">
                 {item.kind === "video" ? (
                   <video
                     key={item.src}
@@ -125,7 +197,7 @@ function Lightbox({
                     className="mx-auto h-full w-auto max-w-full object-contain"
                   />
                 ) : (
-                  <Image key={item.src} src={item.src} alt={item.alt} fill sizes="(min-width: 1152px) 1152px, 100vw" className="object-contain" />
+                  <Image key={item.src} src={item.src} alt={item.alt} fill sizes={LIGHTBOX_SIZES} draggable={false} className="object-contain" />
                 )}
               </div>
               <div className="flex w-full max-w-6xl items-center justify-between gap-3 text-ivory">
