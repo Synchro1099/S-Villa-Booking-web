@@ -15,12 +15,25 @@
 
 export type Orientation = "landscape" | "portrait";
 
+/** Gallery filter chips on /gallery, in display order ("All" is added automatically). */
+export const GALLERY_CATEGORIES = [
+  { id: "court", label: "Court" },
+  { id: "ktv", label: "KTV Lounge" },
+  { id: "pool", label: "Jacuzzi & Pool" },
+  { id: "courtyard", label: "Courtyard" },
+  { id: "villa", label: "Villa" },
+] as const;
+
+export type Category = (typeof GALLERY_CATEGORIES)[number]["id"];
+
 interface MediaBase {
   /** Describes the scene for screen-reader users, e.g. "Lit pickleball court at night". */
   alt: string;
   orientation: Orientation;
   /** CSS object-position used when the frame crops the media. Defaults to "center". */
   focus?: string;
+  /** Which /gallery filter chip it appears under. */
+  category?: Category;
 }
 
 export interface Photo extends MediaBase {
@@ -40,15 +53,16 @@ export type Media = Photo | Clip;
 interface Options {
   portrait?: boolean;
   focus?: string;
+  category?: Category;
 }
 
 /** A photo in public/media, e.g. photo("gallery/court.jpg", "…"). */
-export function photo(file: string, alt: string, { portrait = false, focus }: Options = {}): Photo {
-  return { kind: "photo", src: `/media/${file}`, alt, orientation: portrait ? "portrait" : "landscape", focus };
+export function photo(file: string, alt: string, { portrait = false, focus, category }: Options = {}): Photo {
+  return { kind: "photo", src: `/media/${file}`, alt, orientation: portrait ? "portrait" : "landscape", focus, category };
 }
 
 /** A silent looping clip in public/media, with its poster saved next to it as <name>-poster.jpg. */
-export function clip(file: string, alt: string, { portrait = false, focus }: Options = {}): Clip {
+export function clip(file: string, alt: string, { portrait = false, focus, category }: Options = {}): Clip {
   return {
     kind: "video",
     src: `/media/${file}`,
@@ -56,16 +70,27 @@ export function clip(file: string, alt: string, { portrait = false, focus }: Opt
     alt,
     orientation: portrait ? "portrait" : "landscape",
     focus,
+    category,
   };
 }
 
+export interface HeroSlide {
+  media: Media;
+  /** Short caption shown with the slide, e.g. "The court" or "Add-on: KTV Lounge". */
+  label: string;
+}
+
 /**
- * Homepage hero background: one wide landscape photo, or a short silent loop.
- * null keeps the illustrated court. For example:
- *   export const HERO_MEDIA: Media | null = photo("hero/hero.jpg", "The S-Villa courtyard at dusk");
- *   export const HERO_MEDIA: Media | null = clip("hero/hero.mp4", "Walking from the lounge to the court");
+ * Homepage hero slideshow, first slide first. The first slide loads right away
+ * and leads the pitch, so keep the pickleball court there. Use wide landscape
+ * shots (3000 px wide or more is ideal). An empty list shows the illustrated court.
  */
-export const HERO_MEDIA: Media | null = null;
+export const HERO_SLIDES: HeroSlide[] = [
+  { media: photo("facilities/pickleball.jpg", "The private indoor pickleball court under bright lights"), label: "The court" },
+  { media: photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit"), label: "Add-on: KTV Lounge" },
+  { media: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, focus: "50% 62%" }), label: "Add-on: Jacuzzi" },
+  { media: photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk"), label: "The courtyard" },
+];
 
 /**
  * Facility card photos, keyed by the facility's slug. A facility without a
@@ -81,26 +106,45 @@ export const FACILITY_PHOTOS: Record<string, Photo | undefined> = {
 };
 
 /**
- * How the gallery arranges mixed shapes:
+ * How the /gallery grid arranges mixed shapes:
  * - "rows":    portrait tiles take one column, landscape tiles two; every row lines up.
  * - "uniform": identical portrait-ish (4:5) tiles for everything; landscapes crop the most.
  * - "masonry": columns of 4:3 and 3:4 tiles; staggered, Pinterest-style.
  */
 export const GALLERY_LAYOUT: "rows" | "uniform" | "masonry" = "rows";
 
-/** Gallery, in display order. Mix photos and clips, landscape and portrait, freely. */
+/** How many gallery items the homepage carousel shows before its "View all" card. */
+export const HOMEPAGE_GALLERY_COUNT = 12;
+
+/**
+ * Gallery, in display order: the homepage carousel shows the first
+ * HOMEPAGE_GALLERY_COUNT, /gallery shows everything. Mix photos and clips,
+ * landscape and portrait, freely; give each a category for the filter chips.
+ * Facility photos can appear here too; the same file serves both.
+ */
 export const GALLERY: Media[] = [
-  photo("gallery/court.jpg", "The indoor court with its high steel roof and bright lights"),
-  clip("gallery/walkthrough.mp4", "Walking through the villa from the entrance", { portrait: true }),
-  clip("gallery/bar-lounge.mp4", "The KTV lounge glowing in pink neon", { portrait: true }),
-  // Facility photos can appear here too; the same file serves both.
-  photo("facilities/ktv-lounge.jpg", "The KTV lounge with its neon-lit bar, big screen and sofas"),
-  photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true }),
-  clip("gallery/courtyard-walk.mp4", "A walk through the courtyard, past the lounge windows", { portrait: true }),
-  photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"),
-  clip("gallery/grounds.mp4", "The court seen from the far baseline", { portrait: true }),
-  clip("gallery/courtyard.mp4", "A tree-lined corner of the courtyard", { portrait: true }),
-  clip("gallery/entrance-to-court.mp4", "From the entrance through the courtyard onto the court", { portrait: true }),
-  clip("gallery/lounge-to-court.mp4", "From the KTV lounge out to the court", { portrait: true }),
-  clip("gallery/courtyard-pan.mp4", "Panning across the courtyard between the lounge and the court", { portrait: true }),
+  photo("facilities/pickleball.jpg", "The indoor pickleball court with its high steel roof and bright lights", { category: "court" }),
+  clip("gallery/grounds.mp4", "The court seen from the far baseline", { portrait: true, category: "court" }),
+  photo("gallery/ktv-lounge-wide.jpg", "The KTV lounge with its neon-lit bar, sofas and drum kit", { category: "ktv" }),
+  photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true, category: "pool" }),
+  clip("gallery/entrance-to-court.mp4", "From the entrance through the courtyard onto the court", { portrait: true, category: "court" }),
+  photo("gallery/courtyard-dusk.jpg", "The courtyard and lounge windows lit at dusk", { category: "courtyard" }),
+  clip("gallery/bar-lounge.mp4", "The KTV lounge glowing in pink neon", { portrait: true, category: "ktv" }),
+  photo("gallery/plunge-pool.jpg", "The plunge pool and stepping-stone garden", { portrait: true, category: "pool" }),
+  clip("gallery/pool-night.mp4", "The pool lit blue at night", { portrait: true, category: "pool" }),
+  clip("gallery/lounge-to-court.mp4", "From the KTV lounge out to the court", { portrait: true, category: "court" }),
+  photo("facilities/ktv-lounge.jpg", "The KTV lounge with its neon-lit bar, big screen and sofas", { category: "ktv" }),
+  photo("gallery/dining.jpg", "The dining area and kitchen beside the courtyard", { category: "villa" }),
+  clip("gallery/walkthrough.mp4", "Walking through the villa from the entrance", { portrait: true, category: "courtyard" }),
+  photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court", { category: "courtyard" }),
+  clip("gallery/lounge-to-jacuzzi.mp4", "From the lounge across the deck to the jacuzzi and pool", { portrait: true, category: "pool" }),
+  photo("gallery/living-room.jpg", "The living room looking out to the courtyard garden", { category: "villa" }),
+  clip("gallery/terrace-dusk.mp4", "The courtyard terrace at dusk", { portrait: true, category: "courtyard" }),
+  photo("gallery/balcony.jpg", "The upstairs balcony overlooking the courtyard", { portrait: true, category: "villa" }),
+  clip("gallery/courtyard-walk.mp4", "A walk through the courtyard, past the lounge windows", { portrait: true, category: "courtyard" }),
+  photo("gallery/pool-exterior.jpg", "The pool and lawn beside the villa", { portrait: true, category: "pool" }),
+  clip("gallery/covered-deck.mp4", "The covered deck with lounge chairs", { portrait: true, category: "villa" }),
+  clip("gallery/courtyard.mp4", "A tree-lined corner of the courtyard", { portrait: true, category: "courtyard" }),
+  clip("gallery/living-to-courtyard.mp4", "From the living and dining area out to the courtyard and pool", { category: "villa" }),
+  clip("gallery/courtyard-pan.mp4", "Panning across the courtyard between the lounge and the court", { portrait: true, category: "courtyard" }),
 ];

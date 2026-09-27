@@ -16,7 +16,18 @@ import { Lightbox, useLightbox } from "./lightbox";
  * the screen edges but starts in line with the page content, and ends with a
  * card linking to the full gallery page.
  */
-export function GalleryCarousel({ items, moreHref, className }: { items: Media[]; moreHref: string; className?: string }) {
+export function GalleryCarousel({
+  items,
+  total = items.length,
+  moreHref,
+  className,
+}: {
+  items: Media[];
+  /** How many items the full gallery has, for the "View all" card. */
+  total?: number;
+  moreHref: string;
+  className?: string;
+}) {
   const { index, setIndex, opener, openAt } = useLightbox();
   const scroller = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
@@ -43,7 +54,8 @@ export function GalleryCarousel({ items, moreHref, className }: { items: Media[]
   };
 
   // Phones: height follows screen width so a landscape tile is ~84% of it and the next one peeks in.
-  const tileHeight = "h-[min(18rem,56vw)] sm:h-80 lg:h-[26rem]";
+  // Laptops/iPad landscape: capped by screen height so heading and row fit on one screen.
+  const tileHeight = "h-[min(18rem,56vw)] sm:h-80 lg:h-[min(26rem,44svh)]";
 
   return (
     <div className={cn("relative", className)}>
@@ -68,7 +80,7 @@ export function GalleryCarousel({ items, moreHref, className }: { items: Media[]
           >
             <span className="eyebrow !text-brass">Gallery</span>
             <span className="font-display text-3xl leading-tight">
-              View all {items.length}
+              View all {total}
               <br />
               photos &amp; clips
             </span>
@@ -76,6 +88,17 @@ export function GalleryCarousel({ items, moreHref, className }: { items: Media[]
           </Link>
         </li>
       </ul>
+
+      {/* Soft fades at either end whenever there is more to scroll that way, so a row that happens
+          to end exactly at the screen edge still reads as scrollable. */}
+      <div
+        aria-hidden
+        className={cn("pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-ivory to-transparent transition-opacity duration-300 sm:w-14", edges.start && "opacity-0")}
+      />
+      <div
+        aria-hidden
+        className={cn("pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-ivory to-transparent transition-opacity duration-300 sm:w-14", edges.end && "opacity-0")}
+      />
 
       {/* Desktop arrows, over the ends of the row; hidden once there's nothing further that way. */}
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 hidden items-center justify-between px-3 md:flex lg:px-6">
