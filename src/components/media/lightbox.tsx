@@ -9,6 +9,8 @@ import type { Media } from "@/lib/media";
 
 // The lightbox is at most max-w-6xl (1152px) wide.
 const LIGHTBOX_SIZES = "(min-width: 1152px) 1152px, 100vw";
+// Same higher quality as the gallery tiles (see next.config images.qualities).
+const LIGHTBOX_QUALITY = 85;
 
 /**
  * Which gallery item is open in the lightbox, plus the element that opened it
@@ -48,7 +50,7 @@ export function Lightbox({
       if (m.kind === "video") {
         preload(m.poster, { as: "image", fetchPriority: "low" });
       } else {
-        const { props } = getImageProps({ src: m.src, alt: "", fill: true, sizes: LIGHTBOX_SIZES });
+        const { props } = getImageProps({ src: m.src, alt: "", fill: true, sizes: LIGHTBOX_SIZES, quality: LIGHTBOX_QUALITY });
         preload(props.src, { as: "image", imageSrcSet: props.srcSet, imageSizes: props.sizes, fetchPriority: "low" });
       }
     }
@@ -141,7 +143,7 @@ export function Lightbox({
                     className="mx-auto h-full w-auto max-w-full object-contain"
                   />
                 ) : (
-                  <Image key={item.src} src={item.src} alt={item.alt} fill sizes={LIGHTBOX_SIZES} draggable={false} className="object-contain" />
+                  <Image key={item.src} src={item.src} alt={item.alt} fill sizes={LIGHTBOX_SIZES} quality={LIGHTBOX_QUALITY} draggable={false} className="object-contain" />
                 )}
               </div>
               <div className="flex w-full max-w-6xl items-center justify-between gap-3 text-ivory">

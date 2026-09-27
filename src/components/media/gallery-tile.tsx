@@ -1,8 +1,13 @@
-import { Maximize2, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import type { Media } from "@/lib/media";
 import { MediaFrame, type Ratio } from "./media-frame";
 
-/** One gallery item as a button that opens the lightbox. Fills its parent unless `ratio` is given. */
+/**
+ * One gallery item as a button that opens the lightbox. Fills its parent unless
+ * `ratio` is given. Photos are shown untouched — no overlay, tint or badge —
+ * since nothing sits on top of them; clips get a small play badge so they read
+ * as video.
+ */
 export function GalleryTile({
   media: m,
   sizes,
@@ -25,13 +30,16 @@ export function GalleryTile({
         media={m}
         ratio={ratio}
         sizes={sizes}
+        quality={85}
         alt=""
         className={ratio ? undefined : "size-full"}
         mediaClassName="transition-transform duration-700 ease-soft group-hover:scale-[1.04]"
       />
-      <span className="absolute bottom-2.5 right-2.5 grid size-8 place-items-center rounded-full bg-ink/60 text-ivory backdrop-blur-sm transition-colors group-hover:bg-ink/80" aria-hidden>
-        {m.kind === "video" ? <Play className="size-3.5 translate-x-px fill-current" /> : <Maximize2 className="size-3.5" />}
-      </span>
+      {m.kind === "video" ? (
+        <span className="absolute bottom-2 right-2 grid size-7 place-items-center rounded-full bg-ink/40 text-ivory backdrop-blur-sm transition-colors group-hover:bg-ink/60" aria-hidden>
+          <Play className="size-3 translate-x-px fill-current" />
+        </span>
+      ) : null}
     </button>
   );
 }

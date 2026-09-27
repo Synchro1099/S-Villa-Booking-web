@@ -29,6 +29,7 @@ export function MediaFrame({
   ratio,
   sizes,
   preload = false,
+  quality,
   alt,
   className,
   mediaClassName,
@@ -40,6 +41,8 @@ export function MediaFrame({
   sizes: string;
   /** Load immediately — only for the first thing on screen (the hero). */
   preload?: boolean;
+  /** JPEG/WebP quality for resized photos; must be listed in next.config images.qualities. */
+  quality?: number;
   /** Overrides media.alt; pass "" when surrounding text already describes the image. */
   alt?: string;
   className?: string;
@@ -59,6 +62,7 @@ export function MediaFrame({
           fill
           sizes={sizes}
           preload={preload}
+          quality={quality}
           // Files in public/media are resized and compressed on the fly; photo
           // URLs entered in the owner database can be on any host, so load those as-is.
           unoptimized={!media.src.startsWith("/")}

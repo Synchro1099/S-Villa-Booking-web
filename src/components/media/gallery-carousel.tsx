@@ -53,9 +53,10 @@ export function GalleryCarousel({
     el?.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: still ? "auto" : "smooth" });
   };
 
-  // Phones: height follows screen width so a landscape tile is ~84% of it and the next one peeks in.
+  // Phones: height follows screen width; landscape tiles are 4:3 there (most of the photos' own
+  // shape) so one fills ~85% of the screen and the next still peeks in, portraits ~48%.
   // Laptops/iPad landscape: capped by screen height so heading and row fit on one screen.
-  const tileHeight = "h-[min(18rem,56vw)] sm:h-80 lg:h-[min(26rem,44svh)]";
+  const tileHeight = "h-[min(20rem,64vw)] sm:h-80 lg:h-[min(26rem,44svh)]";
 
   return (
     <div className={cn("relative", className)}>
@@ -65,10 +66,10 @@ export function GalleryCarousel({
         className="scroller-bleed flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 sm:gap-4"
       >
         {items.map((m, i) => (
-          <li key={m.src} className={cn("shrink-0 snap-start", tileHeight, m.orientation === "landscape" ? "aspect-[3/2]" : "aspect-[3/4]")}>
+          <li key={m.src} className={cn("shrink-0 snap-start", tileHeight, m.orientation === "landscape" ? "aspect-[4/3] sm:aspect-[3/2]" : "aspect-[3/4]")}>
             <GalleryTile
               media={m}
-              sizes={m.orientation === "landscape" ? "(min-width: 1024px) 624px, (min-width: 640px) 480px, 84vw" : "(min-width: 1024px) 312px, (min-width: 640px) 240px, 42vw"}
+              sizes={m.orientation === "landscape" ? "(min-width: 1024px) 624px, (min-width: 640px) 480px, 86vw" : "(min-width: 1024px) 312px, (min-width: 640px) 240px, 48vw"}
               onOpen={(el) => openAt(i, el)}
             />
           </li>
@@ -88,17 +89,6 @@ export function GalleryCarousel({
           </Link>
         </li>
       </ul>
-
-      {/* Soft fades at either end whenever there is more to scroll that way, so a row that happens
-          to end exactly at the screen edge still reads as scrollable. */}
-      <div
-        aria-hidden
-        className={cn("pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-ivory to-transparent transition-opacity duration-300 sm:w-14", edges.start && "opacity-0")}
-      />
-      <div
-        aria-hidden
-        className={cn("pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-ivory to-transparent transition-opacity duration-300 sm:w-14", edges.end && "opacity-0")}
-      />
 
       {/* Desktop arrows, over the ends of the row; hidden once there's nothing further that way. */}
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 hidden items-center justify-between px-3 md:flex lg:px-6">

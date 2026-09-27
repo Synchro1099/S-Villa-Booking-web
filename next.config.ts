@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     // Only site photos in public/media are resized on the fly (see src/lib/media.ts).
     localPatterns: [{ pathname: "/media/**", search: "" }],
+    // 75 is the default; the gallery and its lightbox use 85 so photos read crisp.
+    qualities: [75, 85],
   },
   experimental: {
     serverActions: {
