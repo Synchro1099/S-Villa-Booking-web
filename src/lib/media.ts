@@ -138,6 +138,7 @@ export const GALLERY: Media[] = [
   clip("gallery/pool-night.mp4", "The pool lit blue at night", { portrait: true, category: "pool" }),
   clip("gallery/lounge-to-court.mp4", "From the KTV lounge out to the court", { portrait: true, category: "court" }),
   photo("facilities/ktv-lounge.jpg", "The KTV lounge with its neon-lit bar, big screen and sofas", { category: "ktv" }),
+  photo("gallery/ktv-music-corner.jpg", "The KTV lounge's music corner: drum kit and guitar under the neon sign", { category: "ktv" }),
   photo("gallery/dining.jpg", "The dining area and kitchen beside the courtyard", { category: "villa" }),
   clip("gallery/walkthrough.mp4", "Walking through the villa from the entrance", { portrait: true, category: "courtyard" }),
   photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court", { category: "courtyard" }),
