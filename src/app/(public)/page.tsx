@@ -9,6 +9,7 @@ import { Facilities } from "@/components/sections/facilities";
 import { Pricing } from "@/components/sections/pricing";
 import { Contact } from "@/components/sections/contact";
 import { Highlights } from "@/components/sections/highlights";
+import { Gallery } from "@/components/sections/gallery";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { DAY_STATUS_LABEL } from "@/components/calendar/month-calendar";
@@ -24,6 +25,7 @@ export default async function HomePage() {
       <Highlights facilities={services.length} maxGuests={settings.max_guests} hoursDaily={longestDay(hours)} />
       <Experience />
       <Facilities services={services} />
+      <Gallery />
       <Pricing services={services} settings={settings} />
       <WeekAhead settings={settings} hours={hours} />
       <Contact settings={settings} hours={hours} />

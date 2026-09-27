@@ -1,9 +1,10 @@
-/* eslint-disable @next/next/no-img-element -- owner-supplied image URLs from any host */
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { Service } from "@/types";
 import { formatPeso, unitLabel } from "@/lib/pricing";
+import { FACILITY_PHOTOS } from "@/lib/media";
 import { ServiceIcon } from "@/components/services/service-icon";
+import { MediaFrame } from "@/components/media/media-frame";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { SectionHeading } from "./section-heading";
 
@@ -56,19 +57,20 @@ function FacilityCard({ service: s }: { service: Service }) {
       className="group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line/70 bg-cream shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-soft hover:-translate-y-1 hover:border-brass/50 hover:shadow-lift active:scale-[0.99] active:duration-100"
       aria-label={`${s.name} — ${formatPeso(s.price)} per ${unitLabel(s.pricing_unit)}. Book with ${s.name}`}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-forest">
-        {s.image_url ? (
-          <img
-            src={s.image_url}
-            alt=""
-            loading="lazy"
-            className="size-full object-cover transition-transform duration-700 ease-soft group-hover:scale-[1.06]"
-          />
-        ) : (
+      <div className="relative">
+        <MediaFrame
+          media={s.image_url ? { kind: "photo", src: s.image_url, alt: "", orientation: "landscape" } : FACILITY_PHOTOS[s.slug]}
+          ratio="16/10"
+          // The link's label already names the facility, so the photo is decorative here.
+          alt=""
+          sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="bg-forest"
+          mediaClassName="transition-transform duration-700 ease-soft group-hover:scale-[1.06]"
+        >
           <div className="court-lines grid h-full place-items-center">
             <ServiceIcon name={s.icon} className="size-14 text-brass transition-transform duration-500 ease-soft group-hover:scale-110 group-hover:-rotate-3" strokeWidth={1.25} />
           </div>
-        )}
+        </MediaFrame>
         {/* Soft brass light that fades in on hover. */}
         <div
           aria-hidden

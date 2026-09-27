@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    // Only site photos in public/media are resized on the fly (see src/lib/media.ts).
+    localPatterns: [{ pathname: "/media/**", search: "" }],
+  },
   experimental: {
     serverActions: {
       // Payment proofs are limited to 5 MB; leave room for multipart overhead.

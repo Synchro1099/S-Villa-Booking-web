@@ -109,4 +109,4 @@ npm run lint
 
 ## Photos & videos
 
-Put images and videos in `public/media/`. Facility photos can also be set per service through `services.image_url`.
+Images and videos live in `public/media/` and are wired up in `src/lib/media.ts` (hero, facility cards, gallery). See [docs/media-guide.md](docs/media-guide.md) for folder names, how to swap a photo, and what to shoot for each spot.

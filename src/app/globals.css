@@ -45,7 +45,14 @@
   --animate-float: float 7s ease-in-out infinite;
   --animate-court-pan: court-pan 48s linear infinite;
   --animate-glow: glow 9s ease-in-out infinite;
+  /* Hero photo/video: a slow push in, then back out. */
+  --animate-ken-burns: ken-burns 26s ease-in-out infinite alternate;
 
+  @keyframes ken-burns {
+    to {
+      transform: scale(1.08);
+    }
+  }
   @keyframes float {
     0%,
     100% {
