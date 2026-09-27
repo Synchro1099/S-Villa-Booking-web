@@ -84,7 +84,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
             </em>
           </h1>
           <p className="mt-6 max-w-xl animate-fade-up text-lg leading-relaxed text-ivory/75" style={step(3)}>
-            Play pickleball or badminton, sing in the music room, then unwind in the jacuzzi and lounge. One booking reserves
+            Play pickleball or badminton, sing in the KTV lounge, then unwind in the jacuzzi. One booking reserves
             S-Villa exclusively for up to {maxGuests} guests.
           </p>
           <div className="mt-10 flex animate-fade-up flex-wrap gap-3" style={step(4)}>

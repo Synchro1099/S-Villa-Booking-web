@@ -10,7 +10,7 @@ beforeEach(async () => {
 
 describe("booking creation", () => {
   it("books an available slot and snapshots prices", async () => {
-    const [jacuzzi, bar] = await serviceIds(db, "jacuzzi", "bar-lounge");
+    const [jacuzzi, bar] = await serviceIds(db, "jacuzzi", "ktv-lounge");
     const b = await createBooking(db, { date: day, start: "14:00", services: [jacuzzi, bar] });
 
     expect(b.booking_reference).toMatch(/^SV-\d{4}-\d{5}$/);

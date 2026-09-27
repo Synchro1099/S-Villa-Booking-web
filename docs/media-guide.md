@@ -18,9 +18,8 @@ public/media/
                  hero.mp4 + hero-poster.jpg   …or a short silent loop plus its still frame
   facilities/    pickleball.jpg
                  badminton.jpg
-                 music-room.jpg
+                 ktv-lounge.jpg
                  jacuzzi.jpg
-                 bar-lounge.jpg
                  villa-courtyard.jpg
   gallery/       any-name.jpg                 photos, any orientation
                  any-name.mp4 + any-name-poster.jpg   clips, with a still frame named <clip>-poster.jpg
@@ -64,7 +63,7 @@ Tapping any tile opens the whole uncropped photo or clip, whichever layout is us
 | --- | --- | --- | --- |
 | **Hero** (top of homepage) | **Landscape**, wide (16:9 or wider) | 3000 px wide or more | Most important shot. The headline sits over the **left** side on computers, so put the interest on the right. Phones show only the **middle third** of the width, so the key subject should also work cropped to the centre. Even, soft light; dusk works well. |
 | **Hero clip** (optional, instead of a photo) | **Landscape** 16:9 | 1920×1080 | 8–15 seconds that loops smoothly, slow and steady movement (walking or a slow pan), no sound needed. Keep it under ~8 MB. |
-| **Facility cards** (6) | **Landscape** | 1600 px wide or more | Shown as a wide 16:10 frame. Subject in the centre with some space around it. Portrait shots work but keep only a middle band (a tall phone shot loses about two thirds). One clear shot per facility: court, badminton net, music room, jacuzzi, bar & lounge, courtyard. |
+| **Facility cards** (5) | **Landscape** | 1600 px wide or more | Shown as a wide 16:10 frame. Subject in the centre with some space around it. Portrait shots work but keep only a middle band (a tall phone shot loses about two thirds). One clear shot per facility: court, badminton net, KTV lounge, jacuzzi, courtyard. |
 | **Gallery** | **Either** | 2000 px on the long side or more | Mix freely. Details, people enjoying the space (with permission), and evening lighting all work well here. |
 | **Gallery clips** | **Either** (phone vertical is fine) | 720p–1080p | 5–15 seconds, silent, under ~8 MB each, plus one still frame saved as `<name>-poster.jpg`. |
 

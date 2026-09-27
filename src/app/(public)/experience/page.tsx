@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 const MOMENTS = [
   ["Afternoon", "Warm up on the pickleball court or rally a few badminton games with your group."],
-  ["Golden hour", "Move to the music room for karaoke, or take the jam session outdoors in the courtyard."],
-  ["Evening", "Slip into the jacuzzi, then settle into the bar & lounge as the lights come on."],
+  ["Golden hour", "Move to the KTV lounge for karaoke, or take a breather in the open-air courtyard."],
+  ["Evening", "Slip into the jacuzzi, then settle into the KTV lounge as the lights come on."],
 ];
 
 export default function ExperiencePage() {

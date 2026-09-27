@@ -75,9 +75,8 @@ export const HERO_MEDIA: Media | null = null;
 export const FACILITY_PHOTOS: Record<string, Photo | undefined> = {
   pickleball: photo("facilities/pickleball.jpg", "The indoor pickleball court under bright lights"),
   badminton: photo("facilities/badminton.jpg", "Badminton net set up across the court"),
-  "music-room": undefined,
-  jacuzzi: undefined,
-  "bar-lounge": undefined,
+  "ktv-lounge": photo("facilities/ktv-lounge.jpg", "The KTV lounge with its neon-lit bar, big screen and sofas"),
+  jacuzzi: photo("facilities/jacuzzi.jpg", "The outdoor jacuzzi and plunge pool on the garden deck", { portrait: true }),
   "villa-courtyard": photo("facilities/villa-courtyard.jpg", "Trees and lounge chairs in the open-air courtyard"),
 };
 
@@ -93,9 +92,9 @@ export const GALLERY_LAYOUT: "rows" | "uniform" | "masonry" = "rows";
 export const GALLERY: Media[] = [
   photo("gallery/court.jpg", "The indoor court with its high steel roof and bright lights"),
   clip("gallery/walkthrough.mp4", "Walking through the villa from the entrance", { portrait: true }),
-  clip("gallery/bar-lounge.mp4", "The bar and lounge glowing in pink neon", { portrait: true }),
+  clip("gallery/bar-lounge.mp4", "The KTV lounge glowing in pink neon", { portrait: true }),
   photo("gallery/courtyard.jpg", "The courtyard garden opening onto the court"),
   clip("gallery/grounds.mp4", "The court seen from the far baseline", { portrait: true }),
   clip("gallery/courtyard.mp4", "A tree-lined corner of the courtyard", { portrait: true }),
-  clip("gallery/lounge-to-court.mp4", "From the lounge out to the court", { portrait: true }),
+  clip("gallery/lounge-to-court.mp4", "From the KTV lounge out to the court", { portrait: true }),
 ];

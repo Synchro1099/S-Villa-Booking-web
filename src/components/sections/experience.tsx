@@ -11,12 +11,12 @@ const PILLARS = [
   {
     icon: Trophy,
     title: "Play together",
-    body: "A dedicated pickleball court, badminton setup and a music room for karaoke or jamming — equipment included.",
+    body: "A dedicated pickleball court, a badminton setup and a KTV lounge for karaoke — equipment included.",
   },
   {
     icon: Moon,
     title: "Unwind in style",
-    body: "Finish in the warm jacuzzi or settle into the bar & lounge. Perfect for barkada nights, birthdays and team outings.",
+    body: "Finish in the warm jacuzzi or settle into the KTV lounge. Perfect for barkada nights, birthdays and team outings.",
   },
 ];
 

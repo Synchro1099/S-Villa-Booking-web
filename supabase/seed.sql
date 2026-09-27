@@ -11,7 +11,7 @@ insert into public.settings (
 ) values (
   1,
   'S-Villa Private Pickleball & Courtyard',
-  'A private villa and courtyard for small groups — pickleball, badminton, music, a jacuzzi and a bar & lounge, reserved exclusively for you.',
+  'A private villa and courtyard for small groups — pickleball, badminton, a KTV lounge and a jacuzzi, reserved exclusively for you.',
   'Philippines',
   '09XXXXXXXXX', 'hello@example.com', 'https://facebook.com/', 'https://m.me/',
   'S-Villa', '09XXXXXXXXX', 'BDO', 'S-Villa', 'XXXXXXXXXX',
@@ -32,10 +32,9 @@ on conflict (weekday) do nothing;
 insert into public.services (slug, name, description, price, pricing_unit, icon, sort_order) values
   ('pickleball',   'Pickleball',       'A private, well-lit court with paddles and balls ready for your group.',            500, 'HOUR', 'target',   1),
   ('badminton',    'Badminton',        'Indoor-ready badminton setup — rackets and shuttlecocks provided.',                 400, 'HOUR', 'feather',  2),
-  ('music-room',   'Music Room',       'Karaoke and instruments in a sound-treated room for your own jam session.',         500, 'HOUR', 'music',    3),
+  ('ktv-lounge',   'KTV Lounge',       'Karaoke, a private bar and lounge seating under neon lights — the whole room is your group''s.',  500, 'HOUR', 'mic',      3),
   ('jacuzzi',      'Jacuzzi',          'Warm, bubbling and completely private — the perfect way to unwind after a game.',   500, 'HOUR', 'waves',    4),
-  ('bar-lounge',   'Bar & Lounge',     'A relaxed lounge with a private bar area for your group.',                          500, 'HOUR', 'wine',     5),
-  ('villa-courtyard', 'Villa & Courtyard', 'Exclusive use of the villa grounds and open-air courtyard.',                    800, 'HOUR', 'trees',    6)
+  ('villa-courtyard', 'Villa & Courtyard', 'Exclusive use of the villa grounds and open-air courtyard.',                    800, 'HOUR', 'trees',    5)
 on conflict (slug) do nothing;
 
 -- To create the owner account:

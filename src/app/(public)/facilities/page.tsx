@@ -4,7 +4,7 @@ import { Facilities } from "@/components/sections/facilities";
 
 export const metadata: Metadata = {
   title: "Facilities",
-  description: "Pickleball, badminton, music room, jacuzzi, bar & lounge and the villa courtyard — current rates included.",
+  description: "Pickleball, badminton, the KTV lounge, jacuzzi and the villa courtyard — current rates included.",
 };
 
 export default async function FacilitiesPage() {
