@@ -26,7 +26,7 @@ export function Gallery() {
           </Link>
         </Button>
       </div>
-      <GalleryCarousel items={GALLERY.slice(0, HOMEPAGE_GALLERY_COUNT)} total={GALLERY.length} moreHref="/gallery" className="mt-10 md:mt-12" />
+      <GalleryCarousel items={GALLERY.slice(0, HOMEPAGE_GALLERY_COUNT)} total={GALLERY.length} moreHref="/gallery" className="mt-10 md:mt-12 lg:mt-10 xl:mt-12" />
     </section>
   );
 }

@@ -57,7 +57,7 @@ export function GalleryCarousel({
   // shape) so one fills ~85% of the screen and the next still peeks in, portraits ~48%.
   // Tablets: 19rem, so at 768px wide the second tile ends short of the edge and the next one peeks in.
   // Laptops/iPad landscape: capped by screen height so heading and row fit on one screen.
-  const tileHeight = "h-[min(20rem,64vw)] sm:h-[19rem] lg:h-[min(26rem,44svh)]";
+  const tileHeight = "h-[min(20rem,64vw)] sm:h-[19rem] lg:h-[min(26rem,42svh)]";
 
   return (
     <div className={cn("relative", className)}>

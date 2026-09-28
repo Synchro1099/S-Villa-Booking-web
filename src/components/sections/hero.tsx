@@ -79,7 +79,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
         Book the court by the hour, then add the KTV lounge, jacuzzi or badminton when you want more. One booking keeps all of
         S-Villa private for up to {maxGuests} guests.
       </p>
-      <div className={cn("mt-9 flex animate-fade-up flex-wrap gap-3", hasSlides && "max-lg:mt-8 lg:mt-6 xl:mt-8")} style={step(4)}>
+      <div className={cn("mt-9 flex animate-fade-up flex-wrap gap-3", hasSlides && "max-lg:mt-8 md:max-lg:justify-center lg:mt-6 xl:mt-8")} style={step(4)}>
         <Button asChild variant="brass" size="lg">
           <Link href="/book?service=pickleball">
             Book the court <ArrowRight />
@@ -89,7 +89,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
           <Link href="/availability">Check availability</Link>
         </Button>
       </div>
-      <ul className={cn("mt-10 flex animate-fade-up flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/75", hasSlides && "max-lg:order-last max-lg:mt-7 lg:mt-6 xl:mt-8")} style={step(5)}>
+      <ul className={cn("mt-10 flex animate-fade-up flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/75", hasSlides && "max-lg:order-last max-lg:mt-7 md:max-lg:justify-center lg:mt-6 xl:mt-8")} style={step(5)}>
         <li className="flex items-center gap-2">
           <Users className="size-4 text-brass" aria-hidden /> Up to {maxGuests} guests
         </li>
@@ -155,7 +155,7 @@ export function Hero({ maxGuests }: { maxGuests: number }) {
         <div className="container-page relative flex flex-col pb-14 pt-5 md:pb-20 md:pt-8 lg:mx-0 lg:max-w-none lg:py-10 xl:py-16 lg:pl-[max(2rem,calc((100vw-76rem)/2+2rem))] lg:pr-14">
           {/* Slide caption, progress and pause: top of the sheet on phones/tablets, foot of the column on desktop. */}
           <SlideControls slides={slides} show={show} className="border-b border-ivory/10 pb-3 lg:order-last lg:mt-6 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-3 xl:mt-12 xl:pt-4" />
-          <motion.div style={textMotion} className="mt-6 flex max-w-2xl flex-col md:mt-8 lg:mt-0">
+          <motion.div style={textMotion} className="mt-6 flex max-w-2xl flex-col md:mx-auto md:mt-8 md:items-center md:text-center lg:mx-0 lg:mt-0 lg:items-start lg:text-left">
             {copy}
           </motion.div>
         </div>
