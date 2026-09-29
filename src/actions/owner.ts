@@ -8,11 +8,13 @@ import { createClient } from "@/lib/supabase/server";
 import { friendlyError } from "@/lib/booking/errors";
 import { notifyBooking } from "@/lib/notifications";
 import {
+  arrivalSettingsSchema,
   blockDateSchema,
   blockTimeSchema,
   bookingRulesSchema,
   contactSettingsSchema,
   fieldErrors,
+  houseRulesSchema,
   newServiceSchema,
   operatingHoursSchema,
   paymentSettingsSchema,
@@ -254,6 +256,28 @@ export async function saveContactSettings(_prev: ActionResult | null, formData: 
     facebook_url: d.facebookUrl,
     messenger_url: d.messengerUrl,
   });
+}
+
+/** Caretaker contact (owner-only table) and the venue's Google Maps link. */
+export async function saveArrivalSettings(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  await requireOwner();
+  const parsed = arrivalSettingsSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { ok: false, error: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  const d = parsed.data;
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("caretaker_contact")
+    .update({ name: d.caretakerName, mobile: d.caretakerMobile, viber: d.caretakerViber }, { count: "exact" })
+    .eq("id", 1);
+  if (error || count === 0) return { ok: false, error: "We couldn't save the caretaker's details. Please try again." };
+  return updateSettings({ directions_url: d.directionsUrl });
+}
+
+export async function saveHouseRules(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  await requireOwner();
+  const parsed = houseRulesSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { ok: false, error: "Please check the house rules.", fieldErrors: fieldErrors(parsed.error) };
+  return updateSettings({ house_rules: parsed.data.houseRules });
 }
 
 export async function saveBookingRules(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {

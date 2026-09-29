@@ -9,6 +9,8 @@ import { getViewer } from "@/lib/auth";
 import { friendlyError } from "@/lib/booking/errors";
 import { findBookingToken, getBookingForViewer } from "@/lib/data/bookings";
 import { notifyBooking } from "@/lib/notifications";
+import { getSettings } from "@/lib/data/public";
+import { publicHouseRules } from "@/lib/house-rules-context";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { createBookingSchema, fieldErrors, lookupSchema, type CreateBookingInput } from "@/lib/validation/schemas";
 import { safeFileName, sniffProofType, validateProofFile } from "@/lib/validation/file";
@@ -30,6 +32,11 @@ export async function createBooking(
 
   if (!(await rateLimit(`book:${await clientIp()}`, 8, 3600))) {
     return { ok: false, error: "Too many booking attempts. Please wait a little or contact us directly." };
+  }
+
+  // The Step 6 tick box, checked here too so it can't be skipped.
+  if (!d.acceptedRules && publicHouseRules(await getSettings()).length > 0) {
+    return { ok: false, error: "Please tick the box to confirm you've read the house rules." };
   }
 
   const viewer = await getViewer();

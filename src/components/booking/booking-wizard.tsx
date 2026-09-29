@@ -5,6 +5,7 @@ import { AnimatePresence, animate, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Landmark, Loader2, Minus, Plus, Smartphone } from "lucide-react";
 import type { PaymentMethod, Service } from "@/types";
+import type { RuleLine } from "@/lib/house-rules";
 import { createBooking } from "@/actions/bookings";
 import { isSelectableDay, maxHoursFrom } from "@/lib/availability/engine";
 import { estimateBooking, formatPeso, unitLabel } from "@/lib/pricing";
@@ -13,6 +14,7 @@ import { emailSchema, mobileSchema, nameSchema } from "@/lib/validation/schemas"
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/form";
 import { ServiceIcon } from "@/components/services/service-icon";
+import { HouseRules } from "@/components/booking/house-rules";
 import { CalendarLegend, MonthCalendar } from "@/components/calendar/month-calendar";
 import { TimeSlots } from "@/components/calendar/time-slots";
 import { useAvailability, type AvailabilityConfig, type AvailabilitySnapshot } from "@/components/calendar/use-availability";
@@ -35,6 +37,7 @@ const BLOCKED_HINT: Partial<Record<number, string>> = {
   2: "Choose at least one facility to continue.",
   5: "Choose GCash or Bank Transfer to submit.",
 };
+const RULES_HINT = "Tick the box under the house rules to submit.";
 
 export interface WizardProps {
   config: AvailabilityConfig;
@@ -45,11 +48,13 @@ export interface WizardProps {
   services: Service[];
   rules: { maxGuests: number; maxBookingHours: number; expirationMinutes: number };
   prefill: { fullName: string; email: string; mobile: string };
+  /** The owner's house rules, shown before payment (empty: none, and no tick box). */
+  houseRules: RuleLine[];
 }
 
 type Errors = Partial<Record<"fullName" | "email" | "mobile" | "guests", string>>;
 
-export function BookingWizard({ config, initial, initialDate, initialServiceSlug, services, rules, prefill }: WizardProps) {
+export function BookingWizard({ config, initial, initialDate, initialServiceSlug, services, rules, prefill, houseRules }: WizardProps) {
   const router = useRouter();
   const av = useAvailability(config, initial);
   // Arriving with ?date= skips straight to time selection if that day is open.
@@ -66,6 +71,8 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
   const [mobile, setMobile] = useState(prefill.mobile);
   const [notes, setNotes] = useState("");
   const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [acceptedRules, setAcceptedRules] = useState(false);
+  const needsRules = houseRules.length > 0;
   const [errors, setErrors] = useState<Errors>({});
   const [banner, setBanner] = useState<string | null>(null);
   const bannerRef = useRef<HTMLParagraphElement>(null);
@@ -113,8 +120,9 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
     serviceIds.length > 0,
     true,
     true,
-    !!method,
+    !!method && (!needsRules || acceptedRules),
   ][step];
+  const blockedHint = step === 5 && method ? RULES_HINT : BLOCKED_HINT[step];
 
   function next() {
     if (step === 3 && !validateGuestStep()) return;
@@ -132,6 +140,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
         guestCount: guests,
         serviceIds,
         paymentMethod: method,
+        acceptedRules,
         fullName,
         email,
         mobile,
@@ -387,6 +396,25 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                       </label>
                     ))}
                   </fieldset>
+                  <HouseRules
+                    lines={houseRules}
+                    title="Before you pay: house rules"
+                    intro="Please read these before you submit. They also appear on your confirmation."
+                    className="mt-6"
+                  >
+                    <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-cream px-4 py-3.5 transition-colors has-[:checked]:border-forest has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass">
+                      <input
+                        id="acceptRules"
+                        type="checkbox"
+                        checked={acceptedRules}
+                        onChange={(e) => setAcceptedRules(e.target.checked)}
+                        className="mt-0.5 size-5 shrink-0 accent-[var(--color-forest)]"
+                      />
+                      <span className="text-sm font-semibold leading-snug">
+                        I&apos;ve read the house rules and understand that payment is non-refundable once my booking is confirmed.
+                      </span>
+                    </label>
+                  </HouseRules>
                   <p className="mt-6 rounded-xl bg-warn-bg/70 px-4 py-3 text-sm text-warn">
                     Your slot is held for {rules.expirationMinutes} minutes after you submit. Upload your payment proof within that time to keep it.
                   </p>
@@ -418,9 +446,9 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                 <span className="font-semibold">{formatPeso(estimate.total)}</span>
               </p>
             ) : null}
-            {!canContinue && BLOCKED_HINT[step] ? (
+            {!canContinue && blockedHint ? (
               <p className="order-last w-full text-center text-sm text-muted sm:order-none sm:ml-auto sm:w-auto sm:text-right" aria-live="polite">
-                {BLOCKED_HINT[step]}
+                {blockedHint}
               </p>
             ) : null}
             {step < 5 ? (

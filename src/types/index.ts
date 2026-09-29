@@ -18,6 +18,10 @@ export interface Settings {
   contact_email: string;
   facebook_url: string;
   messenger_url: string;
+  /** Google Maps link for the venue. */
+  directions_url: string;
+  /** Owner-editable house rules; see src/lib/house-rules.ts. */
+  house_rules: string;
   gcash_name: string;
   gcash_number: string;
   bank_name: string;

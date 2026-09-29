@@ -3,6 +3,7 @@ import { formatPeso } from "@/lib/pricing";
 import { formatDate, formatTimeRange } from "@/lib/time";
 import { PAYMENT_METHOD_LABEL, PAYMENT_STATUS_LABEL, BOOKING_STATUS_LABEL } from "@/lib/booking/labels";
 import { isPlaceholderEmail, isPlaceholderPhone, isPlaceholderUrl } from "@/lib/contact";
+import { houseRulesText, type RuleLine } from "@/lib/house-rules";
 
 export type BookingEvent = "PENDING" | "PROOF_SUBMITTED" | "CONFIRMED" | "REJECTED" | "CANCELLED" | "EXPIRED";
 
@@ -139,8 +140,11 @@ export function renderBookingEmail(opts: {
   settings: Settings;
   link: string;
   cancelledBy?: CancelledBy;
+  /** House rules for the customer's "Confirmed" email (ignored for other emails). */
+  houseRules?: RuleLine[];
 }) {
   const { event, audience, booking: b, settings: s, link } = opts;
+  const rules = audience === "CUSTOMER" && event === "CONFIRMED" ? (opts.houseRules ?? []) : [];
   const copy = audience === "CUSTOMER" ? customerCopy(event, b, s) : ownerCopy(event, b, s, opts.cancelledBy);
   const rows = detailRows(b);
   if (audience === "OWNER") rows.push(["Mobile", b.customer_mobile], ["Email", b.customer_email]);
@@ -164,6 +168,7 @@ export function renderBookingEmail(opts: {
     "",
     `${buttonLabel}: ${link}`,
     "",
+    ...(rules.length ? [RULES_TITLE.toUpperCase(), houseRulesText(rules), ""] : []),
     s.business_name,
     ...(contact ? [contact] : []),
   ].join("\n");
@@ -196,10 +201,38 @@ ${rows
 </table>
 <p style="margin:28px 0 0"><a href="${escape(link)}" style="display:inline-block;background:#1c1e20;color:#f5f1ea;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:14px">${buttonLabel}</a></p>
 </td></tr>
+${rules.length ? houseRulesHtml(rules) : ""}
 ${contact ? `<tr><td style="padding:20px 32px;background:#faf7f2;font-size:12px;line-height:1.6;color:#5f6164;white-space:pre-line">${escape(contact)}</td></tr>` : ""}
 </table></td></tr></table></body></html>`;
 
   return { subject: copy.subject, html, text };
+}
+
+const RULES_TITLE = "Before your visit";
+
+function houseRulesHtml(lines: RuleLine[]) {
+  const link = "color:#1c1e20;font-weight:bold;text-decoration:underline";
+  const items = lines
+    .map(
+      (line) =>
+        `<li style="margin:0 0 10px">${line
+          .map((s) =>
+            s.kind === "link"
+              ? `<a href="${escape(s.href)}" style="${link}">${escape(s.text)}</a>`
+              : s.kind === "tel"
+                ? `<a href="tel:${escape(s.number)}" style="${link};white-space:nowrap">${escape(s.text)}</a>`
+                : s.bold
+                  ? `<strong style="color:#1c1e20">${escape(s.text)}</strong>`
+                  : escape(s.text),
+          )
+          .join("")}</li>`,
+    )
+    .join("");
+  return `<tr><td style="padding:0 32px 32px">
+<div style="padding:22px 24px;background:#f5f1ea;border-radius:12px">
+<h2 style="font-family:Georgia,serif;font-weight:normal;font-size:20px;margin:0 0 14px;color:#1c1e20">${RULES_TITLE}</h2>
+<ul style="margin:0;padding:0 0 0 18px;font-size:14px;line-height:1.6;color:#3a3d40">${items}</ul>
+</div></td></tr>`;
 }
 
 export function renderBookingSms(event: BookingEvent, b: BookingDetail, s: Settings, link: string) {

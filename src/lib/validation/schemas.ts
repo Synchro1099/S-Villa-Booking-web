@@ -23,6 +23,8 @@ export const createBookingSchema = z.object({
   guestCount: z.coerce.number().int().min(1, "At least 1 guest.").max(100),
   serviceIds: z.array(z.uuid()).min(1, "Choose at least one service.").max(20),
   paymentMethod: z.enum(PAYMENT_METHODS, "Choose GCash or Bank Transfer."),
+  /** Ticked "I've read the house rules" on Step 6 (required when there are house rules). */
+  acceptedRules: z.boolean().optional().default(false),
   fullName: nameSchema,
   email: emailSchema,
   mobile: mobileSchema,
@@ -109,6 +111,23 @@ export const contactSettingsSchema = z.object({
   contactEmail: z.union([z.literal(""), emailSchema]),
   facebookUrl: optionalUrl,
   messengerUrl: optionalUrl,
+});
+
+const optionalPhone = z
+  .string()
+  .trim()
+  .max(20)
+  .refine((v) => v === "" || v.replace(/\D/g, "").length >= 7, "Enter a full mobile number, e.g. 0917 123 4567.");
+
+export const arrivalSettingsSchema = z.object({
+  caretakerName: z.string().trim().max(80),
+  caretakerMobile: optionalPhone,
+  caretakerViber: optionalPhone,
+  directionsUrl: optionalUrl,
+});
+
+export const houseRulesSchema = z.object({
+  houseRules: z.string().trim().max(4000, "Keep the house rules under 4,000 characters."),
 });
 
 export const bookingRulesSchema = z.object({

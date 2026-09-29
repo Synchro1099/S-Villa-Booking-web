@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderBookingEmail } from "@/lib/notifications/templates";
+import { renderHouseRules } from "@/lib/house-rules";
 import type { BookingDetail, Settings } from "@/types";
 
 const booking = {
@@ -109,5 +110,39 @@ describe("owner emails when a slot frees up", () => {
     expect(mail.subject).toBe("Booking expired — SV-2026-00012 · Sep 30, 2026, 7:00 PM – 8:00 PM");
     expect(mail.text).toContain("within 30 minutes");
     expect(mail.text).toContain("Slot available again:");
+  });
+});
+
+describe("house rules in the Confirmed email", () => {
+  const rules = renderHouseRules("**When you arrive, call our caretaker.** {caretaker}\n**Directions:** {directions}\nNo <script> here & there.", {
+    directionsUrl: "https://maps.app.goo.gl/abc?x=1&y=2",
+    messengerUrl: "",
+    maxGuests: 6,
+    caretaker: { name: "Nena", mobile: "0917 123 4567", viber: "" },
+  });
+  const confirmed = (audience: "OWNER" | "CUSTOMER", houseRules = rules) =>
+    renderBookingEmail({ event: "CONFIRMED", audience, booking: { ...booking, status: "CONFIRMED" } as BookingDetail, settings, link: "https://example.com/x", houseRules });
+
+  it("lists the rules with the caretaker's number in both text and HTML", () => {
+    const mail = confirmed("CUSTOMER");
+    expect(mail.text).toContain("BEFORE YOUR VISIT\n• When you arrive, call our caretaker. Nena: 0917 123 4567 (mobile and Viber).");
+    expect(mail.text).toContain("• Directions: Open in Google Maps: https://maps.app.goo.gl/abc?x=1&y=2");
+    expect(mail.html).toContain(">Before your visit</h2>");
+    expect(mail.html).toContain('href="tel:09171234567"');
+    expect(mail.html).toContain('href="https://maps.app.goo.gl/abc?x=1&amp;y=2"');
+  });
+
+  it("escapes the owner's text in the HTML", () => {
+    const html = confirmed("CUSTOMER").html;
+    expect(html).toContain("No &lt;script&gt; here &amp; there.");
+    expect(html).not.toContain("<script>");
+  });
+
+  it("leaves the rules out of owner emails, other customer emails, and when there are none", () => {
+    expect(confirmed("OWNER").html).not.toContain("Before your visit");
+    const pending = renderBookingEmail({ event: "PENDING", audience: "CUSTOMER", booking, settings, link: "https://example.com/x", houseRules: rules });
+    expect(pending.text).not.toContain("BEFORE YOUR VISIT");
+    expect(pending.html).not.toContain("0917 123 4567");
+    expect(confirmed("CUSTOMER", []).html).not.toContain("Before your visit");
   });
 });

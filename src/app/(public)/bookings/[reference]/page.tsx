@@ -12,6 +12,9 @@ import { ContactActions } from "@/components/contact/contact-actions";
 import { KeepInTouch } from "@/components/booking/keep-in-touch";
 import { customersReceiveEmails } from "@/lib/notifications/providers";
 import { Button } from "@/components/ui/button";
+import { HouseRules } from "@/components/booking/house-rules";
+import { getCaretaker } from "@/lib/data/caretaker";
+import { confirmedHouseRules } from "@/lib/house-rules-context";
 
 export const metadata: Metadata = {
   title: "Your booking",
@@ -32,6 +35,8 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
   const awaitingPayment = status === "PENDING" && payment?.status === "UNPAID";
   const awaitingReview = status === "PENDING" && payment?.status === "PROOF_SUBMITTED";
   const actionToken = via === "token" ? token : null;
+  // The caretaker's details are only read (and shown) once the booking is confirmed.
+  const houseRules = status === "CONFIRMED" ? confirmedHouseRules(settings, await getCaretaker()) : [];
 
   const hero = {
     PENDING: awaitingReview
@@ -53,6 +58,14 @@ export default async function BookingStatusPage(props: PageProps<"/bookings/[ref
           <p className="mt-3 max-w-2xl text-lg text-muted">{hero.body}</p>
         </div>
       </div>
+
+      <HouseRules
+        lines={houseRules}
+        title="Before your visit"
+        intro="Everything you need for the day, including how to reach our caretaker."
+        id="visit-rules"
+        className="mt-8 border-2 border-brass/60 bg-cream shadow-soft sm:p-8"
+      />
 
       {via !== "owner" ? (
         <KeepInTouch

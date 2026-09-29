@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { toBookingDetail, DETAIL_COLUMNS } from "@/lib/data/bookings";
 import type { BookingDetail, Settings } from "@/types";
+import { getCaretaker } from "@/lib/data/caretaker";
+import { confirmedHouseRules } from "@/lib/house-rules-context";
 import { customerEmailBlockedReason, envValue, getEmailProvider, getSmsProvider, type DeliveryResult } from "./providers";
 import { planExpiryEmails, type Audience, type LoggedEmail } from "./expiry-plan";
 import { OWNER_EVENTS, renderBookingEmail, renderBookingSms, type BookingEvent, type CancelledBy } from "./templates";
@@ -66,7 +68,9 @@ export async function notifyBooking(
     // Customer: email (+ SMS when a provider is configured).
     if (to("CUSTOMER")) {
       const blocked = customerEmailBlockedReason();
-      const customerMail = renderBookingEmail({ event, audience: "CUSTOMER", booking, settings, link });
+      // "Confirmed" repeats the house rules, now with the caretaker's details.
+      const houseRules = event === "CONFIRMED" ? confirmedHouseRules(settings, await getCaretaker()) : undefined;
+      const customerMail = renderBookingEmail({ event, audience: "CUSTOMER", booking, settings, link, houseRules });
       const mailResult: DeliveryResult = blocked
         ? { status: "SKIPPED", error: blocked }
         : await email.send({ to: booking.customer_email, ...customerMail });

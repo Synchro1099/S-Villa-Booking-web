@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { loadAvailabilitySnapshot } from "@/lib/availability/snapshot";
 import { getActiveServices } from "@/lib/data/public";
 import { getViewer } from "@/lib/auth";
+import { publicHouseRules } from "@/lib/house-rules-context";
 import { BookingWizard } from "@/components/booking/booking-wizard";
 import { SectionHeading } from "@/components/sections/section-heading";
 
@@ -38,6 +39,7 @@ export default async function BookPage(props: PageProps<"/book">) {
             maxBookingHours: settings.max_booking_hours,
             expirationMinutes: settings.booking_expiration_minutes,
           }}
+          houseRules={publicHouseRules(settings)}
           prefill={{
             fullName: viewer?.profile?.full_name ?? "",
             email: viewer?.email ?? "",

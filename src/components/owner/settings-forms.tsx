@@ -1,9 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { ActionResult, Settings } from "@/types";
-import { saveBookingRules, saveContactSettings, savePaymentSettings } from "@/actions/owner";
+import { saveArrivalSettings, saveBookingRules, saveContactSettings, saveHouseRules, savePaymentSettings } from "@/actions/owner";
+import { HOUSE_RULE_TAGS, type Caretaker } from "@/lib/house-rules";
+import { publicHouseRules } from "@/lib/house-rules-context";
+import { HouseRules } from "@/components/booking/house-rules";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Textarea } from "@/components/ui/form";
 
@@ -109,6 +112,84 @@ export function BookingRulesForm({ settings }: { settings: Settings }) {
         <FormError result={state} />
         <Button type="submit" disabled={pending} className="justify-self-start">
           {pending ? "Saving…" : "Save booking rules"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function ArrivalSettingsForm({ settings, caretaker }: { settings: Settings; caretaker: Caretaker }) {
+  const { state, formAction, pending, errors } = useSettingsForm(saveArrivalSettings, "Caretaker & arrival details saved.");
+  return (
+    <form action={formAction} className="mt-6 grid gap-5 sm:grid-cols-2">
+      <Field label="Caretaker's name" htmlFor="caretakerName" error={errors?.caretakerName} className="sm:col-span-2">
+        <Input id="caretakerName" name="caretakerName" defaultValue={caretaker.name} maxLength={80} autoComplete="off" />
+      </Field>
+      <Field label="Caretaker's mobile" htmlFor="caretakerMobile" error={errors?.caretakerMobile}>
+        <Input id="caretakerMobile" name="caretakerMobile" type="tel" inputMode="tel" defaultValue={caretaker.mobile} maxLength={20} autoComplete="off" />
+      </Field>
+      <Field label="Caretaker's Viber" htmlFor="caretakerViber" error={errors?.caretakerViber} hint="Leave blank if it's the same as the mobile">
+        <Input id="caretakerViber" name="caretakerViber" type="tel" inputMode="tel" defaultValue={caretaker.viber} maxLength={20} autoComplete="off" />
+      </Field>
+      <Field
+        label="Directions link (Google Maps)"
+        htmlFor="directionsUrl"
+        error={errors?.directionsUrl}
+        hint="In Google Maps, tap Share on the venue and paste the link here"
+        className="sm:col-span-2"
+      >
+        <Input id="directionsUrl" name="directionsUrl" type="url" defaultValue={settings.directions_url} placeholder="https://maps.app.goo.gl/…" />
+      </Field>
+      <div className="grid gap-3 sm:col-span-2">
+        <FormError result={state} />
+        <Button type="submit" disabled={pending} className="justify-self-start">
+          {pending ? "Saving…" : "Save caretaker & arrival"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function HouseRulesForm({ settings }: { settings: Settings }) {
+  const { state, formAction, pending, errors } = useSettingsForm(saveHouseRules, "House rules saved. The website is updated.");
+  const [text, setText] = useState(settings.house_rules);
+  const preview = publicHouseRules({ ...settings, house_rules: text });
+  return (
+    <form action={formAction} className="mt-6 grid gap-5">
+      <Field label="House rules" htmlFor="houseRules" error={errors?.houseRules} hint="One rule per line. Leave empty to hide the house rules everywhere.">
+        <Textarea
+          id="houseRules"
+          name="houseRules"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={12}
+          maxLength={4000}
+          className="min-h-72 text-sm leading-relaxed"
+        />
+      </Field>
+      <div className="rounded-xl bg-sand/50 px-4 py-3 text-sm text-muted">
+        <p>
+          Put <strong className="text-ink">**two asterisks**</strong> around the bold start of a rule. These tags fill in automatically:
+        </p>
+        <ul className="mt-2 grid gap-1">
+          {HOUSE_RULE_TAGS.map((t) => (
+            <li key={t.tag}>
+              <code className="rounded bg-cream px-1.5 py-0.5 text-xs text-ink">{t.tag}</code> {t.help}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2">A line whose details aren&apos;t filled in yet (like the directions link) is hidden until they are.</p>
+      </div>
+      {preview.length > 0 ? (
+        <details className="group">
+          <summary className="-my-2.5 cursor-pointer py-2.5 text-sm font-semibold">Preview: how customers see it before paying</summary>
+          <HouseRules lines={preview} title="Before you pay: house rules" id="rules-preview" className="mt-3" />
+        </details>
+      ) : null}
+      <div className="grid gap-3">
+        <FormError result={state} />
+        <Button type="submit" disabled={pending} className="justify-self-start">
+          {pending ? "Saving…" : "Save house rules"}
         </Button>
       </div>
     </form>
