@@ -48,7 +48,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
   } catch {
     return null;
   }
-  const rules = { hours, minLeadMinutes: settings.min_lead_minutes, bookingWindowDays: settings.booking_window_days };
+  const rules = { hours, minLeadMinutes: settings.min_lead_minutes, bookingWindowDays: settings.booking_window_days, slotMinutes: settings.time_slot_minutes };
 
   return (
     <section className="bg-forest py-20 text-ivory md:py-24" id="availability">
@@ -58,7 +58,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
             eyebrow="Availability"
             eyebrowClassName="!text-brass"
             title={<span className="text-ivory">This week at S-Villa</span>}
-            intro={<span className="text-ivory/70">Live from our booking calendar. Pick a day to see open time slots.</span>}
+            intro={<span className="text-ivory/70">Live from our booking calendar. Pick a day to see open start times.</span>}
           />
           <Button asChild variant="brass">
             <Link href="/availability">
@@ -76,7 +76,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
                 <span className="text-xs font-bold uppercase tracking-wider text-ivory/60">{formatDate(date, "full").split(",")[0]}</span>
                 <span className="font-display text-4xl">{Number(date.slice(8))}</span>
                 <span className={cn("text-xs font-semibold", selectable ? "text-brass" : "text-ivory/50")}>
-                  {selectable ? `${open} slot${open === 1 ? "" : "s"} open` : DAY_STATUS_LABEL[day.status]}
+                  {selectable ? `${open} start time${open === 1 ? "" : "s"} open` : DAY_STATUS_LABEL[day.status]}
                 </span>
               </>
             );
@@ -86,7 +86,7 @@ async function WeekAhead({ settings, hours }: { settings: Awaited<ReturnType<typ
                   <Link
                     href={`/book?date=${date}`}
                     className="flex flex-col gap-1 rounded-2xl border border-ivory/15 p-4 transition-[transform,background-color,border-color] duration-300 ease-soft hover:-translate-y-1 hover:border-brass hover:bg-ivory/5 active:scale-[0.98] active:duration-100"
-                    aria-label={`${formatDate(date, "full")}: ${open} slots open — book this day`}
+                    aria-label={`${formatDate(date, "full")}: ${open} start time${open === 1 ? "" : "s"} open — book this day`}
                   >
                     {content}
                   </Link>

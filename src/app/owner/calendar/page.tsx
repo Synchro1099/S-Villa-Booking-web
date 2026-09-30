@@ -121,7 +121,7 @@ export default async function OwnerCalendarPage(props: PageProps<"/owner/calenda
               <h3 className="text-xl">Close this day</h3>
               {dayClosed.length ? <BlockedDateList items={dayClosed} /> : <BlockDateForm key={`d-${day}`} min={today} defaultDate={day} />}
               <h3 className="mt-8 text-xl">Block hours</h3>
-              <BlockTimeForm key={`t-${day}`} min={today} defaultDate={day} />
+              <BlockTimeForm key={`t-${day}`} min={today} defaultDate={day} step={settings.time_slot_minutes} />
               {dayBlocks.length ? <BlockedTimeList items={dayBlocks} /> : null}
             </div>
           ) : null}

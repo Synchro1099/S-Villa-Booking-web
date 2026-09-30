@@ -5,10 +5,9 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { blockDate, blockTime, unblockDate, unblockTime } from "@/actions/owner";
 import type { BlockedDate, BlockedTime } from "@/lib/data/owner";
-import { formatDate, formatTime, formatTimeRange } from "@/lib/time";
+import { formatDate, formatTime, formatTimeRange, fromMinutes } from "@/lib/time";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Select } from "@/components/ui/form";
-import { HOUR_OPTIONS } from "./operating-hours-form";
 
 function useResetOnSuccess(ok: boolean | undefined, message: string) {
   const ref = useRef<HTMLFormElement>(null);
@@ -42,8 +41,15 @@ export function BlockDateForm({ min, defaultDate }: { min: string; defaultDate?:
   );
 }
 
-export function BlockTimeForm({ min, defaultDate }: { min: string; defaultDate?: string }) {
+/** Every `step` minutes from midnight to midnight, as "HH:MM" (the last one is "24:00"). */
+function timeOptions(step: number) {
+  return Array.from({ length: (24 * 60) / step + 1 }, (_, i) => fromMinutes(i * step));
+}
+
+export function BlockTimeForm({ min, defaultDate, step = 60 }: { min: string; defaultDate?: string; step?: number }) {
   const [state, action, pending] = useActionState(blockTime, null);
+  // Blocks can start and end on the same step customers book on (e.g. 4:30–6:00).
+  const options = timeOptions(step);
   const ref = useResetOnSuccess(state?.ok, "Time blocked.");
   return (
     <form ref={ref} action={action} className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -55,7 +61,7 @@ export function BlockTimeForm({ min, defaultDate }: { min: string; defaultDate?:
       </Field>
       <Field label="From" htmlFor="bt-start">
         <Select id="bt-start" name="startTime" defaultValue="17:00">
-          {HOUR_OPTIONS.slice(0, 24).map((t) => (
+          {options.slice(0, -1).map((t) => (
             <option key={t} value={t}>
               {formatTime(t)}
             </option>
@@ -64,7 +70,7 @@ export function BlockTimeForm({ min, defaultDate }: { min: string; defaultDate?:
       </Field>
       <Field label="Until" htmlFor="bt-end">
         <Select id="bt-end" name="endTime" defaultValue="21:00">
-          {HOUR_OPTIONS.slice(1).map((t) => (
+          {options.slice(1).map((t) => (
             <option key={t} value={t}>
               {t === "24:00" ? "Midnight" : formatTime(t)}
             </option>

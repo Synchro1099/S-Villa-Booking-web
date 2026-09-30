@@ -9,6 +9,7 @@ export interface AvailabilityConfig {
   hours: OperatingHours[];
   minLeadMinutes: number;
   bookingWindowDays: number;
+  slotMinutes: number;
   timezone: string;
 }
 
@@ -32,8 +33,8 @@ export function useAvailability(config: AvailabilityConfig, initial: Availabilit
   const requestId = useRef(0);
 
   const rules: AvailabilityRules = useMemo(
-    () => ({ hours: config.hours, minLeadMinutes: config.minLeadMinutes, bookingWindowDays: config.bookingWindowDays }),
-    [config.hours, config.minLeadMinutes, config.bookingWindowDays],
+    () => ({ hours: config.hours, minLeadMinutes: config.minLeadMinutes, bookingWindowDays: config.bookingWindowDays, slotMinutes: config.slotMinutes }),
+    [config.hours, config.minLeadMinutes, config.bookingWindowDays, config.slotMinutes],
   );
 
   const load = useCallback(async (m: string) => {

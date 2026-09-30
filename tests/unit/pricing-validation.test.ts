@@ -70,7 +70,11 @@ describe("booking input validation", () => {
   });
 
   it("rejects bad times and empty services", () => {
-    expect(createBookingSchema.safeParse({ ...valid, startTime: "14:30" }).success).toBe(false);
+    // Quarter hours pass here; the database then enforces the owner's actual step.
+    expect(createBookingSchema.safeParse({ ...valid, startTime: "14:30" }).success).toBe(true);
+    expect(createBookingSchema.safeParse({ ...valid, startTime: "14:15" }).success).toBe(true);
+    expect(createBookingSchema.safeParse({ ...valid, startTime: "14:10" }).success).toBe(false);
+    expect(createBookingSchema.safeParse({ ...valid, startTime: "24:00" }).success).toBe(false);
     expect(createBookingSchema.safeParse({ ...valid, serviceIds: [] }).success).toBe(false);
   });
 

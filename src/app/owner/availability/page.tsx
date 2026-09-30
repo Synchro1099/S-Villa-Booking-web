@@ -37,7 +37,7 @@ export default async function OwnerAvailabilityPage() {
           <section className="rounded-[var(--radius-card)] border border-line/70 bg-cream p-6 sm:p-8">
             <h2 className="text-2xl">Block specific hours</h2>
             <p className="mt-1 text-sm text-muted">Customers can still book the other hours that day.</p>
-            <BlockTimeForm min={today} />
+            <BlockTimeForm min={today} step={settings.time_slot_minutes} />
             <BlockedTimeList items={times} />
           </section>
         </div>

@@ -212,7 +212,6 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                   <TimeSlots
                     slots={day.slots}
                     selectedStart={start}
-                    selectedHours={hours}
                     onSelect={(s) => {
                       setStart(s);
                       setHours((h) => Math.max(1, Math.min(h, maxHoursFrom(day.slots, s, rules.maxBookingHours))));

@@ -4,7 +4,11 @@
  * on the server's or visitor's own time zone.
  */
 
+/** Bookings are whole hours: each slot is a one-hour window. */
 export const SLOT_MINUTES = 60;
+
+/** Start-time steps the owner can choose (each divides an hour, so whole-hour bookings line up). */
+export const START_STEPS = [15, 30, 60] as const;
 
 export function toMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);

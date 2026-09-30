@@ -25,6 +25,7 @@ export async function loadAvailabilitySnapshot(preferredDate?: string | null) {
     hours,
     minLeadMinutes: settings.min_lead_minutes,
     bookingWindowDays: settings.booking_window_days,
+    slotMinutes: settings.time_slot_minutes,
     timezone: settings.timezone,
   };
   const snapshot: AvailabilitySnapshot = { month, entries, now };

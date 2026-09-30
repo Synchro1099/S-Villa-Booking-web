@@ -62,7 +62,7 @@ export function AvailabilityBrowser({ config, initial }: { config: AvailabilityC
         ) : (
           <div className="flex h-full min-h-60 flex-col items-center justify-center text-center">
             <h2 className="text-3xl">Choose a date</h2>
-            <p className="mt-2 max-w-xs text-muted">Select a day on the calendar to see which time slots are open.</p>
+            <p className="mt-2 max-w-xs text-muted">Select a day on the calendar to see which start times are open.</p>
           </div>
         )}
       </div>

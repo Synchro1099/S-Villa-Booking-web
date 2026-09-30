@@ -9,7 +9,7 @@ import type { AvailabilityEntry, OperatingHours, Service, Settings } from "@/typ
  */
 
 const SETTINGS_COLUMNS =
-  "business_name, business_description, address, contact_number, contact_email, facebook_url, messenger_url, directions_url, house_rules, gcash_name, gcash_number, bank_name, bank_account_name, bank_account_number, booking_expiration_minutes, max_guests, max_booking_hours, booking_window_days, min_lead_minutes, timezone";
+  "business_name, business_description, address, contact_number, contact_email, facebook_url, messenger_url, directions_url, house_rules, gcash_name, gcash_number, bank_name, bank_account_name, bank_account_number, booking_expiration_minutes, max_guests, max_booking_hours, booking_window_days, min_lead_minutes, time_slot_minutes, timezone";
 
 const FALLBACK_SETTINGS: Settings = {
   business_name: "S-Villa Private Pickleball & Courtyard",
@@ -31,6 +31,7 @@ const FALLBACK_SETTINGS: Settings = {
   max_booking_hours: 4,
   booking_window_days: 60,
   min_lead_minutes: 60,
+  time_slot_minutes: 30,
   timezone: "Asia/Manila",
 };
 

@@ -2,8 +2,12 @@ import { z } from "zod";
 import { PAYMENT_METHODS } from "@/types";
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a valid date.");
-const hourTime = z.string().regex(/^([01]\d|2[0-3]):00$/, "Choose a valid time.");
+/** A booking start: on a quarter hour (the database applies the owner's actual step). */
+const startTime = z.string().regex(/^([01]\d|2[0-3]):(00|15|30|45)$/, "Choose a valid time.");
+/** Opening hours stay whole hours. */
 const time = z.string().regex(/^([01]\d|2[0-4]):00$/, "Use whole hours, e.g. 17:00.");
+/** Blocked hours: quarter hours, up to midnight. */
+const blockTime = z.string().regex(/^(([01]\d|2[0-3]):(00|15|30|45)|24:00)$/, "Choose a valid time.");
 
 /** Accepts 09171234567, 0917 123 4567, +639171234567 → normalised 09171234567. */
 export const mobileSchema = z
@@ -18,7 +22,7 @@ export const nameSchema = z.string().trim().min(2, "Enter your full name.").max(
 
 export const createBookingSchema = z.object({
   date,
-  startTime: hourTime,
+  startTime: startTime,
   durationHours: z.coerce.number().int().min(1).max(24),
   guestCount: z.coerce.number().int().min(1, "At least 1 guest.").max(100),
   serviceIds: z.array(z.uuid()).min(1, "Choose at least one service.").max(20),
@@ -94,7 +98,7 @@ export const operatingHoursSchema = z
 export const blockDateSchema = z.object({ date, reason: z.string().trim().max(200).default("") });
 
 export const blockTimeSchema = z
-  .object({ date, startTime: time, endTime: time, reason: z.string().trim().max(200).default("") })
+  .object({ date, startTime: blockTime, endTime: blockTime, reason: z.string().trim().max(200).default("") })
   .refine((d) => d.endTime > d.startTime, { message: "End time must be after start time.", path: ["endTime"] });
 
 const optionalUrl = z
@@ -136,6 +140,7 @@ export const bookingRulesSchema = z.object({
   maxBookingHours: z.coerce.number().int().min(1).max(24),
   bookingWindowDays: z.coerce.number().int().min(1).max(365),
   minLeadMinutes: z.coerce.number().int().min(0).max(10080),
+  timeSlotMinutes: z.coerce.number().pipe(z.union([z.literal(15), z.literal(30), z.literal(60)], "Choose 15, 30 or 60 minutes.")),
 });
 
 export const paymentSettingsSchema = z.object({

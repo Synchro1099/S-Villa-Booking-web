@@ -12,6 +12,11 @@ import { SLOT_MINUTES, daysBetween, toMinutes, weekdayOf, type LocalNow } from "
 export type SlotStatus = "AVAILABLE" | "BOOKED" | "PENDING" | "BLOCKED" | "PAST";
 export type DayStatus = "AVAILABLE" | "LIMITED" | "FULL" | "CLOSED" | "PAST" | "OUT_OF_RANGE";
 
+/**
+ * A one-hour window starting at `start`. Windows start every `slotMinutes`
+ * (the owner's start-time step), so with a 30-minute step they overlap:
+ * 3:00–4:00, 3:30–4:30, 4:00–5:00…
+ */
 export interface Slot {
   start: number; // minutes since midnight
   end: number;
@@ -22,6 +27,8 @@ export interface AvailabilityRules {
   hours: OperatingHours[];
   minLeadMinutes: number;
   bookingWindowDays: number;
+  /** Start-time step in minutes (15, 30 or 60). */
+  slotMinutes: number;
 }
 
 export interface DayAvailability {
@@ -55,7 +62,10 @@ export function getDayAvailability(
   const earliestStart = offset === 0 ? now.minutes + rules.minLeadMinutes : -Infinity;
 
   const slots: Slot[] = [];
-  for (let start = open; start + SLOT_MINUTES <= close; start += SLOT_MINUTES) {
+  // A start is offered only if the whole hour fits before closing. Anything that isn't a divisor of an
+  // hour falls back to on-the-hour starts.
+  const step = [15, 30, 60].includes(rules.slotMinutes) ? rules.slotMinutes : SLOT_MINUTES;
+  for (let start = open; start + SLOT_MINUTES <= close; start += step) {
     const end = start + SLOT_MINUTES;
     const hits = dayEntries.filter(
       (e) => e.start_time && e.end_time && overlaps(start, end, toMinutes(e.start_time), toMinutes(e.end_time)),
@@ -88,6 +98,7 @@ export function isSelectableDay(status: DayStatus) {
 /**
  * How many consecutive hours can be booked starting at `start`
  * (bounded by the next unavailable slot, closing time and the max duration).
+ * Steps an hour at a time; with any step there is always a window at start + 60.
  */
 export function maxHoursFrom(slots: Slot[], start: number, maxHours: number): number {
   let hours = 0;

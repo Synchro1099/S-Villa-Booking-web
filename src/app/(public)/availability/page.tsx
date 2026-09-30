@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/sections/section-heading";
 
 export const metadata: Metadata = {
   title: "Check Availability",
-  description: "See which dates and time slots are open at S-Villa, live from our booking calendar.",
+  description: "See which dates and start times are open at S-Villa, live from our booking calendar.",
 };
 
 export default async function AvailabilityPage() {
@@ -16,7 +16,7 @@ export default async function AvailabilityPage() {
         as="h1"
         eyebrow="Live calendar"
         title="Check availability"
-        intro="Each time slot reserves the whole villa for one group. Pending slots are held while a customer completes payment."
+        intro="Times shown are start times for a booking of one hour or more. Each booking reserves the whole villa for one group; pending times are held while a customer completes payment."
       />
       {error ? (
         <p role="alert" className="mt-8 rounded-xl bg-bad-bg px-4 py-3 text-sm text-bad">

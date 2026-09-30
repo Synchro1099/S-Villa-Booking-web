@@ -32,6 +32,8 @@ export interface Settings {
   max_booking_hours: number;
   booking_window_days: number;
   min_lead_minutes: number;
+  /** How often a booking may start: every 15, 30 or 60 minutes. */
+  time_slot_minutes: number;
   timezone: string;
 }
 

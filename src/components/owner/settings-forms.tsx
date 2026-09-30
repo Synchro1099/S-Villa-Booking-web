@@ -8,7 +8,7 @@ import { HOUSE_RULE_TAGS, type Caretaker } from "@/lib/house-rules";
 import { publicHouseRules } from "@/lib/house-rules-context";
 import { HouseRules } from "@/components/booking/house-rules";
 import { Button } from "@/components/ui/button";
-import { Field, FormError, Input, Textarea } from "@/components/ui/form";
+import { Field, FormError, Input, Select, Textarea } from "@/components/ui/form";
 
 type SettingsAction = (prev: ActionResult | null, fd: FormData) => Promise<ActionResult>;
 
@@ -107,6 +107,13 @@ export function BookingRulesForm({ settings }: { settings: Settings }) {
       </Field>
       <Field label="Minimum notice (minutes)" htmlFor="minLeadMinutes" error={errors?.minLeadMinutes} hint="How soon before start time customers can book">
         <Input id="minLeadMinutes" name="minLeadMinutes" type="number" min={0} max={10080} defaultValue={settings.min_lead_minutes} required />
+      </Field>
+      <Field label="Start times every" htmlFor="timeSlotMinutes" error={errors?.timeSlotMinutes} hint="Bookings stay whole hours; this sets when they can start">
+        <Select id="timeSlotMinutes" name="timeSlotMinutes" defaultValue={String(settings.time_slot_minutes)}>
+          <option value="15">15 minutes (3:00, 3:15, 3:30…)</option>
+          <option value="30">30 minutes (3:00, 3:30, 4:00…)</option>
+          <option value="60">60 minutes (on the hour only)</option>
+        </Select>
       </Field>
       <div className="grid gap-3 sm:col-span-2">
         <FormError result={state} />
