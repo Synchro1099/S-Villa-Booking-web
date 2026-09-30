@@ -100,7 +100,7 @@ describe("house rules: text handling", () => {
 
   it("renders plain text for emails with bullet points and visible links", () => {
     const lines = renderHouseRules("**Directions:** {directions}\nCCTV covers the venue.", ctx);
-    expect(houseRulesText(lines)).toBe("• Directions: Open in Google Maps: https://maps.app.goo.gl/abc123\n• CCTV covers the venue.");
+    expect(houseRulesText(lines)).toBe("• Directions: Open in Google Maps (https://maps.app.goo.gl/abc123)\n• CCTV covers the venue.");
   });
 });
 

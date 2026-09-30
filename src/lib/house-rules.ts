@@ -118,7 +118,7 @@ export function houseRulesText(lines: RuleLine[]): string {
       (line) =>
         "• " +
         line
-          .map((s) => (s.kind === "link" ? `${s.text}: ${s.href}` : s.text))
+          .map((s) => (s.kind === "link" ? `${s.text} (${s.href})` : s.text))
           .join(""),
     )
     .join("\n");

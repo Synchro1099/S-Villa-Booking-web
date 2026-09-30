@@ -126,7 +126,7 @@ describe("house rules in the Confirmed email", () => {
   it("lists the rules with the caretaker's number in both text and HTML", () => {
     const mail = confirmed("CUSTOMER");
     expect(mail.text).toContain("BEFORE YOUR VISIT\n• When you arrive, call our caretaker. Nena: 0917 123 4567 (mobile and Viber).");
-    expect(mail.text).toContain("• Directions: Open in Google Maps: https://maps.app.goo.gl/abc?x=1&y=2");
+    expect(mail.text).toContain("• Directions: Open in Google Maps (https://maps.app.goo.gl/abc?x=1&y=2)");
     expect(mail.html).toContain(">Before your visit</h2>");
     expect(mail.html).toContain('href="tel:09171234567"');
     expect(mail.html).toContain('href="https://maps.app.goo.gl/abc?x=1&amp;y=2"');

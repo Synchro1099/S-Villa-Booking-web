@@ -35,11 +35,11 @@ export function HouseRules({
             <p className="min-w-0 [overflow-wrap:anywhere]">
               {line.map((s, j) =>
                 s.kind === "link" ? (
-                  <a key={j} href={s.href} target="_blank" rel="noopener noreferrer" className="font-semibold underline decoration-brass underline-offset-4 hover:decoration-ink">
+                  <a key={j} href={s.href} target="_blank" rel="noopener noreferrer" className="-my-2.5 inline-block py-2.5 font-semibold underline decoration-brass underline-offset-4 hover:decoration-ink">
                     {s.text}
                   </a>
                 ) : s.kind === "tel" ? (
-                  <a key={j} href={`tel:${s.number}`} className="whitespace-nowrap font-semibold underline decoration-brass underline-offset-4 hover:decoration-ink">
+                  <a key={j} href={`tel:${s.number}`} className="-my-2.5 inline-block whitespace-nowrap py-2.5 font-semibold underline decoration-brass underline-offset-4 hover:decoration-ink">
                     {s.text}
                   </a>
                 ) : s.bold ? (

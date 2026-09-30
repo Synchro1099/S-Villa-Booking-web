@@ -182,7 +182,7 @@ export function HouseRulesForm({ settings }: { settings: Settings }) {
       </div>
       {preview.length > 0 ? (
         <details className="group">
-          <summary className="-my-2.5 cursor-pointer py-2.5 text-sm font-semibold">Preview: how customers see it before paying</summary>
+          <summary className="-my-3 cursor-pointer py-3 text-sm font-semibold">Preview: how customers see it before paying</summary>
           <HouseRules lines={preview} title="Before you pay: house rules" id="rules-preview" className="mt-3" />
         </details>
       ) : null}

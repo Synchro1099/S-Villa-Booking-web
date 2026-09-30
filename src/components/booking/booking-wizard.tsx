@@ -400,7 +400,8 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                     lines={houseRules}
                     title="Before you pay: house rules"
                     intro="Please read these before you submit. They also appear on your confirmation."
-                    className="mt-6"
+                    // Phones: run to the card's edges so the rules get the full width instead of a narrow inset column.
+                    className="mt-6 max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0 max-sm:px-5"
                   >
                     <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-cream px-4 py-3.5 transition-colors has-[:checked]:border-forest has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass">
                       <input
