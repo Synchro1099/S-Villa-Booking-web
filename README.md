@@ -102,7 +102,7 @@ tests/unit         availability engine, pricing, validation, uploads
 ## Tests
 
 ```bash
-npm test          # 59 tests; DB tests run the real migrations in in-memory Postgres
+npm test          # 156 tests; DB tests run the real migrations in in-memory Postgres
 npm run typecheck
 npm run lint
 ```
