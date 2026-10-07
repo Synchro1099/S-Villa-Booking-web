@@ -134,3 +134,15 @@ describe("availability engine: half-hour and quarter-hour starts", () => {
     expect(statuses.filter(([, st]) => st === "BOOKED")).toEqual([[13, "BOOKED"], [14, "BOOKED"]]);
   });
 });
+
+describe("availability engine: no maximum booking length", () => {
+  it("lets a booking run until the next unavailable time or closing, with no cap", () => {
+    const free = getDayAvailability(TUE, rules, [], now).slots;
+    expect(maxHoursFrom(free, 9 * 60)).toBe(8); // 9:00 → 17:00 closing: the whole day
+    const entries: AvailabilityEntry[] = [{ kind: "BOOKED", date: TUE, start_time: "15:00:00", end_time: "16:00:00" }];
+    const slots = getDayAvailability(TUE, rules, entries, now).slots;
+    expect(maxHoursFrom(slots, 9 * 60)).toBe(6); // 9:00 → 15:00, then the existing booking
+    const half = getDayAvailability(TUE, { ...rules, slotMinutes: 30 }, [], now).slots;
+    expect(maxHoursFrom(half, 9 * 60 + 30)).toBe(7); // 9:30 → 16:30; 16:30–17:30 would pass closing
+  });
+});

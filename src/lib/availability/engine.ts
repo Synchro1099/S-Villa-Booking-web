@@ -96,11 +96,12 @@ export function isSelectableDay(status: DayStatus) {
 }
 
 /**
- * How many consecutive hours can be booked starting at `start`
- * (bounded by the next unavailable slot, closing time and the max duration).
+ * How many consecutive hours can be booked starting at `start`: up to the next
+ * unavailable slot or closing time. There is no maximum booking length;
+ * `maxHours` is only an optional cap.
  * Steps an hour at a time; with any step there is always a window at start + 60.
  */
-export function maxHoursFrom(slots: Slot[], start: number, maxHours: number): number {
+export function maxHoursFrom(slots: Slot[], start: number, maxHours = Infinity): number {
   let hours = 0;
   let cursor = start;
   while (hours < maxHours) {

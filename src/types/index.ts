@@ -29,7 +29,6 @@ export interface Settings {
   bank_account_number: string;
   booking_expiration_minutes: number;
   max_guests: number;
-  max_booking_hours: number;
   booking_window_days: number;
   min_lead_minutes: number;
   /** How often a booking may start: every 15, 30 or 60 minutes. */

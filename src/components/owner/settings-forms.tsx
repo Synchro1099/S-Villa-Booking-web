@@ -99,9 +99,6 @@ export function BookingRulesForm({ settings }: { settings: Settings }) {
       <Field label="Payment time limit (minutes)" htmlFor="bookingExpirationMinutes" error={errors?.bookingExpirationMinutes} hint="Unpaid bookings are released after this">
         <Input id="bookingExpirationMinutes" name="bookingExpirationMinutes" type="number" min={5} max={1440} defaultValue={settings.booking_expiration_minutes} required />
       </Field>
-      <Field label="Longest booking (hours)" htmlFor="maxBookingHours" error={errors?.maxBookingHours}>
-        <Input id="maxBookingHours" name="maxBookingHours" type="number" min={1} max={24} defaultValue={settings.max_booking_hours} required />
-      </Field>
       <Field label="Book up to (days ahead)" htmlFor="bookingWindowDays" error={errors?.bookingWindowDays}>
         <Input id="bookingWindowDays" name="bookingWindowDays" type="number" min={1} max={365} defaultValue={settings.booking_window_days} required />
       </Field>

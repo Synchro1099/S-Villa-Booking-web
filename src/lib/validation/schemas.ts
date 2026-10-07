@@ -137,7 +137,6 @@ export const houseRulesSchema = z.object({
 export const bookingRulesSchema = z.object({
   bookingExpirationMinutes: z.coerce.number().int().min(5).max(1440),
   maxGuests: z.coerce.number().int().min(1).max(100),
-  maxBookingHours: z.coerce.number().int().min(1).max(24),
   bookingWindowDays: z.coerce.number().int().min(1).max(365),
   minLeadMinutes: z.coerce.number().int().min(0).max(10080),
   timeSlotMinutes: z.coerce.number().pipe(z.union([z.literal(15), z.literal(30), z.literal(60)], "Choose 15, 30 or 60 minutes.")),

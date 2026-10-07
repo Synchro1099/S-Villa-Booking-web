@@ -36,7 +36,6 @@ export default async function BookPage(props: PageProps<"/book">) {
           services={services}
           rules={{
             maxGuests: settings.max_guests,
-            maxBookingHours: settings.max_booking_hours,
             expirationMinutes: settings.booking_expiration_minutes,
           }}
           houseRules={publicHouseRules(settings)}

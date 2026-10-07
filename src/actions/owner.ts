@@ -288,7 +288,6 @@ export async function saveBookingRules(_prev: ActionResult | null, formData: For
   return updateSettings({
     booking_expiration_minutes: d.bookingExpirationMinutes,
     max_guests: d.maxGuests,
-    max_booking_hours: d.maxBookingHours,
     booking_window_days: d.bookingWindowDays,
     min_lead_minutes: d.minLeadMinutes,
     time_slot_minutes: d.timeSlotMinutes,

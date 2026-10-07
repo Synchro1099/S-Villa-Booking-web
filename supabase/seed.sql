@@ -7,7 +7,7 @@ insert into public.settings (
   id, business_name, business_description, address,
   contact_number, contact_email, facebook_url, messenger_url,
   gcash_name, gcash_number, bank_name, bank_account_name, bank_account_number,
-  booking_expiration_minutes, max_guests, max_booking_hours, booking_window_days, min_lead_minutes, timezone
+  booking_expiration_minutes, max_guests, booking_window_days, min_lead_minutes, timezone
 ) values (
   1,
   'S-Villa Private Pickleball & Courtyard',
@@ -15,7 +15,7 @@ insert into public.settings (
   'Philippines',
   '09XXXXXXXXX', 'hello@example.com', 'https://facebook.com/', 'https://m.me/',
   'S-Villa', '09XXXXXXXXX', 'BDO', 'S-Villa', 'XXXXXXXXXX',
-  30, 6, 4, 60, 60, 'Asia/Manila'
+  30, 6, 60, 60, 'Asia/Manila'
 )
 on conflict (id) do nothing;
 

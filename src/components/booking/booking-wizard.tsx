@@ -46,7 +46,7 @@ export interface WizardProps {
   /** Pre-selected from ?service=<slug> (e.g. a facility card). */
   initialServiceSlug?: string | null;
   services: Service[];
-  rules: { maxGuests: number; maxBookingHours: number; expirationMinutes: number };
+  rules: { maxGuests: number; expirationMinutes: number };
   prefill: { fullName: string; email: string; mobile: string };
   /** The owner's house rules, shown before payment (empty: none, and no tick box). */
   houseRules: RuleLine[];
@@ -91,7 +91,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
   const [pending, startTransition] = useTransition();
 
   const day = date ? av.dayAvailability(date) : null;
-  const maxHours = day && start != null ? maxHoursFrom(day.slots, start, rules.maxBookingHours) : 0;
+  const maxHours = day && start != null ? maxHoursFrom(day.slots, start) : 0;
   const estimate = estimateBooking(services, serviceIds, hours);
 
   function go(to: number) {
@@ -214,7 +214,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                     selectedStart={start}
                     onSelect={(s) => {
                       setStart(s);
-                      setHours((h) => Math.max(1, Math.min(h, maxHoursFrom(day.slots, s, rules.maxBookingHours))));
+                      setHours((h) => Math.max(1, Math.min(h, maxHoursFrom(day.slots, s))));
                     }}
                   />
                   {start != null && (
