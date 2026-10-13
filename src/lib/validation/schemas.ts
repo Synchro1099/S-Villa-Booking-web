@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PAYMENT_METHODS } from "@/types";
+import { MAX_ITEM_QUANTITY } from "@/lib/pricing";
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a valid date.");
 /** A booking start: on a quarter hour (the database applies the owner's actual step). */
@@ -26,6 +27,8 @@ export const createBookingSchema = z.object({
   durationHours: z.coerce.number().int().min(1).max(24),
   guestCount: z.coerce.number().int().min(1, "At least 1 guest.").max(100),
   serviceIds: z.array(z.uuid()).min(1, "Choose at least one service.").max(20),
+  /** How many of each per-item extra (e.g. 2 coffees). Hourly and flat services ignore it. */
+  quantities: z.record(z.uuid(), z.number().int().min(1).max(MAX_ITEM_QUANTITY)).optional().default({}),
   paymentMethod: z.enum(PAYMENT_METHODS, "Choose GCash or Bank Transfer."),
   /** Ticked "I've read the house rules" on Step 6 (required when there are house rules). */
   acceptedRules: z.boolean().optional().default(false),
@@ -76,7 +79,7 @@ export const servicePriceSchema = z.object({
   name: z.string().trim().min(1).max(80),
   description: z.string().trim().max(500).default(""),
   price: z.coerce.number().min(0, "Price cannot be negative.").max(1_000_000),
-  pricingUnit: z.enum(["HOUR", "BOOKING"]),
+  pricingUnit: z.enum(["HOUR", "BOOKING", "ITEM"]),
   isActive: z.coerce.boolean(),
 });
 

@@ -7,7 +7,8 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 export const PAYMENT_METHODS = ["GCASH", "BANK_TRANSFER"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
-export type PricingUnit = "HOUR" | "BOOKING";
+/** HOUR: × booked hours. BOOKING: flat, once. ITEM: × how many the guest picks (e.g. coffee). */
+export type PricingUnit = "HOUR" | "BOOKING" | "ITEM";
 export type Role = "CUSTOMER" | "OWNER";
 
 export interface Settings {

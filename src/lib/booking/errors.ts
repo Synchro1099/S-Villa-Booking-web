@@ -16,6 +16,7 @@ const MESSAGES: Record<string, string> = {
   SV_OUTSIDE_HOURS: "That time is outside our opening hours. Please choose another time.",
   SV_BLOCKED_TIME: "That time isn't available. Please choose another time.",
   SV_SERVICE_REQUIRED: "Please choose at least one service.",
+  SV_QUANTITY_INVALID: "Please choose between 1 and 50 of each extra.",
   SV_SERVICE_INVALID: "One of the selected services is no longer available. Please review your selection.",
   SV_BOOKING_EXPIRED: "The payment window for this booking has ended, so the slot was released. Please make a new booking.",
   SV_BOOKING_NOT_PENDING: "This booking is no longer awaiting payment.",

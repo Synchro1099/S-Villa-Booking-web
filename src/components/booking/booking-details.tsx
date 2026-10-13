@@ -1,5 +1,5 @@
 import type { BookingDetail } from "@/types";
-import { formatPeso } from "@/lib/pricing";
+import { formatPeso, quantitySuffix } from "@/lib/pricing";
 import { formatDate, formatTimeRange } from "@/lib/time";
 import { PAYMENT_METHOD_LABEL } from "@/lib/booking/labels";
 import { BookingStatusBadge, PaymentStatusBadge } from "@/components/ui/status-badge";
@@ -50,7 +50,7 @@ export function BookingDetails({ booking, showContact = false }: { booking: Book
                 <span className="text-sm text-muted">
                   {" "}
                   · {formatPeso(i.unit_price)}
-                  {i.pricing_unit_snapshot === "HOUR" ? ` × ${i.quantity}h` : ""}
+                  {quantitySuffix(i.pricing_unit_snapshot, i.quantity)}
                 </span>
               </span>
               <span className="font-semibold tabular-nums">{formatPeso(i.subtotal)}</span>

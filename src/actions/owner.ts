@@ -1,10 +1,13 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireOwner } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sniffProofType } from "@/lib/validation/file";
 import { friendlyError } from "@/lib/booking/errors";
 import { notifyBooking } from "@/lib/notifications";
 import {
@@ -97,6 +100,41 @@ export async function unarchiveBooking(bookingId: string): Promise<ActionResult>
 
 // --- Services & pricing -----------------------------------------------------------
 
+const PHOTO_BUCKET = "service-photos";
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+
+/** The photo picked in the service dialog, checked by its bytes (JPG, PNG or WEBP, up to 5 MB). */
+async function readServicePhoto(formData: FormData): Promise<{ bytes: Uint8Array; mime: string; ext: string } | null | string> {
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) return null;
+  if (file.size > PHOTO_MAX_BYTES) return "That photo is larger than 5 MB. Please choose a smaller one.";
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const type = sniffProofType(bytes);
+  if (!type || type.mime === "application/pdf") return "Please choose a JPG, PNG or WEBP photo.";
+  return { bytes, mime: type.mime, ext: type.ext };
+}
+
+/** Upload a service photo and return its public URL. Call only after requireOwner(). */
+async function uploadServicePhoto(serviceId: string, photo: { bytes: Uint8Array; mime: string; ext: string }) {
+  const admin = createAdminClient();
+  const path = `${serviceId}/${randomUUID()}.${photo.ext}`;
+  const { error } = await admin.storage.from(PHOTO_BUCKET).upload(path, photo.bytes, { contentType: photo.mime, upsert: false });
+  if (error) {
+    console.error("[s-villa] service photo upload:", error.message);
+    return null;
+  }
+  return admin.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/** Delete a photo this site uploaded (a URL from elsewhere is left alone). Best effort. */
+async function removeServicePhoto(url: string | null) {
+  const marker = `/storage/v1/object/public/${PHOTO_BUCKET}/`;
+  const at = url?.indexOf(marker) ?? -1;
+  if (!url || at < 0) return;
+  const { error } = await createAdminClient().storage.from(PHOTO_BUCKET).remove([decodeURIComponent(url.slice(at + marker.length))]);
+  if (error) console.error("[s-villa] service photo remove:", error.message);
+}
+
 export async function updateService(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   await requireOwner();
   const parsed = servicePriceSchema.safeParse({
@@ -109,16 +147,34 @@ export async function updateService(_prev: ActionResult | null, formData: FormDa
   });
   if (!parsed.success) return { ok: false, error: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
   const d = parsed.data;
+  const photo = await readServicePhoto(formData);
+  if (typeof photo === "string") return { ok: false, error: photo, fieldErrors: { photo: [photo] } };
+  const removePhoto = formData.get("removePhoto") === "on";
 
   const supabase = await createClient();
+  const { data: current } = await supabase.from("services").select("image_url").eq("id", d.id).maybeSingle<{ image_url: string | null }>();
+  if (!current) return { ok: false, error: "We couldn't save this service. Please try again." };
+
+  let imageUrl = current.image_url;
+  if (photo) {
+    imageUrl = await uploadServicePhoto(d.id, photo);
+    if (!imageUrl) return { ok: false, error: "We couldn't upload the photo. Please try again." };
+  } else if (removePhoto) {
+    imageUrl = null;
+  }
+
   const { error, count } = await supabase
     .from("services")
     .update(
-      { name: d.name, description: d.description, price: d.price, pricing_unit: d.pricingUnit, is_active: d.isActive },
+      { name: d.name, description: d.description, price: d.price, pricing_unit: d.pricingUnit, is_active: d.isActive, image_url: imageUrl },
       { count: "exact" },
     )
     .eq("id", d.id);
-  if (error || count === 0) return { ok: false, error: "We couldn't save this service. Please try again." };
+  if (error || count === 0) {
+    if (photo && imageUrl) await removeServicePhoto(imageUrl);
+    return { ok: false, error: "We couldn't save this service. Please try again." };
+  }
+  if (imageUrl !== current.image_url) await removeServicePhoto(current.image_url);
   refreshEverywhere();
   return { ok: true };
 }
@@ -134,6 +190,8 @@ export async function createService(_prev: ActionResult | null, formData: FormDa
   });
   if (!parsed.success) return { ok: false, error: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
   const d = parsed.data;
+  const photo = await readServicePhoto(formData);
+  if (typeof photo === "string") return { ok: false, error: photo, fieldErrors: { photo: [photo] } };
   const slug =
     d.name
       .toLowerCase()
@@ -141,15 +199,28 @@ export async function createService(_prev: ActionResult | null, formData: FormDa
       .replace(/^-|-$/g, "") || "service";
 
   const supabase = await createClient();
-  const { error } = await supabase.from("services").insert({
-    slug: `${slug}-${Math.random().toString(36).slice(2, 6)}`,
-    name: d.name,
-    description: d.description,
-    price: d.price,
-    pricing_unit: d.pricingUnit,
-    sort_order: 100,
-  });
-  if (error) return { ok: false, error: "We couldn't add this service. Please try again." };
+  const { data: created, error } = await supabase
+    .from("services")
+    .insert({
+      slug: `${slug}-${Math.random().toString(36).slice(2, 6)}`,
+      name: d.name,
+      description: d.description,
+      price: d.price,
+      pricing_unit: d.pricingUnit,
+      sort_order: 100,
+    })
+    .select("id")
+    .single<{ id: string }>();
+  if (error || !created) return { ok: false, error: "We couldn't add this service. Please try again." };
+
+  if (photo) {
+    const imageUrl = await uploadServicePhoto(created.id, photo);
+    const saved = imageUrl && !(await supabase.from("services").update({ image_url: imageUrl }).eq("id", created.id)).error;
+    if (!saved) {
+      refreshEverywhere();
+      return { ok: false, error: "The service was added, but its photo didn't upload. Use Edit to try the photo again." };
+    }
+  }
   refreshEverywhere();
   return { ok: true };
 }

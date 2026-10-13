@@ -125,7 +125,7 @@ function detailRows(b: BookingDetail): [string, string][] {
     ["Date", formatDate(b.booking_date, "full")],
     ["Time", formatTimeRange(b.start_time, b.end_time)],
     ["Guests", String(b.guest_count)],
-    ["Services", b.items.map((i) => `${i.service_name_snapshot} (${formatPeso(i.subtotal)})`).join(", ")],
+    ["Services", b.items.map((i) => `${i.service_name_snapshot}${i.pricing_unit_snapshot === "ITEM" ? ` × ${i.quantity}` : ""} (${formatPeso(i.subtotal)})`).join(", ")],
     ["Total", formatPeso(b.total_amount)],
     ["Payment method", PAYMENT_METHOD_LABEL[b.payment_method]],
     ["Payment status", b.payment ? PAYMENT_STATUS_LABEL[b.payment.status] : "—"],

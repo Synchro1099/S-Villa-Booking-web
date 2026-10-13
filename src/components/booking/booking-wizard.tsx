@@ -8,7 +8,7 @@ import type { PaymentMethod, Service } from "@/types";
 import type { RuleLine } from "@/lib/house-rules";
 import { createBooking } from "@/actions/bookings";
 import { isSelectableDay, maxHoursFrom } from "@/lib/availability/engine";
-import { estimateBooking, formatPeso, unitLabel } from "@/lib/pricing";
+import { estimateBooking, formatPeso, MAX_ITEM_QUANTITY, quantitySuffix, unitLabel } from "@/lib/pricing";
 import { formatDate, formatTimeRange, fromMinutes } from "@/lib/time";
 import { emailSchema, mobileSchema, nameSchema } from "@/lib/validation/schemas";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,8 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
   const [start, setStart] = useState<number | null>(null);
   const [hours, setHours] = useState(1);
   const [serviceIds, setServiceIds] = useState<string[]>(() => services.filter((s) => s.slug === initialServiceSlug).map((s) => s.id));
+  /** How many of each per-item extra (e.g. coffee); 1 unless the guest changes it. */
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [dir, setDir] = useState(1);
   const [guests, setGuests] = useState(Math.min(2, rules.maxGuests));
   const [fullName, setFullName] = useState(prefill.fullName);
@@ -92,7 +94,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
 
   const day = date ? av.dayAvailability(date) : null;
   const maxHours = day && start != null ? maxHoursFrom(day.slots, start) : 0;
-  const estimate = estimateBooking(services, serviceIds, hours);
+  const estimate = estimateBooking(services, serviceIds, hours, quantities);
 
   function go(to: number) {
     setBanner(null);
@@ -139,6 +141,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
         durationHours: hours,
         guestCount: guests,
         serviceIds,
+        quantities: Object.fromEntries(estimate.lines.filter((l) => l.unit === "ITEM").map((l) => [l.serviceId, l.quantity])),
         paymentMethod: method,
         acceptedRules,
         fullName,
@@ -246,8 +249,9 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                     <ul className="grid gap-3 sm:grid-cols-2">
                       {services.map((s) => {
                         const checked = serviceIds.includes(s.id);
+                        const qty = quantities[s.id] ?? 1;
                         return (
-                          <li key={s.id}>
+                          <li key={s.id} className="flex flex-col gap-2">
                             <label
                               className={cn(
                                 "flex h-full cursor-pointer gap-4 rounded-2xl border bg-white p-4 transition-[transform,border-color,box-shadow] duration-200 ease-soft active:scale-[0.98] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brass",
@@ -274,6 +278,21 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                                 <span className="mt-1 block text-sm text-muted">{s.description}</span>
                               </span>
                             </label>
+                            {checked && s.pricing_unit === "ITEM" ? (
+                              <div className="flex items-center justify-between gap-3 rounded-2xl bg-sand/60 px-4 py-2">
+                                <span className="text-sm font-semibold" id={`qty-${s.id}`}>
+                                  How many?
+                                </span>
+                                <Stepper
+                                  labelledBy={`qty-${s.id}`}
+                                  value={qty}
+                                  min={1}
+                                  max={MAX_ITEM_QUANTITY}
+                                  onChange={(v) => setQuantities((q) => ({ ...q, [s.id]: v }))}
+                                  format={(v) => `${v} × ${formatPeso(s.price)}`}
+                                />
+                              </div>
+                            ) : null}
                           </li>
                         );
                       })}
@@ -319,7 +338,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                     {[
                       ["Date", formatDate(date, "full"), 0],
                       ["Time", formatTimeRange(start, start + hours * 60), 1],
-                      ["Facilities", estimate.lines.map((l) => l.name).join(", "), 2],
+                      ["Facilities", estimate.lines.map((l) => (l.unit === "ITEM" ? `${l.name} × ${l.quantity}` : l.name)).join(", "), 2],
                       ["Guests", `${guests}`, 3],
                       ["Name", fullName, 3],
                       ["Mobile", mobile, 3],
@@ -351,7 +370,7 @@ export function BookingWizard({ config, initial, initialDate, initialServiceSlug
                         <li key={l.serviceId} className="flex justify-between gap-4">
                           <span>
                             {l.name}
-                            {l.unit === "HOUR" ? <span className="text-muted"> · {formatPeso(l.unitPrice)} × {l.quantity}h</span> : null}
+                            {l.unit !== "BOOKING" ? <span className="text-muted"> · {formatPeso(l.unitPrice)}{quantitySuffix(l.unit, l.quantity)}</span> : null}
                           </span>
                           <span className="font-semibold tabular-nums">{formatPeso(l.subtotal)}</span>
                         </li>
@@ -586,7 +605,7 @@ function Summary({
                 <li key={l.serviceId} className="flex justify-between gap-3">
                   <span>
                     {l.name}
-                    {l.unit === "HOUR" && l.quantity > 1 ? <span className="text-ivory/50"> × {l.quantity}h</span> : null}
+                    {l.unit !== "BOOKING" && l.quantity > 1 ? <span className="text-ivory/50">{quantitySuffix(l.unit, l.quantity)}</span> : null}
                   </span>
                   <span className="tabular-nums">{formatPeso(l.subtotal)}</span>
                 </li>

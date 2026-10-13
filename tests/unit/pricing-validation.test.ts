@@ -6,7 +6,7 @@ import { friendlyError } from "@/lib/booking/errors";
 import { effectiveStatus } from "@/lib/booking/status";
 import type { Service } from "@/types";
 
-const svc = (id: string, price: number, unit: "HOUR" | "BOOKING" = "HOUR"): Service => ({
+const svc = (id: string, price: number, unit: "HOUR" | "BOOKING" | "ITEM" = "HOUR"): Service => ({
   id,
   slug: id,
   name: id,
@@ -31,6 +31,12 @@ describe("live price estimate", () => {
     const { total, lines } = estimateBooking([svc("a", 500), svc("b", 300, "BOOKING")], ["a", "b"], 3);
     expect(lines.map((l) => l.subtotal)).toEqual([1500, 300]);
     expect(total).toBe(1800);
+  });
+
+  it("multiplies per-item extras by the quantity picked (1 by default)", () => {
+    const services = [svc("a", 500), svc("coffee", 100, "ITEM")];
+    expect(estimateBooking(services, ["a", "coffee"], 2, { coffee: 3 }).total).toBe(1000 + 300);
+    expect(estimateBooking(services, ["coffee"], 2).total).toBe(100);
   });
 
   it("formats pesos", () => {
