@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Image from "next/image";
 import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { ActionResult, Service } from "@/types";
@@ -18,9 +19,13 @@ export function ServiceList({ services }: { services: Service[] }) {
       <ul className="grid gap-3">
         {services.map((s) => (
           <li key={s.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-line/70 bg-cream p-5">
-            <span className="grid size-11 place-items-center rounded-full bg-forest text-brass">
-              <ServiceIcon name={s.icon} className="size-5" />
-            </span>
+            {s.image_url ? (
+              <Image src={s.image_url} alt="" width={44} height={44} unoptimized className="size-11 rounded-full object-cover" />
+            ) : (
+              <span className="grid size-11 place-items-center rounded-full bg-forest text-brass">
+                <ServiceIcon name={s.icon} className="size-5" />
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">
                 {s.name}
@@ -83,6 +88,7 @@ function ServiceDialog({ service }: { service?: Service }) {
             <Field label="Unit" htmlFor={`unit-${idp}`} error={errors?.pricingUnit}>
               <Select id={`unit-${idp}`} name="pricingUnit" defaultValue={service?.pricing_unit ?? "HOUR"}>
                 <option value="HOUR">Per hour</option>
+                <option value="ITEM">Per item (guest picks how many)</option>
                 <option value="BOOKING">Per booking (flat)</option>
               </Select>
             </Field>
@@ -90,6 +96,23 @@ function ServiceDialog({ service }: { service?: Service }) {
           <Field label="Description" htmlFor={`desc-${idp}`} error={errors?.description}>
             <Textarea id={`desc-${idp}`} name="description" defaultValue={service?.description} maxLength={500} />
           </Field>
+          <Field
+            label="Photo"
+            htmlFor={`photo-${idp}`}
+            error={errors?.photo}
+            hint={service?.image_url ? "Choose a new photo to replace the current one." : "JPG, PNG or WEBP, up to 5 MB. Without a photo the card shows an icon."}
+          >
+            <Input id={`photo-${idp}`} name="photo" type="file" accept="image/jpeg,image/png,image/webp" className="h-auto py-2" />
+          </Field>
+          {service?.image_url ? (
+            <div className="flex items-center gap-4">
+              <Image src={service.image_url} alt={`Current photo of ${service.name}`} width={96} height={60} unoptimized className="h-15 w-24 rounded-lg object-cover" />
+              <label className="flex items-center gap-3 text-sm font-semibold">
+                <input type="checkbox" name="removePhoto" className="size-5 accent-forest" />
+                Remove photo
+              </label>
+            </div>
+          ) : null}
           {service ? (
             <label className="flex items-center gap-3 text-sm font-semibold">
               <input type="checkbox" name="isActive" defaultChecked={service.is_active} className="size-5 accent-forest" />

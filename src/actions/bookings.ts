@@ -54,6 +54,7 @@ export async function createBooking(
       p_service_ids: d.serviceIds,
       p_payment_method: d.paymentMethod,
       p_notes: d.notes || null,
+      p_quantities: d.quantities,
     })
     .single<{ booking_id: string; booking_reference: string; access_token: string }>();
 

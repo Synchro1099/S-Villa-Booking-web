@@ -100,11 +100,13 @@ export interface BookingInput {
   guests?: number;
   services: string[];
   method?: string;
+  /** How many of each per-item extra, by service id. */
+  quantities?: Record<string, unknown>;
 }
 
 export async function createBooking(db: Db | Transaction, input: BookingInput) {
   const res = await db.query<{ booking_id: string; booking_reference: string; access_token: string }>(
-    `select * from public.create_booking($1, $2, $3, $4, $5::date, $6::time, $7, $8, $9::uuid[], $10, $11)`,
+    `select * from public.create_booking($1, $2, $3, $4, $5::date, $6::time, $7, $8, $9::uuid[], $10, $11, $12::jsonb)`,
     [
       input.customerId ?? null,
       "Juan Dela Cruz",
@@ -117,6 +119,7 @@ export async function createBooking(db: Db | Transaction, input: BookingInput) {
       input.services,
       input.method ?? "GCASH",
       null,
+      JSON.stringify(input.quantities ?? {}),
     ],
   );
   return res.rows[0];
