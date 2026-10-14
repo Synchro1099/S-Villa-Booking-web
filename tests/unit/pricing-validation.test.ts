@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimateBooking, formatPeso } from "@/lib/pricing";
+import { estimateBooking, formatPeso, quantitySuffix, unitLabel } from "@/lib/pricing";
 import { createBookingSchema, mobileSchema } from "@/lib/validation/schemas";
 import { sniffProofType, validateProofFile } from "@/lib/validation/file";
 import { friendlyError } from "@/lib/booking/errors";
@@ -37,6 +37,43 @@ describe("live price estimate", () => {
     const services = [svc("a", 500), svc("coffee", 100, "ITEM")];
     expect(estimateBooking(services, ["a", "coffee"], 2, { coffee: 3 }).total).toBe(1000 + 300);
     expect(estimateBooking(services, ["coffee"], 2).total).toBe(100);
+  });
+
+  it("prices 2 coffees at ₱200 regardless of hours, and ignores quantities for other units", () => {
+    const services = [svc("a", 500), svc("flat", 300, "BOOKING"), svc("coffee", 100, "ITEM")];
+    const { lines, total } = estimateBooking(services, ["a", "flat", "coffee"], 4, { coffee: 2, a: 9, flat: 9 });
+    expect(lines.map((l) => [l.serviceId, l.quantity, l.subtotal])).toEqual([
+      ["a", 4, 2000],
+      ["flat", 1, 300],
+      ["coffee", 2, 200],
+    ]);
+    expect(total).toBe(2500);
+  });
+
+  it("labels per-item prices and quantities", () => {
+    expect(unitLabel("ITEM")).toBe("item");
+    expect(quantitySuffix("ITEM", 2)).toBe(" × 2");
+    expect(quantitySuffix("HOUR", 3)).toBe(" × 3h");
+    expect(quantitySuffix("BOOKING", 1)).toBe("");
+  });
+
+  it("validates per-item quantities from the wizard (1 to 50 whole numbers)", () => {
+    const base = {
+      date: "2026-10-20",
+      startTime: "10:00",
+      durationHours: 1,
+      guestCount: 2,
+      serviceIds: ["7b0c6a2e-4b7f-4c1e-9a55-0d2f3e4a5b6c"],
+      paymentMethod: "GCASH",
+      fullName: "Maria Santos",
+      email: "maria@example.com",
+      mobile: "09171234567",
+    };
+    const id = base.serviceIds[0];
+    expect(createBookingSchema.safeParse({ ...base, quantities: { [id]: 2 } }).success).toBe(true);
+    for (const q of [0, 51, 1.5]) {
+      expect(createBookingSchema.safeParse({ ...base, quantities: { [id]: q } }).success).toBe(false);
+    }
   });
 
   it("formats pesos", () => {

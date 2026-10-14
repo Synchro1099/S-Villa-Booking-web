@@ -48,8 +48,15 @@ describe("per-item extras", () => {
     expect(await total(b.booking_id)).toBe(1000);
   });
 
+  it("accepts the 1 and 50 limits", async () => {
+    const b = await createBooking(db, { date: day, start: "10:00", services: [coffee], quantities: { [coffee]: 50 } });
+    expect(await items(b.booking_id)).toEqual([["Coffee", "ITEM", 50, 5000]]);
+    const c = await createBooking(db, { date: day, start: "14:00", services: [coffee], quantities: { [coffee]: 1 } });
+    expect(await total(c.booking_id)).toBe(100);
+  });
+
   it("rejects quantities outside 1 to 50 or not whole numbers", async () => {
-    for (const q of [0, 51, 1.5, "3"]) {
+    for (const q of [0, -1, 51, 1.5, "3", "abc", null, [2], { n: 2 }]) {
       await expectDbError(
         createBooking(db, { date: day, start: "10:00", services: [coffee], quantities: { [coffee]: q } }),
         "SV_QUANTITY_INVALID",
@@ -57,8 +64,30 @@ describe("per-item extras", () => {
     }
   });
 
-  it("owners can save the per-item unit; other units are still refused", async () => {
-    await db.query(`update services set pricing_unit = 'BOOKING' where id = $1`, [coffee]);
+  it("leaves no booking behind when a quantity is refused", async () => {
+    await expectDbError(
+      createBooking(db, { date: day, start: "10:00", services: [coffee], quantities: { [coffee]: 99 } }),
+      "SV_QUANTITY_INVALID",
+    );
+    const count = (await db.query<{ n: number }>(`select count(*)::int as n from bookings`)).rows[0].n;
+    expect(count).toBe(0);
+  });
+
+  it("allows the per-item unit on services; other units are still refused", async () => {
+    await db.query(`update services set pricing_unit = 'ITEM' where id = $1`, [jacuzzi]);
     await expect(db.query(`update services set pricing_unit = 'DOZEN' where id = $1`, [coffee])).rejects.toThrow();
+    await expect(
+      db.query(
+        `insert into services (slug, name, description, price, pricing_unit, icon, sort_order) values ('x', 'X', '', 1, 'PIECE', 'sparkles', 1)`,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("keeps a single create_booking (the old signature is dropped)", async () => {
+    const res = await db.query<{ args: string }>(
+      `select pg_get_function_identity_arguments(p.oid) as args from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'create_booking'`,
+    );
+    expect(res.rows).toHaveLength(1);
+    expect(res.rows[0].args).toContain("p_quantities jsonb");
   });
 });

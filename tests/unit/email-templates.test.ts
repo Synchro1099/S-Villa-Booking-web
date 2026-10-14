@@ -51,6 +51,18 @@ describe("owner booking emails", () => {
     expect(mail.text).toContain("Name: Maria Santos");
   });
 
+  it("show how many of a per-item extra was booked", () => {
+    const withCoffee = {
+      ...booking,
+      items: [
+        ...booking.items,
+        { id: "i2", service_name_snapshot: "Coffee", pricing_unit_snapshot: "ITEM", unit_price: 100, quantity: 2, subtotal: 200 },
+      ],
+    } as BookingDetail;
+    const mail = renderBookingEmail({ event: "PENDING", audience: "OWNER", booking: withCoffee, settings, link: "https://example.com/x" });
+    expect(mail.text).toMatch(/Pickleball \(₱\s?600\), Coffee × 2 \(₱\s?200\)/);
+  });
+
   it("does the same for the payment-proof email", () => {
     expect(render("PROOF_SUBMITTED", "OWNER").subject).toBe("Payment proof to review — SV-2026-00012 · Sep 30, 2026, 7:00 PM – 8:00 PM");
   });

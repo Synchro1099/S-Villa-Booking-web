@@ -26,10 +26,12 @@ create or replace function public.booking_item_quantity(p_unit text, p_service_i
 returns integer language sql immutable set search_path = public as $$
   select case p_unit
            when 'HOUR' then p_hours
-           when 'ITEM' then coalesce((p_quantities ->> p_service_id::text)::integer, 1)
+           when 'ITEM' then coalesce((p_quantities ->> p_service_id::text)::numeric::integer, 1)
            else 1
          end
 $$;
+
+revoke execute on function public.booking_item_quantity(text, uuid, integer, jsonb) from public, anon, authenticated;
 
 -- The signature changes (new last parameter), so drop the old one rather than
 -- leave two overloads that a named-argument call can't choose between.
@@ -160,13 +162,16 @@ begin
   end if;
 
   -- Per-item extras (e.g. coffee): the guest picks how many, 1 to 50. Missing means 1.
+  -- CASE (not OR) so a non-number such as "abc" is never cast and reports SV_QUANTITY_INVALID.
   if jsonb_typeof(v_qty) <> 'object' or exists (
     select 1 from public.services sv
      where sv.id = any (v_service_ids) and sv.pricing_unit = 'ITEM'
        and v_qty ? sv.id::text
-       and (jsonb_typeof(v_qty -> sv.id::text) <> 'number'
-            or (v_qty ->> sv.id::text)::numeric not between 1 and 50
-            or (v_qty ->> sv.id::text)::numeric <> trunc((v_qty ->> sv.id::text)::numeric))
+       and case when jsonb_typeof(v_qty -> sv.id::text) = 'number'
+                then (v_qty ->> sv.id::text)::numeric not between 1 and 50
+                  or (v_qty ->> sv.id::text)::numeric <> trunc((v_qty ->> sv.id::text)::numeric)
+                else true
+           end
   ) then
     raise exception using message = 'SV_QUANTITY_INVALID';
   end if;
